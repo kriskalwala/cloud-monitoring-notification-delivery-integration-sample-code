@@ -49,12 +49,12 @@ from google.cloud import monitoring_v3
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
 
 
-def create_metric_descriptor(project_id, descriptor_name):
+def create_custom_metric(project_id, metric_name):
     # [START monitoring_create_metric]
     client = monitoring_v3.MetricServiceClient()
     project_name = client.project_path(project_id)
     descriptor = monitoring_v3.types.MetricDescriptor()
-    descriptor.type = 'custom.googleapis.com/' + descriptor_name
+    descriptor.type = 'custom.googleapis.com/' + metric_name
     descriptor.metric_kind = (
         monitoring_v3.enums.MetricDescriptor.MetricKind.GAUGE)
     descriptor.value_type = (
@@ -65,13 +65,13 @@ def create_metric_descriptor(project_id, descriptor_name):
     # [END monitoring_create_metric]
 
 
-def write_time_series(project_id, descriptor_name, point_value):
+def append_to_time_series(project_id, metric_name, point_value):
     # [START monitoring_write_timeseries]
     client = monitoring_v3.MetricServiceClient()
     project_name = client.project_path(project_id)
 
     series = monitoring_v3.types.TimeSeries()
-    series.metric.type = 'custom.googleapis.com/' + descriptor_name
+    series.metric.type = 'custom.googleapis.com/' + metric_name
     series.resource.type = 'gce_instance'
     series.resource.labels['instance_id'] = '1234567890123456789'
     series.resource.labels['zone'] = 'us-central1-f'
@@ -87,7 +87,7 @@ def write_time_series(project_id, descriptor_name, point_value):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Options to create a custom metric called "testing_metric" and to append new data points to this metric in order to trigger and resolve incidents')
+        description='Create a custom metric and use it to trigger and resolve incidents')
 
     subparsers = parser.add_subparsers(dest='command')
 
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     write_time_series_parser = subparsers.add_parser(
         'trigger-incident',
-        help='trigger incident appending new data point (of value 4.0) to "testing_metric" time series'
+        help='trigger incident by appending new data point (of value 4.0) to "testing_metric" time series'
     )
 
     write_time_series_parser = subparsers.add_parser(
@@ -109,10 +109,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'create-custom-metric':
-        create_metric_descriptor(PROJECT_ID, 'testing_metric')
+        create_custom_metric(PROJECT_ID, 'testing_metric')
     if args.command == 'trigger-incident':
-        write_time_series(PROJECT_ID, 'testing_metric', 4.0)
+        append_to_time_series(PROJECT_ID, 'testing_metric', 4.0)
     if args.command == 'resolve-incident':
-        write_time_series(PROJECT_ID, 'testing_metric', 2.0)
+        append_to_time_series(PROJECT_ID, 'testing_metric', 2.0)
     if args.command is None:
         print('To see available arguments, use $ python3 trigger_incident.py -h')
