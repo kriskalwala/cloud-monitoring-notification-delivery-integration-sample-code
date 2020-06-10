@@ -27,7 +27,8 @@ type is "GCE VM Instance", and set it to trigger when the
 most recent value of any time series is above 3.0 (only create
 the policy once). Once the custom metric and policy are
 created, the program can properly trigger and resolve an
-incident on command.
+incident on command. Note, that if you trigger an incident,
+you must resolve the incident before you can trigger it again.
 
 
   How to use:
@@ -40,7 +41,6 @@ incident on command.
 
 import argparse
 import os
-import pprint
 import time
 
 from google.cloud import monitoring_v3
@@ -87,7 +87,8 @@ def append_to_time_series(project_id, metric_name, point_value):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Create a custom metric and use it to trigger and resolve incidents')
+        description=('Create a custom metric and use it to trigger '
+                     'and resolve incidents'))
 
     subparsers = parser.add_subparsers(dest='command')
 
@@ -98,12 +99,14 @@ if __name__ == '__main__':
 
     write_time_series_parser = subparsers.add_parser(
         'trigger-incident',
-        help='trigger incident by appending new data point (of value 4.0) to "testing_metric" time series'
+        help=('trigger incident by appending new data point (of value '
+              '4.0) to "testing_metric" time series')
     )
 
     write_time_series_parser = subparsers.add_parser(
         'resolve-incident',
-        help='resolve incident by appending new data point (of value 2.0) to "testing_metric" time series'
+        help=('resolve incident by appending new data point (of value '
+              '2.0) to "testing_metric" time series')
     )
 
     args = parser.parse_args()
@@ -115,4 +118,4 @@ if __name__ == '__main__':
     if args.command == 'resolve-incident':
         append_to_time_series(PROJECT_ID, 'testing_metric', 2.0)
     if args.command is None:
-        print('To see available arguments, use $ python3 trigger_incident.py -h')
+        print('See available arguments with $ python3 trigger_incident.py -h')
