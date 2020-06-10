@@ -92,18 +92,18 @@ if __name__ == '__main__':
 
     subparsers = parser.add_subparsers(dest='command')
 
-    create_metric_descriptor_parser = subparsers.add_parser(
+    create_custom_metric_parser = subparsers.add_parser(
         'create-custom-metric',
         help='create a custom metric type called "testing_metric"'
     )
 
-    write_time_series_parser = subparsers.add_parser(
+    trigger_incident_parser = subparsers.add_parser(
         'trigger-incident',
         help=('trigger incident by appending new data point (of value '
               '4.0) to "testing_metric" time series')
     )
 
-    write_time_series_parser = subparsers.add_parser(
+    resolve_incident_parser = subparsers.add_parser(
         'resolve-incident',
         help=('resolve incident by appending new data point (of value '
               '2.0) to "testing_metric" time series')
