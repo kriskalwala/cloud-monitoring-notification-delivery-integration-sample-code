@@ -17,7 +17,7 @@
 
 """Use custom metric to trigger and resolve incidents.
 
-This program has can perform 3 operations depending on
+This program can perform 3 operations depending on
 the argument that is given: create a new custom metric
 called "testing_metric", trigger an incident, or resolve
 the incident. To use it correctly, first create the custom
@@ -33,10 +33,10 @@ you must resolve the incident before you can trigger it again.
 
   How to use:
 
-  $ python3 trigger_incident.py -h
-  $ python3 trigger_incident.py create-custom-metric
-  $ python3 trigger_incident.py trigger-incident
-  $ python3 trigger_incident.py resolve-incident
+  $ python3 incident_script.py -h
+  $ python3 incident_script.py create-custom-metric
+  $ python3 incident_script.py trigger-incident
+  $ python3 incident_script.py resolve-incident
 """
 
 import argparse
@@ -118,4 +118,4 @@ if __name__ == '__main__':
     if args.command == 'resolve-incident':
         append_to_time_series(PROJECT_ID, 'testing_metric', 2.0)
     if args.command is None:
-        print('See available arguments with $ python3 trigger_incident.py -h')
+        print('See available arguments with: $ python3 incident_script.py -h')
