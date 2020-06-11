@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Source code from https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/main.py
+# The code in this module is based on https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/main.py. See https://cloud.google.com/run/docs/tutorials/pubsub for the accompanying Cloud Run/PubSub solutions guide.
 
 # [START run_pubsub_server_setup]
 import base64
