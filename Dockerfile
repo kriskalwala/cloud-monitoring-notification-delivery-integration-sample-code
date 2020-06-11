@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Source code from https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/Dockerfile
+# See https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/Dockerfile for a minimal Cloud Run Dockerfile example.
 
 # [START run_pubsub_dockerfile]
 
