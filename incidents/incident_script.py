@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Source code based off of
-# https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/blob/server-setup/main.py
+# https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/monitoring/api/v3/cloud-client/snippets.py
 
 """Use custom metric to trigger and resolve incidents.
 
