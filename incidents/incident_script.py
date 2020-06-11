@@ -88,7 +88,7 @@ def append_to_time_series(project_id, metric_name, point_value):
     # [END monitoring_write_timeseries]
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(
         description=('Create a custom metric and use it to trigger '
                      'and resolve incidents'))
@@ -99,7 +99,7 @@ if __name__ == '__main__':
         'create-custom-metric',
         help='create a custom metric type called "testing_metric"'
     )
-    
+
     create_custom_metric_parser.add_argument(
         '--metric-name',
         help='name of metric to create',
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         help=('trigger incident by appending new data point (of value '
               '4.0) to "testing_metric" time series')
     )
-    
+
     trigger_incident_parser.add_argument(
         '--metric-name',
         help='name of metric to trigger incident with',
@@ -123,7 +123,7 @@ if __name__ == '__main__':
         help=('resolve incident by appending new data point (of value '
               '2.0) to "testing_metric" time series')
     )
-    
+
     resolve_incident_parser.add_argument(
         '--metric-name',
         help='name of metric to resolve incident with',
@@ -140,3 +140,7 @@ if __name__ == '__main__':
         append_to_time_series(PROJECT_ID, args.metric_name, TRIGGER_VALUE - 1)
     if args.command is None:
         print('See available arguments with: $ python3 incident_script.py -h')
+
+
+if __name__ == '__main__':
+    main()
