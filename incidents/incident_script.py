@@ -19,10 +19,11 @@
 
 This program can perform 3 operations depending on
 the argument that is given: create a new custom metric
-called "testing_metric", trigger an incident, or resolve
-the incident. To use it correctly, first create the custom
-metric (only do this once). Then in the GCP website create a
-policy where the metric is "testing_metric" and the resource
+called "testing_metric" in the current GCP project,
+trigger an incident, or resolve the incident. To use
+it correctly, first create the custom metric (only
+do this once). Then in the GCP website create a policy
+where the metric is "testing_metric" and the resource
 type is "GCE VM Instance", and set it to trigger when the
 most recent value of any time series is above 3.0 (only create
 the policy once). Once the custom metric and policy are
@@ -47,6 +48,7 @@ from google.cloud import monitoring_v3
 
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
+METRIC_NAME = 'testing_metric'
 
 
 def create_custom_metric(project_id, metric_name):
@@ -112,10 +114,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'create-custom-metric':
-        create_custom_metric(PROJECT_ID, 'testing_metric')
+        create_custom_metric(PROJECT_ID, METRIC_NAME)
     if args.command == 'trigger-incident':
-        append_to_time_series(PROJECT_ID, 'testing_metric', 4.0)
+        append_to_time_series(PROJECT_ID, METRIC_NAME, 4.0)
     if args.command == 'resolve-incident':
-        append_to_time_series(PROJECT_ID, 'testing_metric', 2.0)
+        append_to_time_series(PROJECT_ID, METRIC_NAME, 2.0)
     if args.command is None:
         print('See available arguments with: $ python3 incident_script.py -h')
