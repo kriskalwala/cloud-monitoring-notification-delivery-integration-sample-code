@@ -19,25 +19,26 @@
 
 This program can perform 3 operations depending on
 the argument that is given: create a new custom metric
-called "testing_metric" in the current GCP project,
-trigger an incident, or resolve the incident. To use
-it correctly, first create the custom metric (only
-do this once). Then in the GCP website create a policy
-where the metric is "testing_metric" and the resource
-type is "GCE VM Instance", and set it to trigger when the
-most recent value of any time series is above 3.0 (only create
-the policy once). Once the custom metric and policy are
-created, the program can properly trigger and resolve an
-incident on command. Note, that if you trigger an incident,
-you must resolve the incident before you can trigger it again.
+in the current GCP project, trigger an incident, or
+resolve the incident. To use it correctly, first create
+a custom metric (only do this once). Then in the GCP
+website create a policy where the metric is the custom
+metric just created and the resource type is "GCE VM
+Instance", and set it to trigger when the most recent
+value of any time series is above 3.0 (only create the
+policy once). Once the custom metric and policy are
+created, the program can properly trigger and resolve
+an incident on command using that custom metric. Note,
+that if you trigger an incident, you must resolve the
+incident before you can trigger it again.
 
 
   How to use:
 
   $ python3 incident_script.py -h
-  $ python3 incident_script.py create-custom-metric
-  $ python3 incident_script.py trigger-incident
-  $ python3 incident_script.py resolve-incident
+  $ python3 incident_script.py create-custom-metric --metric-name METRIC_NAME
+  $ python3 incident_script.py trigger-incident --metric-name METRIC_NAME
+  $ python3 incident_script.py resolve-incident --metric-name METRIC_NAME
 """
 
 import argparse
@@ -48,7 +49,6 @@ from google.cloud import monitoring_v3
 
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
-METRIC_NAME = 'testing_metric'
 TRIGGER_VALUE = 3.0
 
 
@@ -99,11 +99,23 @@ if __name__ == '__main__':
         'create-custom-metric',
         help='create a custom metric type called "testing_metric"'
     )
+    
+    create_custom_metric_parser.add_argument(
+        '--metric-name',
+        help='name of metric to create',
+        required=True
+    )
 
     trigger_incident_parser = subparsers.add_parser(
         'trigger-incident',
         help=('trigger incident by appending new data point (of value '
               '4.0) to "testing_metric" time series')
+    )
+    
+    trigger_incident_parser.add_argument(
+        '--metric-name',
+        help='name of metric to trigger incident with',
+        required=True
     )
 
     resolve_incident_parser = subparsers.add_parser(
@@ -111,14 +123,20 @@ if __name__ == '__main__':
         help=('resolve incident by appending new data point (of value '
               '2.0) to "testing_metric" time series')
     )
+    
+    resolve_incident_parser.add_argument(
+        '--metric-name',
+        help='name of metric to resolve incident with',
+        required=True
+    )
 
     args = parser.parse_args()
 
     if args.command == 'create-custom-metric':
-        create_custom_metric(PROJECT_ID, METRIC_NAME)
+        create_custom_metric(PROJECT_ID, args.metric_name)
     if args.command == 'trigger-incident':
-        append_to_time_series(PROJECT_ID, METRIC_NAME, TRIGGER_VALUE + 1)
+        append_to_time_series(PROJECT_ID, args.metric_name, TRIGGER_VALUE + 1)
     if args.command == 'resolve-incident':
-        append_to_time_series(PROJECT_ID, METRIC_NAME, TRIGGER_VALUE - 1)
+        append_to_time_series(PROJECT_ID, args.metric_name, TRIGGER_VALUE - 1)
     if args.command is None:
         print('See available arguments with: $ python3 incident_script.py -h')
