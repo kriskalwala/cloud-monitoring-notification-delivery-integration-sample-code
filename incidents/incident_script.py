@@ -49,6 +49,7 @@ from google.cloud import monitoring_v3
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
 METRIC_NAME = 'testing_metric'
+TRIGGER_VALUE = 3.0
 
 
 def create_custom_metric(project_id, metric_name):
@@ -116,8 +117,8 @@ if __name__ == '__main__':
     if args.command == 'create-custom-metric':
         create_custom_metric(PROJECT_ID, METRIC_NAME)
     if args.command == 'trigger-incident':
-        append_to_time_series(PROJECT_ID, METRIC_NAME, 4.0)
+        append_to_time_series(PROJECT_ID, METRIC_NAME, TRIGGER_VALUE + 1)
     if args.command == 'resolve-incident':
-        append_to_time_series(PROJECT_ID, METRIC_NAME, 2.0)
+        append_to_time_series(PROJECT_ID, METRIC_NAME, TRIGGER_VALUE - 1)
     if args.command is None:
         print('See available arguments with: $ python3 incident_script.py -h')
