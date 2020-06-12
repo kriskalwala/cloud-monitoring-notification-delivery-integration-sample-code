@@ -23,14 +23,14 @@ from dotenv import load_dotenv
 
 import pytest
 
-from philips_hue import set_color, configure_light
+import philips_hue
 
 load_dotenv()
 URL = os.environ.get("philips-url")
 
 
 def test_set_color():
-    set_color(1, 0)
+    philips_hue.set_color(1, 0)
     
     r = requests.get(f'{URL}/lights/1')
     assert r.status_code == 200
@@ -39,28 +39,4 @@ def test_set_color():
     
     assert light_info["state"]["on"] == True
     assert light_info["state"]["hue"] == 0
-    
-def test_configure_light_open():
-    response = {"incident": {"condition": {"state": "open"}}}
-    configure_light(response, 1)
-    
-    r = requests.get(f'{URL}/lights/1')
-    assert r.status_code == 200
-    
-    light_info = r.json()
-    
-    assert light_info["state"]["on"] == True
-    assert light_info["state"]["hue"] == 0
-    
-def test_configure_light_closed():
-    response = {"incident": {"condition": {"state": "closed"}}}
-    configure_light(response, 1)
-    
-    r = requests.get(f'{URL}/lights/1')
-    assert r.status_code == 200
-    
-    light_info = r.json()
-    
-    assert light_info["state"]["on"] == True
-    assert light_info["state"]["hue"] == 25500
     
