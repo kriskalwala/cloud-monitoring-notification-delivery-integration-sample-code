@@ -53,12 +53,38 @@ def test_invalid_mimetype(client):
     assert r.status_code == 400
 
 
+def test_configure_light_open():
+    response = {"incident": {"condition": {"state": "open"}}}
+    main.configure_light(response, 1)
+    
+    r = requests.get(f'{URL}/lights/1')
+    assert r.status_code == 200
+    
+    light_info = r.json()
+    
+    assert light_info["state"]["on"] == True
+    assert light_info["state"]["hue"] == 0
+
+
+def test_configure_light_closed():
+    response = {"incident": {"condition": {"state": "closed"}}}
+    main.configure_light(response, 1)
+    
+    r = requests.get(f'{URL}/lights/1')
+    assert r.status_code == 200
+    
+    light_info = r.json()
+    
+    assert light_info["state"]["on"] == True
+    assert light_info["state"]["hue"] == 25500
+
+
 def test_nonalert_message(client, capsys):
     r = client.post('/', json={'message': True})
-    assert r.status_code == 204
+    assert r.status_code == 400
 
     out, _ = capsys.readouterr()
-    assert 'not an alert' in out
+    assert 'invalid incident format' in out
 
 
 def test_open_alert_message(client, capsys):
