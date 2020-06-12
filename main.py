@@ -17,6 +17,8 @@
 # [START run_pubsub_server_setup]
 import base64
 import os
+import json
+from philips_hue import configure_light
 
 from flask import Flask, request
 
@@ -41,11 +43,17 @@ def index():
 
     pubsub_message = envelope['message']
 
-    name = 'World'
+    response = 'empty response'
     if isinstance(pubsub_message, dict) and 'data' in pubsub_message:
-        name = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
+        response = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
+        
+    try:
+        response = json.loads(response)
+    except:
+        print('not an alert')
+    else:
+        configure_light(response, 1)  
 
-    print(f'Hello {name}!')
 
     return ('', 204)
 # [END run_pubsub_handler]
