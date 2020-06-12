@@ -29,18 +29,3 @@ def set_color(light_id, hue):
         hue: Hue of the light.
     """
     r = requests.put(url = f'{URL}/lights/{light_id}/state', data=json.dumps({"on": True, "hue": hue}))
-
-
-def configure_light(incident, light_id):
-    """Changes the color of a Philips Hue light based on an incident message from pub/sub.
-    
-    Sets the color of the light to red if the incident is open and green if the incident is closed.
-
-    Args:
-        incident: A JSON message about an incident from pub/sub.
-        light_id: The id of the light to set the color for.
-    """
-    if response["incident"]["condition"]["state"] == "open":
-        set_color(light_id, 0)
-    elif response["incident"]["condition"]["state"] == "closed":
-        set_color(light_id, 25500)
