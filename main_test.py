@@ -19,10 +19,17 @@
 
 import base64
 from uuid import uuid4
+import requests
 
 import pytest
 
 import main
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+URL = os.environ.get("philips-url")
 
 
 @pytest.fixture
@@ -46,20 +53,40 @@ def test_invalid_mimetype(client):
     assert r.status_code == 400
 
 
-def test_minimally_valid_message(client, capsys):
+def test_nonalert_message(client, capsys):
     r = client.post('/', json={'message': True})
     assert r.status_code == 204
 
     out, _ = capsys.readouterr()
-    assert 'Hello World!' in out
+    assert 'not an alert' in out
 
 
-def test_populated_message(client, capsys):
-    name = str(uuid4())
-    data = base64.b64encode(name.encode()).decode()
+def test_open_alert_message(client, capsys):
+    response = '{"incident": {"condition": {"state": "open"}}}'
+    data = base64.b64encode(response.encode()).decode()
 
     r = client.post('/', json={'message': {'data': data}})
     assert r.status_code == 204
 
-    out, _ = capsys.readouterr()
-    assert f'Hello {name}!' in out
+    r = requests.get(f'{URL}/lights/1')
+    assert r.status_code == 200
+    
+    light_info = r.json()
+    
+    assert light_info["state"]["on"] == True
+    assert light_info["state"]["hue"] == 0
+    
+def test_closed_alert_message(client, capsys):
+    response = '{"incident": {"condition": {"state": "closed"}}}'
+    data = base64.b64encode(response.encode()).decode()
+
+    r = client.post('/', json={'message': {'data': data}})
+    assert r.status_code == 204
+
+    r = requests.get(f'{URL}/lights/1')
+    assert r.status_code == 200
+    
+    light_info = r.json()
+    
+    assert light_info["state"]["on"] == True
+    assert light_info["state"]["hue"] == 25500    
