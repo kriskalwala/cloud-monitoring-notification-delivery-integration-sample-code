@@ -49,10 +49,12 @@ def index():
         
     try:
         response = json.loads(response)
-    except:
-        print('not an alert')
-    else:
-        configure_light(response, 1)  
+    except json.JSONDecodeError:
+        msg = 'invalid incident format'
+        print(f'error: {msg}')
+        return f'Bad Request: {msg}', 400
+
+    configure_light(response, 1)  
 
 
     return ('', 204)
