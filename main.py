@@ -18,7 +18,7 @@
 import base64
 import os
 import json
-from philips_hue import configure_light
+import philips_hue
 
 from flask import Flask, request
 
@@ -27,6 +27,21 @@ app = Flask(__name__)
 # [END run_pubsub_server_setup]
 
 
+def configure_light(incident, light_id):
+    """Changes the color of a Philips Hue light based on an incident message from pub/sub.
+    
+    Sets the color of the light to red if the incident is open and green if the incident is closed.
+
+    Args:
+        incident: A JSON message about an incident from pub/sub.
+        light_id: The id of the light to set the color for.
+    """
+    if incident["incident"]["condition"]["state"] == "open":
+        philips_hue.set_color(light_id, 0)
+    elif incident["incident"]["condition"]["state"] == "closed":
+        philips_hue.set_color(light_id, 25500)
+
+        
 # [START run_pubsub_handler]
 @app.route('/', methods=['POST'])
 def index():
