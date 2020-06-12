@@ -21,20 +21,26 @@ load_dotenv()
 URL = os.environ.get("philips-url")
 
 
-# sets the light with light_id to the given hue
 def set_color(light_id, hue):
+    """Sets the color of a Philips Hue light to a specified hue value.
+
+    Args:
+        light_id: The id of the light to set the color for.
+        hue: Hue of the light.
+    """
     r = requests.put(url = f'{URL}/lights/{light_id}/state', data=json.dumps({"on": True, "hue": hue}))
-    print(r.content)
 
 
-# turns Philips Hue red if incident is open, green if closed
-def configure_light(response, light_id):
+def configure_light(incident, light_id):
+    """Changes the color of a Philips Hue light based on an incident message from pub/sub.
+    
+    Sets the color of the light to red if the incident is open and green if the incident is closed.
+
+    Args:
+        incident: A JSON message about an incident from pub/sub.
+        light_id: The id of the light to set the color for.
+    """
     if response["incident"]["condition"]["state"] == "open":
         set_color(light_id, 0)
     elif response["incident"]["condition"]["state"] == "closed":
         set_color(light_id, 25500)
-
-        
-
-
-
