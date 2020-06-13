@@ -40,9 +40,10 @@ def trigger_hue_from_incident(incident, light_id):
     """
     condition_state = incident["incident"]["condition"]["state"]
     if condition_state == "open":
-        philips_hue.set_color(light_id, 0)
+        philips_hue.set_color(light_id, 0)  # set to red
     elif condition_state == "closed":
-        philips_hue.set_color(light_id, 25500)
+        philips_hue.set_color(light_id, 25500)  # set to green
+    # TODO: add condition for acknowledged
         
 
 # TODO: potentially use jsonschema.validate here for a stronger check against a valid schema
