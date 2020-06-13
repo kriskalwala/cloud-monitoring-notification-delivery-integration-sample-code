@@ -26,6 +26,8 @@ import pytest
 import main
 
 import os
+
+# TODO: make config loading centralized
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -53,10 +55,12 @@ def test_invalid_mimetype(client):
     assert r.status_code == 400
 
 
-def test_configure_light_open():
+# TODO: change to call dispatch interface
+def test_trigger_hue_from_incident_open(client):
     response = {"incident": {"condition": {"state": "open"}}}
-    main.configure_light(response, 1)
+    main.trigger_hue_from_incident(response, 1)
     
+    # TODO: mock http request
     r = requests.get(f'{URL}/lights/1')
     assert r.status_code == 200
     
@@ -66,10 +70,12 @@ def test_configure_light_open():
     assert light_info["state"]["hue"] == 0
 
 
-def test_configure_light_closed():
+# TODO: change to call dispatch interface
+def test_trigger_hue_from_incident_closed(client):
     response = {"incident": {"condition": {"state": "closed"}}}
-    main.configure_light(response, 1)
+    main.trigger_hue_from_incident(response, 1)
     
+    # TODO: mock http request
     r = requests.get(f'{URL}/lights/1')
     assert r.status_code == 200
     
@@ -79,12 +85,52 @@ def test_configure_light_closed():
     assert light_info["state"]["hue"] == 25500
 
 
-def test_nonalert_message(client, capsys):
+def test_invalid_pubsub_message(client, capsys):
     r = client.post('/', json={'message': True})
     assert r.status_code == 400
 
     out, _ = capsys.readouterr()
-    assert 'invalid incident format' in out
+    assert 'invalid Pub/Sub message format' in out
+    
+    
+def test_nonstring_notification_message(client, capsys):
+    r = client.post('/', json={'message': {'data': True}})
+    assert r.status_code == 400
+
+    out, _ = capsys.readouterr()
+    assert 'notification should be base64-encoded' in out
+    
+    
+def test_unicode_notification_message(client, capsys):
+    data = '{"incident": {"condition": {"state": "open"}}}'
+    
+    r = client.post('/', json={'message': {'data': data}})
+    assert r.status_code == 400
+    
+    out, _ = capsys.readouterr()
+    assert 'notification should be base64-encoded' in out
+    
+    
+def test_invalid_notification_message(client, capsys):
+    response = 'invalid message'
+    data = base64.b64encode(response.encode()).decode()
+    
+    r = client.post('/', json={'message': {'data': data}})
+    assert r.status_code == 400
+    
+    out, _ = capsys.readouterr()
+    assert 'notification could not be decoded to a JSON' in out
+    
+    
+def test_invalid_incident_message(client, capsys):
+    response = '{"invalid": "error"}'
+    data = base64.b64encode(response.encode()).decode()
+    
+    r = client.post('/', json={'message': {'data': data}})
+    assert r.status_code == 400
+    
+    out, _ = capsys.readouterr()
+    assert 'invalid incident format' in out    
 
 
 def test_open_alert_message(client, capsys):
@@ -94,6 +140,7 @@ def test_open_alert_message(client, capsys):
     r = client.post('/', json={'message': {'data': data}})
     assert r.status_code == 204
 
+    # TODO: mock http request
     r = requests.get(f'{URL}/lights/1')
     assert r.status_code == 200
     
@@ -109,6 +156,7 @@ def test_closed_alert_message(client, capsys):
     r = client.post('/', json={'message': {'data': data}})
     assert r.status_code == 204
 
+    # TODO: mock http request
     r = requests.get(f'{URL}/lights/1')
     assert r.status_code == 200
     
