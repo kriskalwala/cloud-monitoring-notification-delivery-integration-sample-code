@@ -25,6 +25,7 @@ import pytest
 
 import philips_hue
 
+# TODO: make config loading centralized
 load_dotenv()
 URL = os.environ.get("philips-url")
 
@@ -32,6 +33,7 @@ URL = os.environ.get("philips-url")
 def test_set_color():
     philips_hue.set_color(1, 0)
     
+    # TODO: mock http request
     r = requests.get(f'{URL}/lights/1')
     assert r.status_code == 200
     
@@ -39,4 +41,3 @@ def test_set_color():
     
     assert light_info["state"]["on"] == True
     assert light_info["state"]["hue"] == 0
-    
