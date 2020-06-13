@@ -16,6 +16,7 @@
 
 # [START run_pubsub_server_setup]
 import base64
+import binascii
 import os
 import json
 import philips_hue
@@ -27,7 +28,8 @@ app = Flask(__name__)
 # [END run_pubsub_server_setup]
 
 
-def configure_light(incident, light_id):
+# TODO: create a dispatch interface to make this more generic
+def trigger_hue_from_incident(incident, light_id):
     """Changes the color of a Philips Hue light based on an incident message from pub/sub.
     
     Sets the color of the light to red if the incident is open and green if the incident is closed.
@@ -36,40 +38,94 @@ def configure_light(incident, light_id):
         incident: A JSON message about an incident from pub/sub.
         light_id: The id of the light to set the color for.
     """
-    if incident["incident"]["condition"]["state"] == "open":
+    condition_state = incident["incident"]["condition"]["state"]
+    if condition_state == "open":
         philips_hue.set_color(light_id, 0)
-    elif incident["incident"]["condition"]["state"] == "closed":
+    elif condition_state == "closed":
         philips_hue.set_color(light_id, 25500)
+        
+
+# TODO: potentially use jsonschema.validate here for a stronger check against a valid schema
+def is_valid_pubsub_message(envelope):
+    """Returns whether or not a JSON envelope has the correct pubsub message schema.
+
+    Args:
+        envelope: The JSON response to validate.
+        
+    Returns:
+        True if the envelope has a valid message format, False otherwise.
+    """
+    if not isinstance(envelope, dict) or 'message' not in envelope:
+        return False
+
+    pubsub_message = envelope['message']
+
+    if not isinstance(pubsub_message, dict) or 'data' not in pubsub_message:
+        return False
+    
+    return True
+
+# TODO: potentially use jsonschema.validate here for a strong check against a valid schema
+def is_valid_incident_message(message):
+    """Returns whether or not a message has the correct incident message schema.
+
+    Args:
+        message: The JSON notification to validate.
+        
+    Returns:
+        True if the message has a valid incident format, False otherwise.
+    """
+    if not isinstance(message, dict) or 'incident' not in message:
+        return False
+    
+    return True
 
         
 # [START run_pubsub_handler]
 @app.route('/', methods=['POST'])
 def index():
     envelope = request.get_json()
+    
+    # TODO: use a client logging library
     if not envelope:
         msg = 'no Pub/Sub message received'
         print(f'error: {msg}')
         return f'Bad Request: {msg}', 400
 
-    if not isinstance(envelope, dict) or 'message' not in envelope:
+    if not is_valid_pubsub_message(envelope):
         msg = 'invalid Pub/Sub message format'
         print(f'error: {msg}')
         return f'Bad Request: {msg}', 400
-
+    
     pubsub_message = envelope['message']
-
-    response = 'empty response'
-    if isinstance(pubsub_message, dict) and 'data' in pubsub_message:
-        response = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
-        
+    
+    
     try:
-        response = json.loads(response)
+        monitoring_notification_string = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
+    except (TypeError, binascii.Error) as e:
+        msg = 'notification should be base64-encoded'
+        print(f'error: {msg}')
+        return f'Bad Request: {msg}', 400
+    
+    
+    try:
+        monitoring_notification_dict = json.loads(monitoring_notification_string)
     except json.JSONDecodeError:
+        msg = 'notification could not be decoded to a JSON'
+        print(f'error: {msg}')
+        return f'Bad Request: {msg}', 400
+    
+     
+    if not is_valid_incident_message(monitoring_notification_dict):
         msg = 'invalid incident format'
         print(f'error: {msg}')
         return f'Bad Request: {msg}', 400
 
-    configure_light(response, 1)  
+    # TODO: Put light_id into the config
+    LIGHT_ID = 1
+    
+    # TODO: call from dispatch interface
+    trigger_hue_from_incident(monitoring_notification_dict, LIGHT_ID)  
 
 
     return ('', 204)
