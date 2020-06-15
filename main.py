@@ -22,6 +22,7 @@ from flask import Flask, request
 
 
 app = Flask(__name__)
+app.config.from_object('config.DevConfig')
 # [END run_pubsub_server_setup]
 
 
