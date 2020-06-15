@@ -28,8 +28,13 @@ import main
 @pytest.fixture
 def client():
     main.app.testing = True
-    main.app.config.from_object('config.DevConfig')
     return main.app.test_client()
+
+
+@pytest.fixture
+def config():
+    main.app.config.from_object('config.DevConfig')
+    return main.app.config
 
 
 def test_empty_payload(client):
