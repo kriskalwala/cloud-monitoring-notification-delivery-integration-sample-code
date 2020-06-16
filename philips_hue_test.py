@@ -23,21 +23,26 @@ from dotenv import load_dotenv
 
 import pytest
 
+import main
 import philips_hue
+import philips_hue_mock
+        
+        
+@pytest.fixture
+def config():
+    main.app.config.from_object('config.DevConfig')
+    return main.app.config
 
-# TODO: make config loading centralized
-load_dotenv()
-URL = os.environ.get("philips-url")
+
+@pytest.fixture
+def philips_hue_client(config):
+    philips_hue_client = philips_hue.PhilipsHueClient(config['PHILIPS_HUE_URL'])
+    return philips_hue_client
 
 
-def test_set_color():
-    philips_hue.set_color(1, 0)
-    
-    # TODO: mock http request
-    r = requests.get(f'{URL}/lights/1')
+def test_set_color(philips_hue_client, requests_mock):  
+    url = philips_hue_client.api_url
+    requests_mock.put(f'{url}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
+    r = philips_hue_client.set_color(1, 0)
     assert r.status_code == 200
-    
-    light_info = r.json()
-    
-    assert light_info["state"]["on"] == True
-    assert light_info["state"]["hue"] == 0
+    assert '{"on": true, "hue": 0}' == r.text
