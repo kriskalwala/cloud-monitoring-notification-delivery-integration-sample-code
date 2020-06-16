@@ -1,3 +1,17 @@
+# Copyright 2019 Google, LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Flask config."""
 import os
 from dotenv import load_dotenv
@@ -8,14 +22,15 @@ load_dotenv()
 class Config:
     """Base config."""
 
-    FLASK_ENV = 'development'
-    TESTING = True
+    FLASK_ENV = 'production'
+    TESTING = False
+    DEBUG = False
+    
+    PHILIPS_HUE_URL = os.environ.get('PHILIPS_URL')
     
     
 class ProdConfig(Config):
     FLASK_ENV = 'production'
-    DEBUG = False
-    TESTING = False
 
 
 class DevConfig(Config):
@@ -23,5 +38,9 @@ class DevConfig(Config):
     DEBUG = True
     TESTING = True
     
-    # HUE SECRETS
-    PHILIPS_HUE_URL = os.environ.get('philips-url')
+
+configs = {
+    'prod': ProdConfig,
+    'dev': DevConfig,
+    'default': ProdConfig
+}
