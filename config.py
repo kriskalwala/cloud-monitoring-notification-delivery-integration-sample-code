@@ -30,7 +30,7 @@ class Config:
     
     
 class ProdConfig(Config):
-    FLASK_ENV = 'production'
+    pass
 
 
 class DevConfig(Config):
