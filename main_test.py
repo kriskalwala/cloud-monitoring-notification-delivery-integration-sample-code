@@ -31,6 +31,12 @@ def client():
     return main.app.test_client()
 
 
+@pytest.fixture
+def config():
+    main.app.config.from_object('config.DevConfig')
+    return main.app.config
+
+
 def test_empty_payload(client):
     r = client.post('/', json='')
     assert r.status_code == 400
