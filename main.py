@@ -32,28 +32,35 @@ load_dotenv()
 app = Flask(__name__)
 env = os.environ.get('FLASK_APP_ENV', 'default')
 app.config.from_object(configs[env])
+
+philips_hue_client = philips_hue.PhilipsHueClient(app.config['PHILIPS_HUE_URL'])
 # [END run_pubsub_server_setup]
 
 
-# TODO: create a dispatch interface to make this more generic
-def trigger_hue_from_incident(incident, light_id):
-    """Changes the color of a Philips Hue light based on an incident message from pub/sub.
+# TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/10): 
+# Currently specific to Philips Hue, but will be generalized to trigger whatever notification system the client chooses
+def trigger_hue_from_incident(client, incident, light_id):
+    """Changes the color of a Philips Hue light based on an incident message from pub/sub and returns the response.
     
     Sets the color of the light to red if the incident is open and green if the incident is closed.
 
     Args:
         incident: A JSON message about an incident from pub/sub.
         light_id: The id of the light to set the color for.
+    
+    Returns:
+        The HTTP Response from calling the Philips Hue API.
     """
     condition_state = incident["incident"]["condition"]["state"]
     if condition_state == "open":
-        philips_hue.set_color(light_id, 0)  # set to red
+        return client.set_color(light_id, 0)  # set to red
     elif condition_state == "closed":
-        philips_hue.set_color(light_id, 25500)  # set to green
-    # TODO: add condition for acknowledged
+        return client.set_color(light_id, 25500)  # set to green
         
 
-# TODO: potentially use jsonschema.validate here for a stronger check against a valid schema
+# TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/11): 
+# Currently using if statements to check if certain keys exist, but will potentially use the jsonschema library
+# in the future to validate messages
 def is_valid_pubsub_message(envelope):
     """Returns whether or not a JSON envelope has the correct pubsub message schema.
 
@@ -73,7 +80,9 @@ def is_valid_pubsub_message(envelope):
     
     return True
 
-# TODO: potentially use jsonschema.validate here for a strong check against a valid schema
+# TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/11): 
+# Currently using if statements to check if certain keys exist, but will potentially use the jsonschema library
+# in the future to validate messages
 def is_valid_incident_message(message):
     """Returns whether or not a message has the correct incident message schema.
 
@@ -94,7 +103,6 @@ def is_valid_incident_message(message):
 def index():
     envelope = request.get_json()
     
-    # TODO: use a client logging library
     if not envelope:
         msg = 'no Pub/Sub message received'
         print(f'error: {msg}')
@@ -129,14 +137,11 @@ def index():
         print(f'error: {msg}')
         return f'Bad Request: {msg}', 400
 
-    # TODO: Put light_id into the config
-    LIGHT_ID = 1
     
-    # TODO: call from dispatch interface
-    trigger_hue_from_incident(monitoring_notification_dict, LIGHT_ID)  
+    r = trigger_hue_from_incident(philips_hue_client, monitoring_notification_dict, app.config['LIGHT_ID'])  
 
 
-    return ('', 204)
+    return (r.text, 200)
 # [END run_pubsub_handler]
 
 
