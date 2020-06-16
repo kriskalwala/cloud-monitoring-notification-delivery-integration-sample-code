@@ -22,9 +22,16 @@ import json
 import philips_hue
 
 from flask import Flask, request
+from config import configs
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 app = Flask(__name__)
+env = os.environ.get('FLASK_APP_ENV', 'default')
+app.config.from_object(configs[env])
 # [END run_pubsub_server_setup]
 
 
