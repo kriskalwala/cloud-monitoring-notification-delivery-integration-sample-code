@@ -15,6 +15,7 @@
 """Flask config."""
 import os
 from dotenv import load_dotenv
+from google.cloud import secretmanager
 
 load_dotenv()
 
@@ -25,18 +26,30 @@ class Config:
     FLASK_ENV = 'production'
     TESTING = False
     DEBUG = False
-
-    PHILIPS_HUE_URL = os.environ.get('PHILIPS_URL')
-
+    
+    
 
 class ProdConfig(Config):
-    pass
+    client = secretmanager.SecretManagerServiceClient()
+    
+    secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_ip', 'latest')
+    response = client.access_secret_version(secret_path)
+    philips_ip = response.payload.data.decode('UTF-8')
+    
+    secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_username', 'latest')
+    response = client.access_secret_version(secret_path)
+    philips_username = response.payload.data.decode('UTF-8')
+    
+    PHILIPS_HUE_URL = 'http://{}/api/{}'.format(philips_ip, philips_username)
+    
 
 
 class DevConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
+    PHILIPS_HUE_URL = os.environ.get('PHILIPS_URL')
+
 
 
 configs = {
