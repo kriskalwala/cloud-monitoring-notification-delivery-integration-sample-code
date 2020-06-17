@@ -25,10 +25,10 @@ class Config:
     FLASK_ENV = 'production'
     TESTING = False
     DEBUG = False
-    
+
     PHILIPS_HUE_URL = os.environ.get('PHILIPS_URL')
-    
-    
+
+
 class ProdConfig(Config):
     pass
 
@@ -37,7 +37,7 @@ class DevConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
-    
+
 
 configs = {
     'prod': ProdConfig,
