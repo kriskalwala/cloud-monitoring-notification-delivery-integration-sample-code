@@ -30,17 +30,19 @@ class Config:
     
 
 class ProdConfig(Config):
-    client = secretmanager.SecretManagerServiceClient()
-    
-    secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_ip', 'latest')
-    response = client.access_secret_version(secret_path)
-    philips_ip = response.payload.data.decode('UTF-8')
-    
-    secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_username', 'latest')
-    response = client.access_secret_version(secret_path)
-    philips_username = response.payload.data.decode('UTF-8')
-    
-    PHILIPS_HUE_URL = 'http://{}/api/{}'.format(philips_ip, philips_username)
+    @property
+    def PHILIPS_HUE_URL(self):
+        client = secretmanager.SecretManagerServiceClient()
+
+        secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_ip', 'latest')
+        response = client.access_secret_version(secret_path)
+        philips_ip = response.payload.data.decode('UTF-8')
+
+        secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_username', 'latest')
+        response = client.access_secret_version(secret_path)
+        philips_username = response.payload.data.decode('UTF-8')
+
+        return 'http://{}/api/{}'.format(philips_ip, philips_username)
     
 
 
