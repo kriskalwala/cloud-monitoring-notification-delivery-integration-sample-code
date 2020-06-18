@@ -85,6 +85,7 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
     Sets the color of the light to red if the incident is open and green if the incident is closed.
 
     Args:
+        client: The PhilipsHueClient object to trigger a response from.
         notification: A JSON message about a monitoring notification.
         light_id: The id of the light to set the color for.
 
