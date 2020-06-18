@@ -26,33 +26,38 @@ class Config:
     FLASK_ENV = 'production'
     TESTING = False
     DEBUG = False
-    
-    
+
+
 
 class ProdConfig(Config):
-    __philips_hue_ip = None
-    __philips_hue_username = None
-    
+    def __init__(self):
+        self.__philips_hue_ip = None
+        self.__philips_hue_username = None
+
+
     @property
     def PHILIPS_HUE_IP(self):
-        if __philips_hue_ip is None:
+        if self.__philips_hue_ip is None:
             client = secretmanager.SecretManagerServiceClient()
-            secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_ip', 'latest')
+            secret_path = client.secret_version_path('alertmanager-2020-intern-r',
+                                                     'philips_ip', 'latest')
             response = client.access_secret_version(secret_path)
-            __philips_hue_ip = response.payload.data.decode('UTF-8')
+            self.__philips_hue_ip = response.payload.data.decode('UTF-8')
 
-        return __philips_hue_ip
-    
+        return self.__philips_hue_ip
+
+
     @property
     def PHILIPS_HUE_USERNAME(self):
-        if __philips_hue_username is None:
+        if self.__philips_hue_username is None:
             client = secretmanager.SecretManagerServiceClient()
-            secret_path = client.secret_version_path('alertmanager-2020-intern-r', 'philips_username', 'latest')
+            secret_path = client.secret_version_path('alertmanager-2020-intern-r',
+                                                     'philips_username', 'latest')
             response = client.access_secret_version(secret_path)
-            __philips_hue_username = response.payload.data.decode('UTF-8')
+            self.__philips_hue_username = response.payload.data.decode('UTF-8')
 
-        return __philips_hue_username
-    
+        return self.__philips_hue_username
+
 
 
 class DevConfig(Config):

@@ -19,9 +19,8 @@ import base64
 import os
 
 from flask import Flask, request
-from config import configs
-
 from dotenv import load_dotenv
+from config import configs
 
 
 load_dotenv()
