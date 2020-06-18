@@ -51,7 +51,7 @@ def test_empty_payload(flask_client, capsys):
     assert r.status_code == 400
     
     out, _ = capsys.readouterr()
-    assert 'no Pub/Sub message received' in out
+    assert 'invalid Pub/Sub message format' in out
 
 
 def test_invalid_payload(flask_client, capsys):
@@ -83,7 +83,7 @@ def test_nonstring_notification_message(flask_client, capsys):
     assert r.status_code == 400
 
     out, _ = capsys.readouterr()
-    assert 'notification should be base64-encoded' in out
+    assert 'notification should be in a string format' in out
     
     
 def test_unicode_notification_message(flask_client, capsys):
@@ -116,26 +116,6 @@ def test_invalid_incident_message(flask_client, capsys):
     
     out, _ = capsys.readouterr()
     assert 'invalid incident format' in out    
-
-
-def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
-    response = {"incident": {"condition": {"state": "open"}}}
-    
-    url = philips_hue_client.api_url
-    requests_mock.put(f'{url}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
-    r = main.trigger_hue_from_incident(philips_hue_client, response, 1)
-    assert r.status_code == 200
-    assert '{"on": true, "hue": 0}' == r.text
-
-
-def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
-    response = {"incident": {"condition": {"state": "closed"}}}
-    
-    url = philips_hue_client.api_url
-    requests_mock.put(f'{url}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
-    r = main.trigger_hue_from_incident(philips_hue_client, response, 1)
-    assert r.status_code == 200
-    assert '{"on": true, "hue": 25500}' == r.text
     
     
 def test_open_alert_message(flask_client, philips_hue_client, capsys, requests_mock):
