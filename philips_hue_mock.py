@@ -18,15 +18,16 @@ import json
 
 
 def mock_hue_put_response(request, context):
-    """Callback for mocking a Philips Hue API response using the requests-mock library, specifically for a put request.
-    
+    """Callback for mocking a Philips Hue API response using the requests-mock library,
+    specifically for a put request.
+
     See https://requests-mock.readthedocs.io/en/latest/response.html for usage details.
 
     Args:
         request: The requests.Request object that was provided.
         context: An object containing the collected known data about this response
         (headers, status_code, reason, cookies).
-        
+
     Returns:
         The response text with confirmation of the arguments passed in.
     """
@@ -35,15 +36,15 @@ def mock_hue_put_response(request, context):
     except ValueError:
         context.status_code = 400
         return 'invalid Philips Hue url'
-    
+
     try:
         body_json = json.loads(request.body)
     except json.JSONDecodeError:
         context.status_code = 400
         return 'invalid put request body'
-    
+
     context.status_code = 200
-    
+
     base_path = request.url[base_path_index:]
     response = []
     for arg in body_json:

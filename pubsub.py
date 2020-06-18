@@ -18,7 +18,6 @@ This module defines functions and errors to handle input from Google Monitoring,
 such as Pub/Sub notifications.
 """
 
-import json
 import base64
 import binascii
 
@@ -32,17 +31,17 @@ class DataParseError(Exception):
 
     def __init__(self, message):
         self.message = message
-        
+
 
 def parse_data_from_message(pubsub_received_message):
     """Parses notification messages from Pub/Sub.
 
     Args:
         pubsub_received_message: The JSON message to parse from Pub/Sub.
-        
+
     Returns:
         The resulting parsed data as a unicode string.
-        
+
     Raises:
         DataParseError: If data cannot be parsed.
     """
@@ -62,5 +61,5 @@ def parse_data_from_message(pubsub_received_message):
 
     notification_string = notification_bytes.decode('utf-8')
     notification_string = notification_string.strip()
-    
+
     return notification_string

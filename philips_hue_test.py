@@ -12,22 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# NOTE:
-# These tests are unit tests for functions in philips_hue.py.
-
-import requests
-import os
-import base64
-from uuid import uuid4
-from dotenv import load_dotenv
+"""Unit tests for functions in philips_hue.py."""
 
 import pytest
 
 import main
 import philips_hue
 import philips_hue_mock
-        
-        
+
+
 @pytest.fixture
 def config():
     main.app.config.from_object('config.DevConfig')
@@ -36,29 +29,33 @@ def config():
 
 @pytest.fixture
 def philips_hue_client(config):
-    philips_hue_client = philips_hue.PhilipsHueClient(config['BRIDGE_IP_ADDRESS'], config['USERNAME'])
+    philips_hue_client = philips_hue.PhilipsHueClient(
+        config['BRIDGE_IP_ADDRESS'], config['USERNAME'])
     return philips_hue_client
 
 
-def test_set_color(philips_hue_client, requests_mock):  
+def test_set_color(philips_hue_client, requests_mock):
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
-    
-    requests_mock.put(f'http://{bridge_ip_address}/api/{username}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
+
+    requests_mock.put(f'http://{bridge_ip_address}/api/{username}/lights/1/state',
+                      text=philips_hue_mock.mock_hue_put_response)
     response = philips_hue_client.set_color('1', 0)
     assert response.status_code == 200
     assert "{'success': {'/lights/1/state/on': 'True'}}" in response.text
     assert "{'success': {'/lights/1/state/hue': '0'}}" in response.text
-    
-    
+
+
 def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
     response = {"incident": {"condition": {"state": "open"}}}
-    
+
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
-    
-    requests_mock.put(f'http://{bridge_ip_address}/api/{username}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
-    response = philips_hue.trigger_light_from_monitoring_notification(philips_hue_client, response, 1)
+
+    requests_mock.put(f'http://{bridge_ip_address}/api/{username}/lights/1/state',
+                      text=philips_hue_mock.mock_hue_put_response)
+    response = philips_hue.trigger_light_from_monitoring_notification(
+        philips_hue_client, response, 1)
     assert response.status_code == 200
     assert "{'success': {'/lights/1/state/on': 'True'}}" in response.text
     assert "{'success': {'/lights/1/state/hue': '0'}}" in response.text
@@ -66,12 +63,14 @@ def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
 
 def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
     response = {"incident": {"condition": {"state": "closed"}}}
-    
+
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
-    
-    requests_mock.put(f'http://{bridge_ip_address}/api/{username}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
-    response = philips_hue.trigger_light_from_monitoring_notification(philips_hue_client, response, 1)
+
+    requests_mock.put(f'http://{bridge_ip_address}/api/{username}/lights/1/state',
+                      text=philips_hue_mock.mock_hue_put_response)
+    response = philips_hue.trigger_light_from_monitoring_notification(
+        philips_hue_client, response, 1)
     assert response.status_code == 200
     assert "{'success': {'/lights/1/state/on': 'True'}}" in response.text
     assert "{'success': {'/lights/1/state/hue': '25500'}}" in response.text
