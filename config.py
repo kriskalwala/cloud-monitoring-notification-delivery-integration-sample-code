@@ -64,7 +64,8 @@ class DevConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
-    PHILIPS_HUE_URL = os.environ.get('PHILIPS_URL')
+    PHILIPS_HUE_IP = os.environ.get('PHILIPS_IP')
+    PHILIPS_HUE_USERNAME = os.environ.get('PHILIPS_USERNAME')
 
 
 
