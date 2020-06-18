@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Module to provide callback functions for mock HTTP requests to the Philips Hue API."""
+
+import json
+
+
 def mock_hue_put_response(request, context):
     """Callback for mocking a Philips Hue API response using the requests-mock library, specifically for a put request.
     
@@ -23,11 +28,24 @@ def mock_hue_put_response(request, context):
         (headers, status_code, reason, cookies).
         
     Returns:
-        The response text.
+        The response text with confirmation of the arguments passed in.
     """
-    if request.body:
-        context.status_code = 200
-        return request.body
-    else:
+    try:
+        base_path_index = request.url.index('/lights/')
+    except ValueError:
         context.status_code = 400
-        return 'invalid put request'
+        return 'invalid Philips Hue url'
+    
+    try:
+        body_json = json.loads(request.body)
+    except json.JSONDecodeError:
+        context.status_code = 400
+        return 'invalid put request body'
+    
+    context.status_code = 200
+    
+    base_path = request.url[base_path_index:]
+    response = []
+    for arg in body_json:
+        response.append({'success':{f'{base_path}/{arg}': f'{body_json[arg]}'}})
+    return str(response)
