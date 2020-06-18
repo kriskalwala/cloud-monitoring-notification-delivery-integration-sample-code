@@ -94,7 +94,6 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
     Raises:
         ValueError: If the incident state is not open or closed.
     """
-    print(notification)
     try:
         condition_state = notification["incident"]["condition"]["state"]
     except KeyError:
