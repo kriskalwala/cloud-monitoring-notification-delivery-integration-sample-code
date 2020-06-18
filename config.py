@@ -26,7 +26,8 @@ class Config:
     TESTING = False
     DEBUG = False
     
-    PHILIPS_HUE_URL = os.environ.get('PHILIPS_URL')
+    BRIDGE_IP_ADDRESS = os.environ.get('BRIDGE_IP_ADDRESS')
+    USERNAME = os.environ.get('USERNAME')
     LIGHT_ID = 1
     
     
