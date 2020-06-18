@@ -46,3 +46,23 @@ def test_set_color(philips_hue_client, requests_mock):
     r = philips_hue_client.set_color(1, 0)
     assert r.status_code == 200
     assert '{"on": true, "hue": 0}' == r.text
+    
+    
+def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
+    response = {"condition": {"state": "open"}}
+    
+    url = philips_hue_client.api_url
+    requests_mock.put(f'{url}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
+    r = philips_hue.trigger_hue_from_incident(philips_hue_client, response, 1)
+    assert r.status_code == 200
+    assert '{"on": true, "hue": 0}' == r.text
+
+
+def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
+    response = {"condition": {"state": "closed"}}
+    
+    url = philips_hue_client.api_url
+    requests_mock.put(f'{url}/lights/1/state', text=philips_hue_mock.mock_hue_put_response)
+    r = philips_hue.trigger_hue_from_incident(philips_hue_client, response, 1)
+    assert r.status_code == 200
+    assert '{"on": true, "hue": 25500}' == r.text
