@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Flask config."""
+
 import os
 from dotenv import load_dotenv
 
@@ -25,21 +26,23 @@ class Config:
     FLASK_ENV = 'production'
     TESTING = False
     DEBUG = False
-    
+
     BRIDGE_IP_ADDRESS = os.environ.get('BRIDGE_IP_ADDRESS')
     USERNAME = os.environ.get('USERNAME')
-    LIGHT_ID = 1
-    
-    
+    LIGHT_ID = '1'
+
+
 class ProdConfig(Config):
+    """Production config."""
     pass
 
 
 class DevConfig(Config):
+    """Development config."""
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
-    
+
 
 configs = {
     'prod': ProdConfig,
