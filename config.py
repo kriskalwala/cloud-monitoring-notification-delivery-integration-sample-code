@@ -33,8 +33,8 @@ class ProdConfig(Config):
         'alertmanager-2020-intern-r', 'philips_username')
 
     def __init__(self):
-        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret()
-        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret()
+        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret_value()
+        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret_value()
 
 
 
@@ -46,8 +46,8 @@ class DevConfig(Config):
     PHILIPS_HUE_USERNAME = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME') # too long
 
     def __init__(self):
-        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret()
-        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret()
+        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret_value()
+        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret_value()
 
 
 
