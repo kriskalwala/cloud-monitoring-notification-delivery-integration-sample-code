@@ -13,42 +13,38 @@
 # limitations under the License.
 
 import os
-from dotenv import load_dotenv
 from google.cloud import secretmanager
 
-load_dotenv()
-
 class Secret:
-    
+
     def get_secret():
         pass
 
 
 
 class EnvironmentVariableSecret(Secret):
-    
+
     def __init__(self, secret_name):
         self.secret_name = secret_name
-    
-    def get_secret():
-        os.environ.get(self.secret_name)
+
+    def get_secret(self):
+        return os.environ.get(self.secret_name)
 
 
 
 class GoogleSecretManagerSecret(Secret):
-    
+
     def __init__(self, project_id, secret_name, version="latest", client=None):
         self.project_id = project_id
         self.secret_name = secret_name
         self.version = version
-        
-        if client is not None:
-            self.client = client
-        else:
+        self.client = client
+
+
+    def get_secret(self):
+        if self.client is None:
             self.client = secretmanager.SecretManagerServiceClient()
 
-
-    def get_secret():
         secret_path = self.client.secret_version_path(self.project_id,
                                                       self.secret_name,
                                                       self.version)

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import secrets
+
 """Flask config."""
 
 class Config:
@@ -24,33 +26,15 @@ class Config:
 
 
 class ProdConfig(Config):
+
+    PHILIPS_HUE_IP = secrets.GoogleSecretManagerSecret(
+        'alertmanager-2020-intern-r', 'philips_ip')
+    PHILIPS_HUE_USERNAME = secrets.GoogleSecretManagerSecret(
+        'alertmanager-2020-intern-r', 'philips_username')
+
     def __init__(self):
-        self.__philips_hue_ip = None
-        self.__philips_hue_username = None
-
-
-    @property
-    def PHILIPS_HUE_IP(self):
-        if self.__philips_hue_ip is None:
-            client = secretmanager.SecretManagerServiceClient()
-            secret_path = client.secret_version_path('alertmanager-2020-intern-r',
-                                                     'philips_ip', 'latest')
-            response = client.access_secret_version(secret_path)
-            self.__philips_hue_ip = response.payload.data.decode('UTF-8')
-
-        return self.__philips_hue_ip
-
-
-    @property
-    def PHILIPS_HUE_USERNAME(self):
-        if self.__philips_hue_username is None:
-            client = secretmanager.SecretManagerServiceClient()
-            secret_path = client.secret_version_path('alertmanager-2020-intern-r',
-                                                     'philips_username', 'latest')
-            response = client.access_secret_version(secret_path)
-            self.__philips_hue_username = response.payload.data.decode('UTF-8')
-
-        return self.__philips_hue_username
+        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret()
+        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret()
 
 
 
@@ -58,8 +42,12 @@ class DevConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
-    PHILIPS_HUE_IP = os.environ.get('PHILIPS_IP')
-    PHILIPS_HUE_USERNAME = os.environ.get('PHILIPS_USERNAME')
+    PHILIPS_HUE_IP = secrets.EnvironmentVariableSecret('PHILIPS_HUE_IP')
+    PHILIPS_HUE_USERNAME = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME') # too long
+
+    def __init__(self):
+        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret()
+        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret()
 
 
 
