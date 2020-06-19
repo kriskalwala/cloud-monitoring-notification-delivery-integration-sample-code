@@ -36,7 +36,7 @@ class Secret(abc.ABC):
     """
 
     @abc.abstractmethod
-    def get_secret_value():
+    def get_secret_value(self):
         pass
 
 
@@ -63,10 +63,11 @@ class GoogleSecretManagerSecret(Secret):
     of a specified name. Allows access to the secret value.
 
     Attributes:
-        project_id: The id of the project that the secret manager is in
+        project_id: The id of the project whose seceret manager to access
         secret_name: The name of the secret
         version: the version of the secret
-        client: The secret manager client to use to access the secret
+        client: The secret manager client to use to access the secret (if
+                None, a new one is created)
 
     """
 

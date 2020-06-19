@@ -43,7 +43,7 @@ class DevConfig(Config):
     DEBUG = True
     TESTING = True
     PHILIPS_HUE_IP = secrets.EnvironmentVariableSecret('PHILIPS_HUE_IP')
-    PHILIPS_HUE_USERNAME = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME') # too long
+    PHILIPS_HUE_USERNAME = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME')
 
     def __init__(self):
         self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret_value()
