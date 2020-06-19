@@ -13,12 +13,6 @@
 # limitations under the License.
 
 """Flask config."""
-import os
-from dotenv import load_dotenv
-from google.cloud import secretmanager
-
-load_dotenv()
-
 
 class Config:
     """Base config."""
