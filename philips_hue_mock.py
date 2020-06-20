@@ -20,33 +20,47 @@ import json
 def mock_hue_put_response(request, context):
     """Callback for mocking a Philips Hue API response using the requests-mock library,
     specifically for a put request.
+    
+    This mock response assumes that the system has a single light with light_id of '1',
+    and the expected request is to set the 'on' state as well as 'hue' state.
 
     See https://requests-mock.readthedocs.io/en/latest/response.html for usage details.
 
     Args:
-        request: The requests.Request object that was provided.
+        request: The requests.Request object that was provided. The request method is
+        assumed to be a put request.
         context: An object containing the collected known data about this response
         (headers, status_code, reason, cookies).
 
     Returns:
         The response text with confirmation of the arguments passed in.
     """
-    try:
-        base_path_index = request.url.index('/lights/')
-    except ValueError:
+    expected_path = '/lights/1/state'
+    if expected_path not in request.url:
         context.status_code = 400
         return 'invalid Philips Hue url'
 
     try:
-        body_json = json.loads(request.body)
+        body_dict = json.loads(request.body)
     except json.JSONDecodeError:
         context.status_code = 400
-        return 'invalid put request body'
+        return 'put request body should be a JSON-encoded string'
+    
+    try:
+        on = body_dict['on']
+        hue = body_dict['hue']
+    except KeyError:
+        context.status_code = 400
+        return 'missing keys in put request body'
+        
 
     context.status_code = 200
 
-    base_path = request.url[base_path_index:]
     response = []
-    for arg in body_json:
-        response.append({'success':{f'{base_path}/{arg}': f'{body_json[arg]}'}})
+    if on:
+        response.append({'success':{'/lights/1/state/on': 'true'}})
+    else:
+        response.append({'success':{'/lights/1/state/on': 'false'}})
+
+    response.append({'success':{f'/lights/1/state/hue': f'{hue}'}})
     return str(response)
