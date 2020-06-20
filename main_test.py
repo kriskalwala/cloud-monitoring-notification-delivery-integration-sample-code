@@ -18,9 +18,9 @@
 # These tests are unit tests that mock Pub/Sub.
 
 import base64
+import re
 
 import pytest
-import re
 
 import main
 import philips_hue
@@ -105,7 +105,7 @@ def test_invalid_incident_message(flask_client):
     data = base64.b64encode(message.encode()).decode()
 
     response = flask_client.post('/', json={'message': {'data': data}})
-    
+
     assert response.status_code == 400
     assert b'Notification is missing required dict key' in response.data
 
@@ -117,10 +117,10 @@ def test_open_alert_message(flask_client, philips_hue_client, requests_mock):
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
-                      text=philips_hue_mock.mock_hue_put_response)
+                               text=philips_hue_mock.mock_hue_put_response)
 
     response = flask_client.post('/', json={'message': {'data': data}})
-    
+
     assert response.status_code == 200
     assert b"{'success': 'incident condition state is open'}" in response.data
 
@@ -132,7 +132,7 @@ def test_closed_alert_message(flask_client, philips_hue_client, requests_mock):
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
-                      text=philips_hue_mock.mock_hue_put_response)
+                               text=philips_hue_mock.mock_hue_put_response)
 
     response = flask_client.post('/', json={'message': {'data': data}})
 

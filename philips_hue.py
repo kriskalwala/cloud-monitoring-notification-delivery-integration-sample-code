@@ -34,8 +34,8 @@ class NotificationParseError(Error):
 
 class UnknownConditionStateError(Error):
     """Exception raised for errors in an invalid incident state value."""
-    
-    
+
+
 class BadAPIRequestError(Error):
     """Exception raised for errors in a Philips Hue API request."""
 
@@ -88,8 +88,8 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
     """Changes the color of a Philips Hue light based on a monitoring notification
     and returns the response.
 
-    The color of the Philips Hue light is set through the client, 
-    which makes an HTTP PUT request to the Philips Hue API. 
+    The color of the Philips Hue light is set through the client,
+    which makes an HTTP PUT request to the Philips Hue API.
     Sets the color of the light to red if the incident is open and green if the incident is closed.
 
     Args:
@@ -99,7 +99,7 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
 
     Returns:
         A response string indicating whether the light was triggered successfully,
-        as well as the incident state from the notification. 
+        as well as the incident state from the notification.
         An example response is as follows:
         {'success': 'incident condition state is open'}
 

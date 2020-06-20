@@ -24,7 +24,7 @@ import binascii
 
 class Error(Exception):
     """Base class for all errors raised in this module."""
-    
+
 
 class DataParseError(Error):
     """Raised when the encoded 'data' field of a Pub/Sub message cannot be parsed."""

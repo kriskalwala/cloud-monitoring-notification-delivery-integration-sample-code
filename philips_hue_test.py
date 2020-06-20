@@ -14,8 +14,9 @@
 
 """Unit tests for functions in philips_hue.py."""
 
-import pytest
 import re
+
+import pytest
 
 import philips_hue
 import philips_hue_mock
@@ -42,7 +43,7 @@ def test_set_color(philips_hue_client, requests_mock):
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
-                      text=philips_hue_mock.mock_hue_put_response)
+                               text=philips_hue_mock.mock_hue_put_response)
 
     response = philips_hue_client.set_color('1', 0)
 
@@ -57,13 +58,13 @@ def test_trigger_from_incident_invalid_state(philips_hue_client, requests_mock):
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
-                      text=philips_hue_mock.mock_hue_put_response)
-    
+                               text=philips_hue_mock.mock_hue_put_response)
+
     with pytest.raises(philips_hue.UnknownConditionStateError) as e:
         assert philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1)
+            philips_hue_client, notification, 1)
     assert 'Condition state must be "open" or "closed"' in str(e.value)
-    
+
 
 def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
     notification = {"incident": {"condition": {"state": "open"}}}
@@ -71,12 +72,12 @@ def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
-                      text=philips_hue_mock.mock_hue_put_response)
-    
+                               text=philips_hue_mock.mock_hue_put_response)
+
     with pytest.raises(philips_hue.BadAPIRequestError) as e:
         assert philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 2)
-    assert 'invalid Philips Hue url' == str(e.value)
+            philips_hue_client, notification, 2)
+    assert str(e.value) == 'invalid Philips Hue url'
 
 
 def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
@@ -85,12 +86,12 @@ def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
-                      text=philips_hue_mock.mock_hue_put_response)
+                               text=philips_hue_mock.mock_hue_put_response)
 
     response = philips_hue.trigger_light_from_monitoring_notification(
         philips_hue_client, notification, 1)
 
-    assert "{'success': 'incident condition state is open'}" == response
+    assert response == "{'success': 'incident condition state is open'}"
 
 
 def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
@@ -99,9 +100,9 @@ def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
-                      text=philips_hue_mock.mock_hue_put_response)
+                               text=philips_hue_mock.mock_hue_put_response)
 
     response = philips_hue.trigger_light_from_monitoring_notification(
         philips_hue_client, notification, 1)
 
-    assert "{'success': 'incident condition state is closed'}" == response
+    assert response == "{'success': 'incident condition state is closed'}"

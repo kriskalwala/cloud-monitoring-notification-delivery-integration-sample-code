@@ -20,7 +20,7 @@ import json
 def mock_hue_put_response(request, context):
     """Callback for mocking a Philips Hue API response using the requests-mock library,
     specifically for a put request.
-    
+
     This mock response assumes that the system has a single light with light_id of '1',
     and the expected request is to set the 'on' state as well as 'hue' state.
 
@@ -45,14 +45,14 @@ def mock_hue_put_response(request, context):
     except json.JSONDecodeError:
         context.status_code = 400
         return 'put request body should be a JSON-encoded string'
-    
+
     try:
         on = body_dict['on']
         hue = body_dict['hue']
     except KeyError:
         context.status_code = 400
         return 'missing keys in put request body'
-        
+
 
     context.status_code = 200
 
@@ -62,5 +62,5 @@ def mock_hue_put_response(request, context):
     else:
         response.append({'success':{'/lights/1/state/on': 'false'}})
 
-    response.append({'success':{f'/lights/1/state/hue': f'{hue}'}})
+    response.append({'success':{'/lights/1/state/hue': f'{hue}'}})
     return str(response)
