@@ -22,44 +22,39 @@ import base64
 import binascii
 
 
-class DataParseError(Exception):
-    """Exception raised for errors in a Pub/Sub notification format.
+class Error(Exception):
+    """Base class for all errors raised in this module."""
+    
 
-    Attributes:
-        message: explanation of the error
-    """
-
-    def __init__(self, message):
-        self.message = message
+class DataParseError(Error):
+    """Raised when the encoded 'data' field of a Pub/Sub message cannot be parsed."""
 
 
 def parse_data_from_message(pubsub_received_message):
     """Parses notification messages from Pub/Sub.
 
     Args:
-        pubsub_received_message: The JSON message to parse from Pub/Sub.
+        pubsub_received_message: Dictionary containing the Pub/Sub message.
 
     Returns:
-        The resulting parsed data as a unicode string.
+        The decoded 'data' value of provided Pub/Sub message, returned as a string.
 
     Raises:
         DataParseError: If data cannot be parsed.
     """
     try:
-        notification_base64_string = pubsub_received_message['message']['data']
-    except KeyError as e:
-        raise DataParseError('invalid Pub/Sub message format') from e
-    except TypeError as e:
+        data_base64_string = pubsub_received_message['message']['data']
+    except (KeyError, TypeError) as e:
         raise DataParseError('invalid Pub/Sub message format') from e
 
     try:
-        notification_bytes = base64.b64decode(notification_base64_string)
+        data_bytes = base64.b64decode(data_base64_string)
     except binascii.Error as e:
         raise DataParseError('data should be base64-encoded') from e
     except TypeError as e:
         raise DataParseError('data should be in a string format') from e
 
-    notification_string = notification_bytes.decode('utf-8')
-    notification_string = notification_string.strip()
+    data_string = data_bytes.decode('utf-8')
+    data_string = data_string.strip()
 
-    return notification_string
+    return data_string
