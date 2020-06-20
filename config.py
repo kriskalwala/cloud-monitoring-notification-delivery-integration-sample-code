@@ -44,8 +44,13 @@ class DevConfig(Config):
     TESTING = True
 
 
-configs = {
+_ENVIRONMENT_TO_CONFIG_MAPPING = {
     'prod': ProdConfig,
     'dev': DevConfig,
     'default': ProdConfig
 }
+
+
+def load():
+    environment_name = os.environ.get('FLASK_APP_ENV', 'default')
+    return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]
