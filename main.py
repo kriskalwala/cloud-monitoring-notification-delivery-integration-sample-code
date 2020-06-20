@@ -24,24 +24,20 @@ import os
 import json
 
 from flask import Flask, request
-from dotenv import load_dotenv
 
 import philips_hue
-from config import configs
+import config
 import pubsub
 
 
-load_dotenv()
-
 app = Flask(__name__)
-env = os.environ.get('FLASK_APP_ENV', 'default')
-app.config.from_object(configs[env])
+app.config.from_object(config.load())
 # [END run_pubsub_server_setup]
 
 
 # [START run_pubsub_handler]
 @app.route('/', methods=['POST'])
-def index():
+def handle_pubsub_message():
     pubsub_received_message = request.get_json()
 
     # parse the Pub/Sub data
@@ -49,15 +45,14 @@ def index():
         pubsub_data_string = pubsub.parse_data_from_message(pubsub_received_message)
     except pubsub.DataParseError as e:
         print(e)
-        return (e.message, 400)
+        return (str(e), 400)
 
     # load the notification from the data
     try:
         monitoring_notification_dict = json.loads(pubsub_data_string)
     except json.JSONDecodeError as e:
-        msg = 'notification could not be decoded to a JSON'
-        print(msg)
-        return (msg, 400)
+        print(e)
+        return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
 
     philips_hue_client = philips_hue.PhilipsHueClient(app.config['BRIDGE_IP_ADDRESS'],
@@ -68,10 +63,10 @@ def index():
             philips_hue_client, monitoring_notification_dict, app.config['LIGHT_ID'])
     except philips_hue.Error as e:
         print(e)
-        return (e.message, 400)
+        return (str(e), 400)
 
 
-    return (response.text, 200)
+    return (response, 200)
 # [END run_pubsub_handler]
 
 
