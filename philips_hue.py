@@ -24,6 +24,22 @@ import json
 import requests
 
 
+class Error(Exception):
+    """Base class for all errors raised in this module."""
+
+
+class NotificationParseError(Error):
+    """Exception raised for errors in a monitoring notification format."""
+
+
+class UnknownConditionStateError(Error):
+    """Exception raised for errors in an invalid incident state value."""
+    
+    
+class BadAPIRequestError(Error):
+    """Exception raised for errors in a Philips Hue API request."""
+
+
 class PhilipsHueClient():
     """Client for interacting with different Philips Hue APIs.
 
@@ -34,8 +50,18 @@ class PhilipsHueClient():
         username: Authorized user string to make API calls.
     """
     def __init__(self, bridge_ip_address, username):
-        self.bridge_ip_address = bridge_ip_address
-        self.username = username
+        self._bridge_ip_address = bridge_ip_address
+        self._username = username
+
+
+    @property
+    def bridge_ip_address(self):
+        return self._bridge_ip_address
+
+
+    @property
+    def username(self):
+        return self._username
 
 
     def set_color(self, light_id, hue):
@@ -51,28 +77,8 @@ class PhilipsHueClient():
         Returns:
             HTTP Response from the Philips Hue API.
         """
-        return requests.put(url=f'http://{self.bridge_ip_address}/api/{self.username}/lights/{light_id}/state',
+        return requests.put(url=f'http://{self._bridge_ip_address}/api/{self._username}/lights/{light_id}/state',
                             data=json.dumps({"on": True, "hue": hue}))
-
-
-class Error(Exception):
-    """Base class for exceptions in this module.
-
-    Attributes:
-        message: explanation of the error
-    """
-    def __init__(self, message):
-        self.message = message
-
-
-class NotificationParseError(Error):
-    """Exception raised for errors in a monitoring notification format."""
-    pass
-
-
-class StateValueError(Error):
-    """Exception raised for errors in an invalid incident state value."""
-    pass
 
 
 # TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/10):
@@ -82,27 +88,41 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
     """Changes the color of a Philips Hue light based on a monitoring notification
     and returns the response.
 
+    The color of the Philips Hue light is set through the client, 
+    which makes an HTTP PUT request to the Philips Hue API. 
     Sets the color of the light to red if the incident is open and green if the incident is closed.
 
     Args:
         client: The PhilipsHueClient object to trigger a response from.
-        notification: A JSON message about a monitoring notification.
+        notification: A dictionary containing the notification data.
         light_id: The id of the light to set the color for.
 
     Returns:
-        The HTTP Response from calling the Philips Hue API.
+        A response string indicating whether the light was triggered successfully,
+        as well as the incident state from the notification. 
+        An example response is as follows:
+        {'success': 'incident condition state is open'}
 
     Raises:
-        ValueError: If the incident state is not open or closed.
+        UnknownConditionStateError: If the incident state is not open or closed.
+        BadAPIRequestError: If there was an error in calling the Philips Hue API.
     """
     try:
         condition_state = notification["incident"]["condition"]["state"]
     except KeyError:
-        raise NotificationParseError("invalid incident format")
+        raise NotificationParseError("Notification is missing required dict key")
 
     if condition_state == "open":
-        return client.set_color(light_id, 0)  # set to red
+        response = client.set_color(light_id, 0)  # set to red
+        if response.status_code == 200:
+            return "{'success': 'incident condition state is open'}"
+        else:
+            raise BadAPIRequestError(response.text)
     if condition_state == "closed":
-        return client.set_color(light_id, 25500)  # set to green
-
-    raise StateValueError("incident state should be either open or closed")
+        response = client.set_color(light_id, 25500)  # set to green
+        if response.status_code == 200:
+            return "{'success': 'incident condition state is closed'}"
+        else:
+            raise BadAPIRequestError(response.text)
+    else:
+        raise UnknownConditionStateError(f'Condition state must be "open" or "closed"; actual: {condition_state}')
