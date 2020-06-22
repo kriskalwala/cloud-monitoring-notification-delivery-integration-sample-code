@@ -46,15 +46,15 @@ class EnvironmentVariableSecret(Secret):
     name. Allows access to the secret value.
 
     Attributes:
-        secret_name: The name of the secret
+        _secret_name: The name of the secret
     """
 
     def __init__(self, secret_name):
-        self.secret_name = secret_name
+        self._secret_name = secret_name
 
 
     def get_secret_value(self):
-        return os.environ.get(self.secret_name)
+        return os.environ.get(self._secret_name)
 
 
 
@@ -63,27 +63,27 @@ class GoogleSecretManagerSecret(Secret):
     of a specified name. Allows access to the secret value.
 
     Attributes:
-        project_id: The id of the project whose seceret manager to access
-        secret_name: The name of the secret
-        version: the version of the secret
-        client: The secret manager client to use to access the secret (if
+        _project_id: The id of the project whose seceret manager to access
+        _secret_name: The name of the secret
+        _version: the version of the secret
+        _client: The secret manager client to use to access the secret (if
                 None, a new one is created)
 
     """
 
     def __init__(self, project_id, secret_name, version='latest', client=None):
-        self.project_id = project_id
-        self.secret_name = secret_name
-        self.version = version
-        self.client = client
+        self._project_id = project_id
+        self._secret_name = secret_name
+        self._version = version
+        self._client = client
 
 
     def get_secret_value(self):
-        if self.client is None:
-            self.client = secretmanager.SecretManagerServiceClient()
+        if self._client is None:
+            self._client = secretmanager.SecretManagerServiceClient()
 
-        secret_path = self.client.secret_version_path(self.project_id,
-                                                      self.secret_name,
-                                                      self.version)
-        response = self.client.access_secret_version(secret_path)
+        secret_path = self._client.secret_version_path(self._project_id,
+                                                      self._secret_name,
+                                                      self._version)
+        response = self._client.access_secret_version(secret_path)
         return response.payload.data.decode('UTF-8')
