@@ -35,6 +35,7 @@ def parse_data_from_message(pubsub_received_message):
 
     Args:
         pubsub_received_message: Dictionary containing the Pub/Sub message.
+        The message itself should be a base64-encoded string.
 
     Returns:
         The decoded 'data' value of provided Pub/Sub message, returned as a string.
@@ -49,7 +50,7 @@ def parse_data_from_message(pubsub_received_message):
 
     try:
         data_bytes = base64.b64decode(data_base64_string)
-    except binascii.Error as e:
+    except (binascii.Error, ValueError) as e:
         raise DataParseError('data should be base64-encoded') from e
     except TypeError as e:
         raise DataParseError('data should be in a string format') from e
