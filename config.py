@@ -27,14 +27,29 @@ class Config:
 
 class ProdConfig(Config):
 
-    PHILIPS_HUE_IP = secrets.GoogleSecretManagerSecret(
-        'alertmanager-2020-intern-r', 'philips_ip')
-    PHILIPS_HUE_USERNAME = secrets.GoogleSecretManagerSecret(
-        'alertmanager-2020-intern-r', 'philips_username')
-
     def __init__(self):
-        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret_value()
-        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret_value()
+        self._philips_hue_ip = None
+        self._philips_hue_username = None
+
+
+    @property
+    def PHILIPS_HUE_IP(self):
+        if self._philips_hue_ip is None:
+            secret = secrets.GoogleSecretManagerSecret(
+                'alertmanager-2020-intern-r', 'philips_ip')
+            self._philips_hue_ip = secret.get_secret_value()
+
+        return self._philips_hue_ip
+
+
+    @property
+    def PHILIPS_HUE_USERNAME(self):
+        if self._philips_hue_username is None:
+            secret = secrets.GoogleSecretManagerSecret(
+                'alertmanager-2020-intern-r', 'philips_username')
+            self._philips_hue_username = secret.get_secret_value()
+
+        return self._philips_hue_username
 
 
 
@@ -42,12 +57,28 @@ class DevConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
-    PHILIPS_HUE_IP = secrets.EnvironmentVariableSecret('PHILIPS_HUE_IP')
-    PHILIPS_HUE_USERNAME = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME')
 
     def __init__(self):
-        self.PHILIPS_HUE_IP = self.PHILIPS_HUE_IP.get_secret_value()
-        self.PHILIPS_HUE_USERNAME = self.PHILIPS_HUE_USERNAME.get_secret_value()
+        self._philips_hue_ip = None
+        self._philips_hue_username = None
+
+
+    @property
+    def PHILIPS_HUE_IP(self):
+        if self._philips_hue_ip is None:
+            secret = secrets.EnvironmentVariableSecret('PHILIPS_HUE_IP')
+            self._philips_hue_ip = secret.get_secret_value()
+
+        return self._philips_hue_ip
+
+
+    @property
+    def PHILIPS_HUE_USERNAME(self):
+        if self._philips_hue_username is None:
+            secret = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME')
+            self._philips_hue_username = secret.get_secret_value()
+
+        return self._philips_hue_username
 
 
 
