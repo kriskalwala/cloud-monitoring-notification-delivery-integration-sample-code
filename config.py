@@ -34,7 +34,6 @@ class Config:
 
 class ProdConfig(Config):
     """Production config."""
-    pass
 
 
 class DevConfig(Config):
@@ -44,9 +43,21 @@ class DevConfig(Config):
     TESTING = True
 
 
+class TestConfig(Config):
+    """Test config."""
+    FLASK_ENV = 'test'
+    DEBUG = True
+    TESTING = True
+
+    BRIDGE_IP_ADDRESS = '127.0.0.1'
+    USERNAME = 'test-user'
+    LIGHT_ID = '1'
+
+
 _ENVIRONMENT_TO_CONFIG_MAPPING = {
     'prod': ProdConfig,
     'dev': DevConfig,
+    'test': TestConfig,
     'default': ProdConfig
 }
 
