@@ -29,7 +29,7 @@ import philips_hue_mock
 
 @pytest.fixture
 def config():
-    main.app.config.from_object('config.DevConfig')
+    main.app.config.from_object('config.TestConfig')
     return main.app.config
 
 
@@ -82,7 +82,7 @@ def test_nonstring_notification_message(flask_client):
 
 
 def test_unicode_notification_message(flask_client):
-    data = '{"incident": {"condition": {"state": "open"}}}'
+    data = '{"incident": {"condition": {"stăte": "open"}}}'
 
     response = flask_client.post('/', json={'message': {'data': data}})
 
@@ -122,7 +122,7 @@ def test_open_alert_message(flask_client, philips_hue_client, requests_mock):
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert b"{'success': 'incident condition state is open'}" in response.data
+    assert  response.data == repr(philips_hue.PhilipsHueState.OPEN).encode()
 
 
 def test_closed_alert_message(flask_client, philips_hue_client, requests_mock):
@@ -137,4 +137,4 @@ def test_closed_alert_message(flask_client, philips_hue_client, requests_mock):
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert b"{'success': 'incident condition state is closed'}" in response.data
+    assert response.data == repr(philips_hue.PhilipsHueState.CLOSED).encode()
