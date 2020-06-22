@@ -65,7 +65,8 @@ class GoogleSecretManagerSecret(Secret):
     Attributes:
         _project_id: The id of the project whose seceret manager to access
         _secret_name: The name of the secret
-        _version: the version of the secret
+        _version: the version of the secret. Either the version number as
+                  a string (e.g. "5") or an alias (e.g. "latest").
         _client: The secret manager client to use to access the secret (if
                 None, a new one is created)
 
@@ -75,13 +76,10 @@ class GoogleSecretManagerSecret(Secret):
         self._project_id = project_id
         self._secret_name = secret_name
         self._version = version
-        self._client = client
+        self._client = client or secretmanager.SecretManagerServiceClient()
 
 
     def get_secret_value(self):
-        if self._client is None:
-            self._client = secretmanager.SecretManagerServiceClient()
-
         secret_path = self._client.secret_version_path(self._project_id,
                                                       self._secret_name,
                                                       self._version)
