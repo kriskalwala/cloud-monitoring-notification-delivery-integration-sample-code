@@ -91,7 +91,7 @@ def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
     response = philips_hue.trigger_light_from_monitoring_notification(
         philips_hue_client, notification, 1)
 
-    assert response == repr(philips_hue.PhilipsHueState.OPEN)
+    assert response == philips_hue.PhilipsHueState.OPEN
 
 
 def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
@@ -105,4 +105,4 @@ def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
     response = philips_hue.trigger_light_from_monitoring_notification(
         philips_hue_client, notification, 1)
 
-    assert response == repr(philips_hue.PhilipsHueState.CLOSED)
+    assert response == philips_hue.PhilipsHueState.CLOSED
