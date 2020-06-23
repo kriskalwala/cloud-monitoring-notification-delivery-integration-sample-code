@@ -12,48 +12,61 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Source code from https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/main.py
+# The code in this module is based on
+# https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/main.py.
+# See https://cloud.google.com/run/docs/tutorials/pubsub for the accompanying
+# Cloud Run/PubSub solutions guide.
+
+"""Runs Cloud Monitoring Notification Integration app with Flask."""
 
 # [START run_pubsub_server_setup]
-import base64
 import os
+import json
 
 from flask import Flask, request
-from dotenv import load_dotenv
-from config import configs
 
+import philips_hue
+import config
+import pubsub
 
-load_dotenv()
 
 app = Flask(__name__)
-env = os.environ.get('FLASK_APP_ENV', 'default')
-app.config.from_object(configs[env]())
+app.config.from_object(config.load())
 # [END run_pubsub_server_setup]
 
 
 # [START run_pubsub_handler]
 @app.route('/', methods=['POST'])
-def index():
-    envelope = request.get_json()
-    if not envelope:
-        msg = 'no Pub/Sub message received'
-        print(f'error: {msg}')
-        return f'Bad Request: {msg}', 400
+def handle_pubsub_message():
+    pubsub_received_message = request.get_json()
 
-    if not isinstance(envelope, dict) or 'message' not in envelope:
-        msg = 'invalid Pub/Sub message format'
-        print(f'error: {msg}')
-        return f'Bad Request: {msg}', 400
+    # parse the Pub/Sub data
+    try:
+        pubsub_data_string = pubsub.parse_data_from_message(pubsub_received_message)
+    except pubsub.DataParseError as e:
+        print(e)
+        return (str(e), 400)
 
-    pubsub_message = envelope['message']
+    # load the notification from the data
+    try:
+        monitoring_notification_dict = json.loads(pubsub_data_string)
+    except json.JSONDecodeError as e:
+        print(e)
+        return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
-    name = 'World'
-    if isinstance(pubsub_message, dict) and 'data' in pubsub_message:
-        name = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
 
-    print(f'Hello {name}!')
+    philips_hue_client = philips_hue.PhilipsHueClient(app.config['BRIDGE_IP_ADDRESS'],
+                                                      app.config['USERNAME'])
 
-    return ('', 204)
+    try:
+        hue_state = philips_hue.trigger_light_from_monitoring_notification(
+            philips_hue_client, monitoring_notification_dict, app.config['LIGHT_ID'])
+    except philips_hue.Error as e:
+        print(e)
+        return (str(e), 400)
+
+
+    return (repr(hue_state), 200)
 # [END run_pubsub_handler]
 
 

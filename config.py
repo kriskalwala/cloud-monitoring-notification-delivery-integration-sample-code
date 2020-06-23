@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import secrets
-
 """Flask config."""
+
+import secrets
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
     """Base config."""
@@ -22,6 +26,7 @@ class Config:
     FLASK_ENV = 'production'
     TESTING = False
     DEBUG = False
+    LIGHT_ID = '1'
 
 
 
@@ -33,7 +38,7 @@ class ProdConfig(Config):
 
 
     @property
-    def PHILIPS_HUE_IP(self):
+    def BRIDGE_IP_ADDRESS(self):
         if self._philips_hue_ip is None:
             secret = secrets.GoogleSecretManagerSecret(
                 'alertmanager-2020-intern-r', 'philips_ip')
@@ -43,7 +48,7 @@ class ProdConfig(Config):
 
 
     @property
-    def PHILIPS_HUE_USERNAME(self):
+    def USERNAME(self):
         if self._philips_hue_username is None:
             secret = secrets.GoogleSecretManagerSecret(
                 'alertmanager-2020-intern-r', 'philips_username')
@@ -54,9 +59,11 @@ class ProdConfig(Config):
 
 
 class DevConfig(Config):
+    """Development config."""
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
+
 
     def __init__(self):
         self._philips_hue_ip = None
@@ -64,7 +71,7 @@ class DevConfig(Config):
 
 
     @property
-    def PHILIPS_HUE_IP(self):
+    def BRIDGE_IP_ADDRESS(self):
         if self._philips_hue_ip is None:
             secret = secrets.EnvironmentVariableSecret('PHILIPS_HUE_IP')
             self._philips_hue_ip = secret.get_secret_value()
@@ -73,7 +80,7 @@ class DevConfig(Config):
 
 
     @property
-    def PHILIPS_HUE_USERNAME(self):
+    def USERNAME(self):
         if self._philips_hue_username is None:
             secret = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME')
             self._philips_hue_username = secret.get_secret_value()
@@ -82,8 +89,25 @@ class DevConfig(Config):
 
 
 
-configs = {
+class TestConfig(Config):
+    """Test config."""
+    FLASK_ENV = 'test'
+    DEBUG = True
+    TESTING = True
+
+    BRIDGE_IP_ADDRESS = '127.0.0.1'
+    USERNAME = 'test-user'
+
+
+_ENVIRONMENT_TO_CONFIG_MAPPING = {
     'prod': ProdConfig,
     'dev': DevConfig,
+    'test': TestConfig,
     'default': ProdConfig
 }
+
+
+
+def load():
+    environment_name = os.environ.get('FLASK_APP_ENV', 'default')
+    return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]
