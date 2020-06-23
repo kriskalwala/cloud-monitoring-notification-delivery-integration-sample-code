@@ -126,10 +126,10 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
     if condition_state == "open":
         open_state = PhilipsHueState.OPEN
         client.set_color(light_id, open_state.value)  # set to red
-        return repr(open_state)
+        return open_state
     if condition_state == "closed":
         closed_state = PhilipsHueState.CLOSED
         client.set_color(light_id, closed_state.value)  # set to green
-        return repr(closed_state)
+        return closed_state
     else:
         raise UnknownConditionStateError(f'Condition state must be "open" or "closed"; actual: {condition_state}')
