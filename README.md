@@ -1,3 +1,5 @@
+![](https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/workflows/Continuous%20Integration/badge.svg)
+
 # Sample Code for the Cloud Monitoring Notification Delivery Integration Guide
 
 **This is not an officially supported Google product.**
