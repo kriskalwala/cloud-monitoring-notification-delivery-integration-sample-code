@@ -66,7 +66,7 @@ def handle_pubsub_message():
         return (str(e), 400)
 
 
-    return (hue_state, 200)
+    return (repr(hue_state), 200)
 # [END run_pubsub_handler]
 
 
