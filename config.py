@@ -110,4 +110,4 @@ _ENVIRONMENT_TO_CONFIG_MAPPING = {
 
 def load():
     environment_name = os.environ.get('FLASK_APP_ENV', 'default')
-    return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]
+    return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]()
