@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Flask config."""
+
 import os
 from dotenv import load_dotenv
 
@@ -25,22 +26,42 @@ class Config:
     FLASK_ENV = 'production'
     TESTING = False
     DEBUG = False
-    
-    PHILIPS_HUE_URL = os.environ.get('PHILIPS_URL')
-    
-    
+
+    BRIDGE_IP_ADDRESS = os.environ.get('BRIDGE_IP_ADDRESS')
+    USERNAME = os.environ.get('USERNAME')
+    LIGHT_ID = '1'
+
+
 class ProdConfig(Config):
-    pass
+    """Production config."""
 
 
 class DevConfig(Config):
+    """Development config."""
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
-    
 
-configs = {
+
+class TestConfig(Config):
+    """Test config."""
+    FLASK_ENV = 'test'
+    DEBUG = True
+    TESTING = True
+
+    BRIDGE_IP_ADDRESS = '127.0.0.1'
+    USERNAME = 'test-user'
+    LIGHT_ID = '1'
+
+
+_ENVIRONMENT_TO_CONFIG_MAPPING = {
     'prod': ProdConfig,
     'dev': DevConfig,
+    'test': TestConfig,
     'default': ProdConfig
 }
+
+
+def load():
+    environment_name = os.environ.get('FLASK_APP_ENV', 'default')
+    return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]

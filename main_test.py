@@ -18,54 +18,123 @@
 # These tests are unit tests that mock Pub/Sub.
 
 import base64
-from uuid import uuid4
+import re
 
 import pytest
 
 import main
+import philips_hue
+import philips_hue_mock
 
 
 @pytest.fixture
-def client():
+def config():
+    main.app.config.from_object('config.TestConfig')
+    return main.app.config
+
+
+@pytest.fixture
+def flask_client():
     main.app.testing = True
     return main.app.test_client()
 
 
 @pytest.fixture
-def config():
-    main.app.config.from_object('config.DevConfig')
-    return main.app.config
+def philips_hue_client(config):
+    philips_hue_client = philips_hue.PhilipsHueClient(
+        config['BRIDGE_IP_ADDRESS'], config['USERNAME'])
+    return philips_hue_client
 
 
-def test_empty_payload(client):
-    r = client.post('/', json='')
-    assert r.status_code == 400
+def test_empty_payload(flask_client):
+    response = flask_client.post('/', json='')
+
+    assert response.status_code == 400
+    assert b'invalid Pub/Sub message format' in response.data
 
 
-def test_invalid_payload(client):
-    r = client.post('/', json={'nomessage': 'invalid'})
-    assert r.status_code == 400
+def test_invalid_payload(flask_client):
+    response = flask_client.post('/', json={'nomessage': 'invalid'})
+
+    assert response.status_code == 400
+    assert b'invalid Pub/Sub message format' in response.data
 
 
-def test_invalid_mimetype(client):
-    r = client.post('/', json="{ message: true }")
-    assert r.status_code == 400
+def test_invalid_mimetype(flask_client):
+    response = flask_client.post('/', json="{ message: true }")
+
+    assert response.status_code == 400
+    assert b'invalid Pub/Sub message format' in response.data
 
 
-def test_minimally_valid_message(client, capsys):
-    r = client.post('/', json={'message': True})
-    assert r.status_code == 204
+def test_nonstring_pubsub_message(flask_client):
+    response = flask_client.post('/', json={'message': True})
 
-    out, _ = capsys.readouterr()
-    assert 'Hello World!' in out
+    assert response.status_code == 400
+    assert b'invalid Pub/Sub message format' in response.data
 
 
-def test_populated_message(client, capsys):
-    name = str(uuid4())
-    data = base64.b64encode(name.encode()).decode()
+def test_nonstring_notification_message(flask_client):
+    response = flask_client.post('/', json={'message': {'data': True}})
 
-    r = client.post('/', json={'message': {'data': data}})
-    assert r.status_code == 204
+    assert response.status_code == 400
+    assert b'data should be in a string format' in response.data
 
-    out, _ = capsys.readouterr()
-    assert f'Hello {name}!' in out
+
+def test_unicode_notification_message(flask_client):
+    data = '{"incident": {"condition": {"stăte": "open"}}}'
+
+    response = flask_client.post('/', json={'message': {'data': data}})
+
+    assert response.status_code == 400
+    assert b'data should be base64-encoded' in response.data
+
+
+def test_invalid_notification_message(flask_client):
+    message = 'invalid message'
+    data = base64.b64encode(message.encode()).decode()
+
+    response = flask_client.post('/', json={'message': {'data': data}})
+
+    assert response.status_code == 400
+    assert b'Notification could not be decoded' in response.data
+
+
+def test_invalid_incident_message(flask_client):
+    message = '{"invalid": "error"}'
+    data = base64.b64encode(message.encode()).decode()
+
+    response = flask_client.post('/', json={'message': {'data': data}})
+
+    assert response.status_code == 400
+    assert b'Notification is missing required dict key' in response.data
+
+
+def test_open_alert_message(flask_client, philips_hue_client, requests_mock):
+    message = '{"incident": {"condition": {"state": "open"}}}'
+    data = base64.b64encode(message.encode()).decode()
+    bridge_ip_address = philips_hue_client.bridge_ip_address
+    username = philips_hue_client.username
+    matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
+    requests_mock.register_uri('PUT', matcher,
+                               text=philips_hue_mock.mock_hue_put_response)
+
+    response = flask_client.post('/', json={'message': {'data': data}})
+
+    assert response.status_code == 200
+    assert  response.data == repr(philips_hue.PhilipsHueState.OPEN).encode()
+
+
+def test_closed_alert_message(flask_client, philips_hue_client, requests_mock):
+    message = '{"incident": {"condition": {"state": "closed"}}}'
+    data = base64.b64encode(message.encode()).decode()
+    bridge_ip_address = philips_hue_client.bridge_ip_address
+    username = philips_hue_client.username
+    matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
+    requests_mock.register_uri('PUT', matcher,
+                               text=philips_hue_mock.mock_hue_put_response)
+
+    response = flask_client.post('/', json={'message': {'data': data}})
+
+    assert response.status_code == 200
+    assert response.data == repr(philips_hue.PhilipsHueState.CLOSED).encode()
