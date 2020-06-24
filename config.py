@@ -14,11 +14,11 @@
 
 """Flask config."""
 
+import secrets
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
 
 class Config:
     """Base config."""
@@ -26,14 +26,36 @@ class Config:
     FLASK_ENV = 'production'
     TESTING = False
     DEBUG = False
-
-    BRIDGE_IP_ADDRESS = os.environ.get('BRIDGE_IP_ADDRESS')
-    USERNAME = os.environ.get('USERNAME')
     LIGHT_ID = '1'
 
 
+
 class ProdConfig(Config):
-    """Production config."""
+
+    def __init__(self):
+        self._philips_hue_ip = None
+        self._philips_hue_username = None
+
+
+    @property
+    def BRIDGE_IP_ADDRESS(self):
+        if self._philips_hue_ip is None:
+            secret = secrets.GoogleSecretManagerSecret(
+                'alertmanager-2020-intern-r', 'philips_ip')
+            self._philips_hue_ip = secret.get_secret_value()
+
+        return self._philips_hue_ip
+
+
+    @property
+    def USERNAME(self):
+        if self._philips_hue_username is None:
+            secret = secrets.GoogleSecretManagerSecret(
+                'alertmanager-2020-intern-r', 'philips_username')
+            self._philips_hue_username = secret.get_secret_value()
+
+        return self._philips_hue_username
+
 
 
 class DevConfig(Config):
@@ -41,6 +63,30 @@ class DevConfig(Config):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
+
+
+    def __init__(self):
+        self._philips_hue_ip = None
+        self._philips_hue_username = None
+
+
+    @property
+    def BRIDGE_IP_ADDRESS(self):
+        if self._philips_hue_ip is None:
+            secret = secrets.EnvironmentVariableSecret('PHILIPS_HUE_IP')
+            self._philips_hue_ip = secret.get_secret_value()
+
+        return self._philips_hue_ip
+
+
+    @property
+    def USERNAME(self):
+        if self._philips_hue_username is None:
+            secret = secrets.EnvironmentVariableSecret('PHILIPS_HUE_USERNAME')
+            self._philips_hue_username = secret.get_secret_value()
+
+        return self._philips_hue_username
+
 
 
 class TestConfig(Config):
@@ -51,7 +97,6 @@ class TestConfig(Config):
 
     BRIDGE_IP_ADDRESS = '127.0.0.1'
     USERNAME = 'test-user'
-    LIGHT_ID = '1'
 
 
 _ENVIRONMENT_TO_CONFIG_MAPPING = {
@@ -62,6 +107,7 @@ _ENVIRONMENT_TO_CONFIG_MAPPING = {
 }
 
 
+
 def load():
     environment_name = os.environ.get('FLASK_APP_ENV', 'default')
-    return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]
+    return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]()
