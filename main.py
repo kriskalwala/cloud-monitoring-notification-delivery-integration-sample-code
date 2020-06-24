@@ -31,6 +31,7 @@ import pubsub
 
 
 app = Flask(__name__)
+app.logger.setLevel("INFO")
 app.config.from_object(config.load())
 # [END run_pubsub_server_setup]
 
@@ -44,14 +45,14 @@ def handle_pubsub_message():
     try:
         pubsub_data_string = pubsub.parse_data_from_message(pubsub_received_message)
     except pubsub.DataParseError as e:
-        print(e)
+        app.logger.error(e)
         return (str(e), 400)
 
     # load the notification from the data
     try:
         monitoring_notification_dict = json.loads(pubsub_data_string)
     except json.JSONDecodeError as e:
-        print(e)
+        app.logger.error(e)
         return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
 
@@ -62,7 +63,7 @@ def handle_pubsub_message():
         hue_state = philips_hue.trigger_light_from_monitoring_notification(
             philips_hue_client, monitoring_notification_dict, app.config['LIGHT_ID'])
     except philips_hue.Error as e:
-        print(e)
+        app.logger.error(e)
         return (str(e), 400)
 
 
