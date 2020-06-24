@@ -119,7 +119,7 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
         BadAPIRequestError: If there was an error in calling the Philips Hue API.
     """
     try:
-        condition_state = notification["incident"]["condition"]["state"]
+        condition_state = notification["incident"]["state"]
     except KeyError:
         raise NotificationParseError("Notification is missing required dict key")
 

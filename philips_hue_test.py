@@ -53,7 +53,7 @@ def test_set_color(philips_hue_client, requests_mock):
 
 
 def test_trigger_from_incident_invalid_state(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "unknown"}}}
+    notification = {"incident": {"state": "unknown"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -67,7 +67,7 @@ def test_trigger_from_incident_invalid_state(philips_hue_client, requests_mock):
 
 
 def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "open"}}}
+    notification = {"incident": {"state": "open"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -81,7 +81,7 @@ def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
 
 
 def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "open"}}}
+    notification = {"incident": {"state": "open"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -95,7 +95,7 @@ def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
 
 
 def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "closed"}}}
+    notification = {"incident": {"state": "closed"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
