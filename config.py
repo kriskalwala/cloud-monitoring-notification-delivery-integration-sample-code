@@ -27,6 +27,19 @@ class Config:
     TESTING = False
     DEBUG = False
     LIGHT_ID = '1'
+    
+    # Mappings between policy names and philips hue (color)
+    # values (0 to 65535). Each mapping indicates what 
+    # hue the light bulb should light up when receiving
+    # a notification from a certain policy. The default
+    # mapping indicates the hue it should light up for
+    # notifications from all other unspecified policies.
+    POLICY_HUE_MAPPING = {
+        'policy1': 65535,  # red
+        'policy2': 25500,  # green
+        'policy3': 46920,  # blue
+        'default': 56063  # purple
+    }
 
 
 
@@ -97,6 +110,12 @@ class TestConfig(Config):
 
     BRIDGE_IP_ADDRESS = '127.0.0.1'
     USERNAME = 'test-user'
+    
+    POLICY_HUE_MAPPING = {
+        'policy1': 65535,
+        'policy2': 25500,
+        'default': 56063
+    }
 
 
 _ENVIRONMENT_TO_CONFIG_MAPPING = {

@@ -60,7 +60,8 @@ def handle_pubsub_message():
 
     try:
         hue_state = philips_hue.trigger_light_from_monitoring_notification(
-            philips_hue_client, monitoring_notification_dict, app.config['LIGHT_ID'])
+            philips_hue_client, monitoring_notification_dict,
+            app.config['LIGHT_ID'], app.config)
     except philips_hue.Error as e:
         print(e)
         return (str(e), 400)
