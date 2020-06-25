@@ -60,10 +60,10 @@ def test_trigger_from_incident_invalid_state(philips_hue_client, requests_mock):
     requests_mock.register_uri('PUT', matcher,
                                text=philips_hue_mock.mock_hue_put_response)
 
-    with pytest.raises(philips_hue.UnknownConditionStateError) as e:
+    with pytest.raises(philips_hue.UnknownIncidentStateError) as e:
         assert philips_hue.trigger_light_from_monitoring_notification(
             philips_hue_client, notification, 1)
-    assert 'Condition state must be "open" or "closed"' in str(e.value)
+    assert 'Incident state must be "open" or "closed"' in str(e.value)
 
 
 def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):

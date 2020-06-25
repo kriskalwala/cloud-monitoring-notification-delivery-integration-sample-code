@@ -34,7 +34,7 @@ class NotificationParseError(Error):
     """Exception raised for errors in a monitoring notification format."""
 
 
-class UnknownConditionStateError(Error):
+class UnknownIncidentStateError(Error):
     """Exception raised for errors in an invalid incident state value."""
 
 
@@ -115,21 +115,21 @@ def trigger_light_from_monitoring_notification(client, notification, light_id):
         One of PhilipsHueState.
 
     Raises:
-        UnknownConditionStateError: If the incident state is not open or closed.
+        UnknownIncidentStateError: If the incident state is not open or closed.
         BadAPIRequestError: If there was an error in calling the Philips Hue API.
     """
     try:
-        condition_state = notification["incident"]["state"]
+        incident_state = notification["incident"]["state"]
     except KeyError:
         raise NotificationParseError("Notification is missing required dict key")
 
-    if condition_state == "open":
+    if incident_state == "open":
         open_state = PhilipsHueState.OPEN
         client.set_color(light_id, open_state.value)  # set to red
         return open_state
-    if condition_state == "closed":
+    if incident_state == "closed":
         closed_state = PhilipsHueState.CLOSED
         client.set_color(light_id, closed_state.value)  # set to green
         return closed_state
     else:
-        raise UnknownConditionStateError(f'Condition state must be "open" or "closed"; actual: {condition_state}')
+        raise UnknownIncidentStateError(f'Incident state must be "open" or "closed"; actual: {incident_state}')
