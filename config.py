@@ -38,7 +38,7 @@ class Config:
         'policy1': 65535,  # red
         'policy2': 25500,  # green
         'policy3': 46920,  # blue
-        'default': 56063  # purple
+        'default': 56063  # pink
     }
 
 
