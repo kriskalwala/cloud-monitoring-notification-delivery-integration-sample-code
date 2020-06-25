@@ -24,9 +24,16 @@ import philips_hue_mock
 
 @pytest.fixture
 def config():
+    policy_hue_mapping = {
+        'policy1': 65535,
+        'policy2': 25500,
+        'default': 56063
+    }
+    
     configs = {
         'BRIDGE_IP_ADDRESS': '127.0.0.1',
-        'USERNAME': 'test-user'
+        'USERNAME': 'test-user',
+        'POLICY_HUE_MAPPING': policy_hue_mapping
     }
     return configs
 
@@ -52,22 +59,9 @@ def test_set_color(philips_hue_client, requests_mock):
     assert "{'success': {'/lights/1/state/hue': '0'}}" in response.text
 
 
-def test_trigger_from_incident_invalid_state(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "unknown"}}}
-    bridge_ip_address = philips_hue_client.bridge_ip_address
-    username = philips_hue_client.username
-    matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
-    requests_mock.register_uri('PUT', matcher,
-                               text=philips_hue_mock.mock_hue_put_response)
-
-    with pytest.raises(philips_hue.UnknownConditionStateError) as e:
-        assert philips_hue.trigger_light_from_monitoring_notification(
-            philips_hue_client, notification, 1)
-    assert 'Condition state must be "open" or "closed"' in str(e.value)
-
-
-def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "open"}}}
+def test_trigger_from_incident_bad_url(config, philips_hue_client,
+                                       requests_mock):
+    notification = {'incident': {'policy_name': 'policy2'}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -76,12 +70,14 @@ def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
 
     with pytest.raises(philips_hue.BadAPIRequestError) as e:
         assert philips_hue.trigger_light_from_monitoring_notification(
-            philips_hue_client, notification, 2)
+            philips_hue_client, notification, 2, config)
     assert str(e.value) == 'invalid Philips Hue url'
 
 
-def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "open"}}}
+def test_trigger_hue_with_nondefault_policy(config, philips_hue_client,
+                                            requests_mock):
+    test_policy_name = 'policy2'
+    notification = {'incident': {'policy_name': test_policy_name}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -89,13 +85,15 @@ def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
                                text=philips_hue_mock.mock_hue_put_response)
 
     response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1)
+        philips_hue_client, notification, 1, config)
 
-    assert response == philips_hue.PhilipsHueState.OPEN
+    assert response == config['POLICY_HUE_MAPPING'][test_policy_name]
 
 
-def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "closed"}}}
+def test_trigger_hue_with_default_policy(config, philips_hue_client,
+                                         requests_mock):
+    test_policy_name = 'unknown_policy'
+    notification = {'incident': {'policy_name': test_policy_name}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -103,6 +101,6 @@ def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
                                text=philips_hue_mock.mock_hue_put_response)
 
     response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1)
+        philips_hue_client, notification, 1, config)
 
-    assert response == philips_hue.PhilipsHueState.CLOSED
+    assert response == config['POLICY_HUE_MAPPING']['default']
