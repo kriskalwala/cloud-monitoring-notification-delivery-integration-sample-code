@@ -102,6 +102,7 @@ def trigger_light_from_monitoring_notification(client, notification, light_id, c
         client: The PhilipsHueClient object to trigger a response from.
         notification: A dictionary containing the notification data.
         light_id: The id of the light to set the color for.
+        config: A dictionary containing configuration values of the application
 
     Returns:
         The hue (color) value of the provided Philips Hue after the
