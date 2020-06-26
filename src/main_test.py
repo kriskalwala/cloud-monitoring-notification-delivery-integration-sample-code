@@ -81,7 +81,7 @@ def test_nonstring_notification_message(flask_client):
 
 
 def test_unicode_notification_message(flask_client):
-    data = '{"incident": {"condition": {"stăte": "open"}}}'
+    data = '{"incident": {"stăte": "open"}}'
 
     response = flask_client.post('/', json={'message': {'data': data}})
 
@@ -110,7 +110,7 @@ def test_invalid_incident_message(flask_client):
 
 
 def test_open_alert_message(flask_client, philips_hue_client, requests_mock):
-    message = '{"incident": {"condition": {"state": "open"}}}'
+    message = '{"incident": {"state": "open"}}'
     data = base64.b64encode(message.encode()).decode()
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
@@ -125,7 +125,7 @@ def test_open_alert_message(flask_client, philips_hue_client, requests_mock):
 
 
 def test_closed_alert_message(flask_client, philips_hue_client, requests_mock):
-    message = '{"incident": {"condition": {"state": "closed"}}}'
+    message = '{"incident": {"state": "closed"}}'
     data = base64.b64encode(message.encode()).decode()
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
