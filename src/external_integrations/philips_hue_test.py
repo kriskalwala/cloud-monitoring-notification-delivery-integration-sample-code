@@ -53,21 +53,21 @@ def test_set_color(philips_hue_client, requests_mock):
 
 
 def test_trigger_from_incident_invalid_state(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "unknown"}}}
+    notification = {"incident": {"state": "unknown"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
     requests_mock.register_uri('PUT', matcher,
                                text=philips_hue_mock.mock_hue_put_response)
 
-    with pytest.raises(philips_hue.UnknownConditionStateError) as e:
+    with pytest.raises(philips_hue.UnknownIncidentStateError) as e:
         assert philips_hue.trigger_light_from_monitoring_notification(
             philips_hue_client, notification, 1)
-    assert 'Condition state must be "open" or "closed"' in str(e.value)
+    assert 'Incident state must be "open" or "closed"' in str(e.value)
 
 
 def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "open"}}}
+    notification = {"incident": {"state": "open"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -81,7 +81,7 @@ def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
 
 
 def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "open"}}}
+    notification = {"incident": {"state": "open"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -95,7 +95,7 @@ def test_trigger_hue_from_incident_open(philips_hue_client, requests_mock):
 
 
 def test_trigger_hue_from_incident_closed(philips_hue_client, requests_mock):
-    notification = {"incident": {"condition": {"state": "closed"}}}
+    notification = {"incident": {"state": "closed"}}
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
