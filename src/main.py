@@ -25,7 +25,7 @@ import json
 
 from flask import Flask, request
 
-import philips_hue
+from external_integrations import philips_hue
 import config
 import pubsub
 
