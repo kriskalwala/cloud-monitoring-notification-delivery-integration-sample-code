@@ -81,7 +81,7 @@ class GoogleSecretManagerSecret(Secret):
 
     def get_secret_value(self):
         secret_path = self._client.secret_version_path(self._project_id,
-                                                      self._secret_name,
-                                                      self._version)
+                                                       self._secret_name,
+                                                       self._version)
         response = self._client.access_secret_version(secret_path)
         return response.payload.data.decode('UTF-8')
