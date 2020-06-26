@@ -31,8 +31,8 @@ import pubsub
 
 
 app = Flask(__name__)
-app.logger.setLevel("INFO")
 app.config.from_object(config.load())
+app.logger.setLevel(app.config["LOGGING_LEVEL"])
 # [END run_pubsub_server_setup]
 
 
