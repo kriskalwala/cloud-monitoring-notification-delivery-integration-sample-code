@@ -89,7 +89,8 @@ class PhilipsHueClient():
 # TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/10):
 # Currently specific to Philips Hue, but will be generalized to trigger
 # whatever notification system the client chooses.
-def trigger_light_from_monitoring_notification(client, notification, light_id, config):
+def trigger_light_from_monitoring_notification(client, notification, light_id,
+                                               policy_hue_mapping):
     """Changes the color of a Philips Hue light based on a monitoring notification
     and returns the hue (color) value that the light was set to.
 
@@ -102,7 +103,10 @@ def trigger_light_from_monitoring_notification(client, notification, light_id, c
         client: The PhilipsHueClient object to trigger a response from.
         notification: A dictionary containing the notification data.
         light_id: The id of the light to set the color for.
-        config: A dictionary containing configuration values of the application
+        policy_hue_mapping: A dictionary mapping policy names to hue
+            values. Indicates what hue the light bulb should change
+            to due to a notification from a specific policy.
+            
 
     Returns:
         The hue (color) value of the provided Philips Hue after the
@@ -118,11 +122,11 @@ def trigger_light_from_monitoring_notification(client, notification, light_id, c
     except KeyError:
         raise NotificationParseError("Notification is missing required dict key")
 
-    if policy_name in config["POLICY_HUE_MAPPING"]:
-        color = config["POLICY_HUE_MAPPING"][policy_name]
+    if policy_name in policy_hue_mapping:
+        color = policy_hue_mapping[policy_name]
         client.set_color(light_id, color)
         return color
     else:
-        color = config["POLICY_HUE_MAPPING"]["default"]
+        color = policy_hue_mapping["default"]
         client.set_color(light_id, color)
         return color

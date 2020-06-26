@@ -70,7 +70,7 @@ def test_trigger_from_incident_bad_url(config, philips_hue_client,
 
     with pytest.raises(philips_hue.BadAPIRequestError) as e:
         assert philips_hue.trigger_light_from_monitoring_notification(
-            philips_hue_client, notification, 2, config)
+            philips_hue_client, notification, 2, config["POLICY_HUE_MAPPING"])
     assert str(e.value) == 'invalid Philips Hue url'
 
 
@@ -85,7 +85,7 @@ def test_trigger_hue_with_nondefault_policy(config, philips_hue_client,
                                text=philips_hue_mock.mock_hue_put_response)
 
     response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1, config)
+        philips_hue_client, notification, 1, config["POLICY_HUE_MAPPING"])
 
     assert response == config['POLICY_HUE_MAPPING'][test_policy_name]
 
@@ -101,6 +101,6 @@ def test_trigger_hue_with_default_policy(config, philips_hue_client,
                                text=philips_hue_mock.mock_hue_put_response)
 
     response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1, config)
+        philips_hue_client, notification, 1, config["POLICY_HUE_MAPPING"])
 
     assert response == config['POLICY_HUE_MAPPING']['default']
