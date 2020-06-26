@@ -34,7 +34,7 @@ class NotificationParseError(Error):
     """Exception raised for errors in a monitoring notification format."""
 
 
-class UnknownConditionStateError(Error):
+class UnknownIncidentStateError(Error):
     """Exception raised for errors in an invalid incident state value."""
 
 

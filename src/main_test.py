@@ -23,8 +23,7 @@ import re
 import pytest
 
 import main
-import philips_hue
-import philips_hue_mock
+from external_integrations import philips_hue, philips_hue_mock
 
 
 @pytest.fixture
@@ -82,7 +81,7 @@ def test_nonstring_notification_message(flask_client):
 
 
 def test_unicode_notification_message(flask_client):
-    data = '{"incident": {"condition": {"stăte": "open"}}}'
+    data = '{"incident": {"stăte": "open"}}'
 
     response = flask_client.post('/', json={'message': {'data': data}})
 
