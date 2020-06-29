@@ -14,9 +14,9 @@
 
 """Flask config."""
 
-import secrets
 import os
 from dotenv import load_dotenv
+from notifications import secrets
 
 load_dotenv()
 

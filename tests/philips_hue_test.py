@@ -18,8 +18,7 @@ import re
 
 import pytest
 
-import philips_hue
-import philips_hue_mock
+from external_integrations import philips_hue, philips_hue_mock
 
 
 @pytest.fixture
