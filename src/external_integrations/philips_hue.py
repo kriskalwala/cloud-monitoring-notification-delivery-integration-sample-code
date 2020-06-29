@@ -89,51 +89,42 @@ class PhilipsHueClient():
 # TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/10):
 # Currently specific to Philips Hue, but will be generalized to trigger
 # whatever notification system the client chooses.
-def trigger_light_from_monitoring_notification(client, notification, light_id,
-                                               policy_hue_mapping):
-    """Changes the color of a Philips Hue light based on a monitoring notification
-    and returns the hue (color) value that the light was set to.
+def get_target_hue_from_monitoring_notification(notification,
+                                                policy_hue_mapping):
+    """Gets the target hue value (color) of a Philips Hue light based on
+    a monitoring notification and returns this hue value
 
-    The color of the Philips Hue light is set through the client,
-    which makes an HTTP PUT request to the Philips Hue API.
-    Sets the color based off of the name of the policy that
-    triggered the incident the notification is about and 
+    Gets the hue value based off of the name of the policy that
+    triggered the incident that the notification is about and 
     whether the incident is open or closed.
 
     Args:
-        client: The PhilipsHueClient object to trigger a response from.
         notification: A dictionary containing the notification data.
-        light_id: The id of the light to set the color for.
         policy_hue_mapping: A dictionary mapping policy names to hue
             values. Indicates what hue the light bulb should change
             to due to a notification from a specific policy.
             
 
     Returns:
-        The hue (color) value of the provided Philips Hue after the
-        monitoring notification was translated into a light signal,
-        and then forwarded to the bulb. A value between 0 and 65535.
+        The target hue value (color) of a Philips Hue light based on
+        the given notification. A value between 0 and 65535.
 
     Raises:
         UnknownIncidentStateError: If the incident state is not open or closed.
         NotificationParseError: If notification is missing required dict key.
-        BadAPIRequestError: If there was an error in calling the Philips Hue API.
     """
     try:
         policy_name = notification["incident"]["policy_name"]
-        state = notification["incident"]["state"]
         incident_state = notification["incident"]["state"]
     except KeyError:
         raise NotificationParseError("Notification is missing required dict key")
 
     try:
         if policy_name in policy_hue_mapping:
-            color = policy_hue_mapping[policy_name][incident_state]
-            client.set_color(light_id, color)
-            return color
+            hue_value = policy_hue_mapping[policy_name][incident_state]
+            return hue_value
         else:
-            color = policy_hue_mapping["default"][incident_state]
-            client.set_color(light_id, color)
-            return color
+            hue_value = policy_hue_mapping["default"][incident_state]
+            return hue_value
     except KeyError:
         raise UnknownIncidentStateError(f'Incident state must be "open" or "closed"; actual: {incident_state}')

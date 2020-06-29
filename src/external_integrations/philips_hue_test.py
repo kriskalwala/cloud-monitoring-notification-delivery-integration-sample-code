@@ -38,7 +38,7 @@ def config():
             'closed': 24432
         }
     }
-    
+
     configs = {
         'BRIDGE_IP_ADDRESS': '127.0.0.1',
         'USERNAME': 'test-user',
@@ -78,8 +78,7 @@ def test_trigger_from_incident_bad_url(config, philips_hue_client,
                                text=philips_hue_mock.mock_hue_put_response)
 
     with pytest.raises(philips_hue.BadAPIRequestError) as e:
-        assert philips_hue.trigger_light_from_monitoring_notification(
-            philips_hue_client, notification, 2, config["POLICY_HUE_MAPPING"])
+        assert philips_hue_client.set_color('2', 65535)
     assert str(e.value) == 'invalid Philips Hue url'
 
 
@@ -93,8 +92,8 @@ def test_trigger_from_incident_invalid_state(config, philips_hue_client,
                                text=philips_hue_mock.mock_hue_put_response)
 
     with pytest.raises(philips_hue.UnknownIncidentStateError) as e:
-        assert philips_hue.trigger_light_from_monitoring_notification(
-            philips_hue_client, notification, 1, config["POLICY_HUE_MAPPING"])
+        assert philips_hue.get_target_hue_from_monitoring_notification(
+            notification, config["POLICY_HUE_MAPPING"])
     assert 'Incident state must be "open" or "closed"' in str(e.value)
 
 
@@ -109,8 +108,8 @@ def test_trigger_hue_with_nondefault_open_incident(config, philips_hue_client,
     requests_mock.register_uri('PUT', matcher,
                                text=philips_hue_mock.mock_hue_put_response)
 
-    response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1, config['POLICY_HUE_MAPPING'])
+    response = philips_hue.get_target_hue_from_monitoring_notification(
+        notification, config['POLICY_HUE_MAPPING'])
 
     assert response == config['POLICY_HUE_MAPPING'][policy_name][state]
 
@@ -126,8 +125,8 @@ def test_trigger_hue_with_nondefault_closed_incident(config, philips_hue_client,
     requests_mock.register_uri('PUT', matcher,
                                text=philips_hue_mock.mock_hue_put_response)
 
-    response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1, config['POLICY_HUE_MAPPING'])
+    response = philips_hue.get_target_hue_from_monitoring_notification(
+        notification, config['POLICY_HUE_MAPPING'])
 
     assert response == config['POLICY_HUE_MAPPING'][policy_name][state]
 
@@ -143,8 +142,8 @@ def test_trigger_hue_with_default_open_incident(config, philips_hue_client,
     requests_mock.register_uri('PUT', matcher,
                                text=philips_hue_mock.mock_hue_put_response)
 
-    response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1, config['POLICY_HUE_MAPPING'])
+    response = philips_hue.get_target_hue_from_monitoring_notification(
+        notification, config['POLICY_HUE_MAPPING'])
 
     assert response == config['POLICY_HUE_MAPPING']['default'][state]
 
@@ -160,7 +159,7 @@ def test_trigger_hue_with_default_closed_incident(config, philips_hue_client,
     requests_mock.register_uri('PUT', matcher,
                                text=philips_hue_mock.mock_hue_put_response)
 
-    response = philips_hue.trigger_light_from_monitoring_notification(
-        philips_hue_client, notification, 1, config['POLICY_HUE_MAPPING'])
+    response = philips_hue.get_target_hue_from_monitoring_notification(
+        notification, config['POLICY_HUE_MAPPING'])
 
     assert response == config['POLICY_HUE_MAPPING']['default'][state]

@@ -123,7 +123,7 @@ def test_nondefault_open_incident_alert_message(flask_client, philips_hue_client
 
     assert response.status_code == 200
     assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                       ['policyB']['open']).encode()
+                                 ['policyB']['open']).encode()
 
 
 def test_nondefault_closed_incident_alert_message(flask_client, philips_hue_client,
@@ -140,7 +140,7 @@ def test_nondefault_closed_incident_alert_message(flask_client, philips_hue_clie
 
     assert response.status_code == 200
     assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                       ['policyB']['closed']).encode()
+                                 ['policyB']['closed']).encode()
 
 
 def test_default_open_incident_alert_message(flask_client, philips_hue_client,
@@ -157,7 +157,7 @@ def test_default_open_incident_alert_message(flask_client, philips_hue_client,
 
     assert response.status_code == 200
     assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                       ['default']['open']).encode()
+                                 ['default']['open']).encode()
 
 
 def test_default_closed_incident_alert_message(flask_client, philips_hue_client,
@@ -174,4 +174,4 @@ def test_default_closed_incident_alert_message(flask_client, philips_hue_client,
 
     assert response.status_code == 200
     assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                       ['default']['closed']).encode()
+                                 ['default']['closed']).encode()
