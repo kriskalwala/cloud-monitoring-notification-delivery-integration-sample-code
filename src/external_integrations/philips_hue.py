@@ -97,7 +97,8 @@ def trigger_light_from_monitoring_notification(client, notification, light_id,
     The color of the Philips Hue light is set through the client,
     which makes an HTTP PUT request to the Philips Hue API.
     Sets the color based off of the name of the policy that
-    triggered the notification.
+    triggered the incident the notification is about and 
+    whether the incident is open or closed.
 
     Args:
         client: The PhilipsHueClient object to trigger a response from.

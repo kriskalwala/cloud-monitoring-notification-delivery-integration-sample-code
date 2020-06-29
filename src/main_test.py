@@ -109,9 +109,9 @@ def test_invalid_incident_message(flask_client):
     assert b'Notification is missing required dict key' in response.data
 
 
-def test_nondefault_policy_alert_message(flask_client, philips_hue_client,
-                                      requests_mock, config):
-    message = '{"incident": {"policy_name": "policy2"}}'
+def test_nondefault_open_incident_alert_message(flask_client, philips_hue_client,
+                                                requests_mock, config):
+    message = '{"incident": {"policy_name": "policyB", "state": "open"}}'
     data = base64.b64encode(message.encode()).decode()
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
@@ -122,12 +122,13 @@ def test_nondefault_policy_alert_message(flask_client, philips_hue_client,
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert response.data == repr(config['POLICY_HUE_MAPPING']['policy2']).encode()
+    assert response.data == repr(config['POLICY_HUE_MAPPING']
+                                       ['policyB']['open']).encode()
 
 
-def test_default_policy_alert_message(flask_client, philips_hue_client,
-                                      requests_mock, config):
-    message = '{"incident": {"policy_name": "unknown_policy"}}'
+def test_nondefault_closed_incident_alert_message(flask_client, philips_hue_client,
+                                                  requests_mock, config):
+    message = '{"incident": {"policy_name": "policyB", "state": "closed"}}'
     data = base64.b64encode(message.encode()).decode()
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
@@ -138,4 +139,39 @@ def test_default_policy_alert_message(flask_client, philips_hue_client,
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert response.data == repr(config['POLICY_HUE_MAPPING']['default']).encode()
+    assert response.data == repr(config['POLICY_HUE_MAPPING']
+                                       ['policyB']['closed']).encode()
+
+
+def test_default_open_incident_alert_message(flask_client, philips_hue_client,
+                                             requests_mock, config):
+    message = '{"incident": {"policy_name": "unknown_policy", "state": "open"}}'
+    data = base64.b64encode(message.encode()).decode()
+    bridge_ip_address = philips_hue_client.bridge_ip_address
+    username = philips_hue_client.username
+    matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
+    requests_mock.register_uri('PUT', matcher,
+                               text=philips_hue_mock.mock_hue_put_response)
+
+    response = flask_client.post('/', json={'message': {'data': data}})
+
+    assert response.status_code == 200
+    assert response.data == repr(config['POLICY_HUE_MAPPING']
+                                       ['default']['open']).encode()
+
+
+def test_default_closed_incident_alert_message(flask_client, philips_hue_client,
+                                               requests_mock, config):
+    message = '{"incident": {"policy_name": "unknown_policy", "state": "closed"}}'
+    data = base64.b64encode(message.encode()).decode()
+    bridge_ip_address = philips_hue_client.bridge_ip_address
+    username = philips_hue_client.username
+    matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
+    requests_mock.register_uri('PUT', matcher,
+                               text=philips_hue_mock.mock_hue_put_response)
+
+    response = flask_client.post('/', json={'message': {'data': data}})
+
+    assert response.status_code == 200
+    assert response.data == repr(config['POLICY_HUE_MAPPING']
+                                       ['default']['closed']).encode()
