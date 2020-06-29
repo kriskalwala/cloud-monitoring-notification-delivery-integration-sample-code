@@ -20,8 +20,6 @@ This module defines Philips Hue classes, as well as
 callback functions that interact with a Philips Hue client.
 """
 
-from enum import Enum, unique
-
 import json
 import requests
 
@@ -95,7 +93,7 @@ def get_target_hue_from_monitoring_notification(notification,
     a monitoring notification and returns this hue value
 
     Gets the hue value based off of the name of the policy that
-    triggered the incident that the notification is about and 
+    triggered the incident that the notification is about and
     whether the incident is open or closed.
 
     Args:
@@ -103,7 +101,7 @@ def get_target_hue_from_monitoring_notification(notification,
         policy_hue_mapping: A dictionary mapping policy names to hue
             values. Indicates what hue the light bulb should change
             to due to a notification from a specific policy.
-            
+
 
     Returns:
         The target hue value (color) of a Philips Hue light based on
@@ -122,9 +120,9 @@ def get_target_hue_from_monitoring_notification(notification,
     try:
         if policy_name in policy_hue_mapping:
             hue_value = policy_hue_mapping[policy_name][incident_state]
-            return hue_value
         else:
             hue_value = policy_hue_mapping["default"][incident_state]
-            return hue_value
     except KeyError:
         raise UnknownIncidentStateError(f'Incident state must be "open" or "closed"; actual: {incident_state}')
+
+    return hue_value

@@ -68,9 +68,7 @@ def test_set_color(philips_hue_client, requests_mock):
     assert "{'success': {'/lights/1/state/hue': '0'}}" in response.text
 
 
-def test_trigger_from_incident_bad_url(config, philips_hue_client,
-                                       requests_mock):
-    notification = {'incident': {'policy_name': 'policyB', 'state': "open"}}
+def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
