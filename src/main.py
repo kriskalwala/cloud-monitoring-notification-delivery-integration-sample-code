@@ -20,6 +20,7 @@
 """Runs Cloud Monitoring Notification Integration app with Flask."""
 
 # [START run_pubsub_server_setup]
+import logging.config
 import os
 import json
 
@@ -29,9 +30,26 @@ from external_integrations import philips_hue
 import config
 import pubsub
 
+logging.config.dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    }},
+    'handlers': {'console': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://sys.stderr',
+        'formatter': 'default'
+    }},
+    'root': {
+        'handlers': ['console']
+    }
+})
 
 app = Flask(__name__)
 app.config.from_object(config.load())
+
+root_logger = logging.getLogger()
+root_logger.setLevel(app.config["LOGGING_LEVEL"])
 app.logger.setLevel(app.config["LOGGING_LEVEL"])
 # [END run_pubsub_server_setup]
 
@@ -45,14 +63,14 @@ def handle_pubsub_message():
     try:
         pubsub_data_string = pubsub.parse_data_from_message(pubsub_received_message)
     except pubsub.DataParseError as e:
-        app.logger.error(e)
+        root_logger.error(e)
         return (str(e), 400)
 
     # load the notification from the data
     try:
         monitoring_notification_dict = json.loads(pubsub_data_string)
     except json.JSONDecodeError as e:
-        app.logger.error(e)
+        root_logger.error(e)
         return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
 
@@ -63,7 +81,7 @@ def handle_pubsub_message():
         hue_state = philips_hue.trigger_light_from_monitoring_notification(
             philips_hue_client, monitoring_notification_dict, app.config['LIGHT_ID'])
     except philips_hue.Error as e:
-        app.logger.error(e)
+        root_logger.error(e)
         return (str(e), 400)
 
 
