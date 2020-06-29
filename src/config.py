@@ -30,15 +30,25 @@ class Config:
     
     # Mappings between policy names and philips hue (color)
     # values (0 to 65535). Each mapping indicates what 
-    # hue the light bulb should light up when receiving
-    # a notification from a certain policy. The default
-    # mapping indicates the hue it should light up for
-    # notifications from all other unspecified policies.
+    # hues the light bulb should light up when receiving
+    # a notification about an "open" or "closed" incident
+    # regarding a specific policy. The default mapping
+    # indicates the hues it should light up for notifications
+    # about "open" or "closed" incidents regarding any 
+    # other unspecified policy.
     POLICY_HUE_MAPPING = {
-        'policy1': 65535,  # red
-        'policy2': 25500,  # green
-        'policy3': 46920,  # blue
-        'default': 56063  # pink
+        'policyA': {
+            'open': 5620,
+            'closed': 42237
+        },
+        'policyB': {
+            'open': 10126,
+            'closed': 48013
+        },
+        'default': {
+            'open': 65280,
+            'closed': 24432
+        }
     }
 
 
@@ -112,9 +122,18 @@ class TestConfig(Config):
     USERNAME = 'test-user'
     
     POLICY_HUE_MAPPING = {
-        'policy1': 65535,
-        'policy2': 25500,
-        'default': 56063
+        'policyA': {
+            'open': 5620,
+            'closed': 42237
+        },
+        'policyB': {
+            'open': 10126,
+            'closed': 48013
+        },
+        'default': {
+            'open': 65280,
+            'closed': 24432
+        }
     }
 
 

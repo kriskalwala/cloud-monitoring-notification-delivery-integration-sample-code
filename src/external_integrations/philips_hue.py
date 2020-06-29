@@ -114,19 +114,25 @@ def trigger_light_from_monitoring_notification(client, notification, light_id,
         and then forwarded to the bulb. A value between 0 and 65535.
 
     Raises:
+        UnknownIncidentStateError: If the incident state is not open or closed.
         NotificationParseError: If notification is missing required dict key.
         BadAPIRequestError: If there was an error in calling the Philips Hue API.
     """
     try:
         policy_name = notification["incident"]["policy_name"]
+        state = notification["incident"]["state"]
+        incident_state = notification["incident"]["state"]
     except KeyError:
         raise NotificationParseError("Notification is missing required dict key")
 
-    if policy_name in policy_hue_mapping:
-        color = policy_hue_mapping[policy_name]
-        client.set_color(light_id, color)
-        return color
-    else:
-        color = policy_hue_mapping["default"]
-        client.set_color(light_id, color)
-        return color
+    try:
+        if policy_name in policy_hue_mapping:
+            color = policy_hue_mapping[policy_name][incident_state]
+            client.set_color(light_id, color)
+            return color
+        else:
+            color = policy_hue_mapping["default"][incident_state]
+            client.set_color(light_id, color)
+            return color
+    except KeyError:
+        raise UnknownIncidentStateError(f'Incident state must be "open" or "closed"; actual: {incident_state}')
