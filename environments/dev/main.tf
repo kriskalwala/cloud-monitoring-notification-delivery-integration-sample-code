@@ -32,7 +32,7 @@ module "pubsub" {
       name              = "alert-push-subscription"
       
       # this will later be an output from a Cloud Run Terraform module
-      push_endpoint     = "https://pubsub-tutorial-uvbet5mdya-uw.a.run.app/"
+      push_endpoint     = "${var.push_endpoint}"
     }
   ]
 }
