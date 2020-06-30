@@ -12,31 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-locals {
-  env = "dev"
-}
-
-provider "google" {
-  project = "var.project"
-}
-
-resource "google_project_service" "run" {
-  service = "run.googleapis.com"
-}
-
-module "pubsub" {
-  source  = "terraform-google-modules/pubsub/google"
-  version = "~> 1.3"
-  
-  topic              = "tf-topic"
-  project_id         = "${var.project}"
-  push_subscriptions = [
-    {
-      name              = "alert-push-subscription"
-      
-      # this will later be an output from a Cloud Run Terraform module
-      push_endpoint     = "${var.push_endpoint}"
-    }
-  ]
+output "url" {
+  value = "${google_cloud_run_service.cloud_run_pubsub_service.status[0].url}"
 }
