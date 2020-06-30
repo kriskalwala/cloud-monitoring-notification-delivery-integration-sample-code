@@ -16,7 +16,3 @@
 output "topic" {
   value = "${module.pubsub.topic}"
 }
-
-output "subscription_names" {
-  value = "${module.pubsub.subscription_names}"
-}

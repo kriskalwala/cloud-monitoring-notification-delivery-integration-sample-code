@@ -18,11 +18,7 @@ locals {
 }
 
 provider "google" {
-  project = "var.project"
-}
-
-resource "google_project_service" "run" {
-  service = "run.googleapis.com"
+  project = var.project
 }
 
 module "pubsub" {
@@ -31,12 +27,4 @@ module "pubsub" {
   
   topic              = "tf-topic"
   project_id         = "${var.project}"
-  push_subscriptions = [
-    {
-      name              = "alert-push-subscription"
-      
-      # this will later be an output from a Cloud Run Terraform module
-      push_endpoint     = "${var.push_endpoint}"
-    }
-  ]
 }
