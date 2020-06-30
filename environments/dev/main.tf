@@ -14,11 +14,11 @@
 
 
 locals {
-  "env" = "dev"
+  env = "dev"
 }
 
 provider "google" {
-  project = "${var.project}"
+  project = "var.project"
 }
 
 module "pubsub" {
@@ -30,25 +30,9 @@ module "pubsub" {
   push_subscriptions = [
     {
       name              = "alert-push-subscription"
+      
+      # this will later be an output from a Cloud Run Terraform module
       push_endpoint     = "https://pubsub-tutorial-uvbet5mdya-uw.a.run.app/"
     }
   ]
 }
-
-#module "service_accounts" {
-#  source        = "terraform-google-modules/service-accounts/google"
-#  version       = "~> 2.0"
-#  project_id    = "${var.project}"
-#  prefix        = "test-sa"
-#  names         = ["first", "second"]
-#  project_roles = [
-#    "project-foo=>roles/viewer",
-#    "project-spam=>roles/storage.objectViewer",
-#  ]
-#}
-
-#module "firewall" {
-#  source  = "../../modules/firewall"
-#  project = "${var.project}"
-#  subnet  = "${module.vpc.subnet}"
-#}
