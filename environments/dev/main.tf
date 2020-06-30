@@ -18,11 +18,7 @@ locals {
 }
 
 provider "google" {
-  project = "var.project"
-}
-
-resource "google_project_service" "run" {
-  service = "run.googleapis.com"
+  project = var.project
 }
 
 module "pubsub" {
@@ -39,4 +35,9 @@ module "pubsub" {
       push_endpoint     = "${var.push_endpoint}"
     }
   ]
+}
+
+module "cloud_run_with_pubsub" {
+  source  = "../../modules/cloud_run_with_pubsub"
+  project = "${var.project}"
 }

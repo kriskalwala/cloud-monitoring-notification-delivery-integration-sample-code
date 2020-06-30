@@ -13,14 +13,20 @@
 # limitations under the License.
 
 
-resource "google_cloud_run_service" "cloudrun_pubsub_service" {
-  name     = "cloudrun-pubsub-service"
+resource "google_project_service" "run" {
+  service = "run.googleapis.com"
+  project  = var.project
+}
+
+resource "google_cloud_run_service" "cloud_run_pubsub_service" {
+  name     = "cloud-run-pubsub-service"
   location = "us-west1"
+  project  = var.project
 
   template {
     spec {
       containers {
-        image = "gcr.io/${var.project}/cloudrun-pubsub-service"
+        image = "gcr.io/${var.project}/cloud-run-pubsub-service"
       }
     }
   }
