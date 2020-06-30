@@ -38,16 +38,16 @@ class Config:
     # other unspecified policy.
     POLICY_HUE_MAPPING = {
         'policyA': {
-            'open': 5620,
-            'closed': 42237
+            'open': 5620, # orange
+            'closed': 42237  # blue
         },
         'policyB': {
-            'open': 10126,
-            'closed': 48013
+            'open': 10126,  # yellow
+            'closed': 48013  # purple
         },
         'default': {
-            'open': 65280,
-            'closed': 24432
+            'open': 65280,  # red
+            'closed': 24432  # green
         }
     }
 
