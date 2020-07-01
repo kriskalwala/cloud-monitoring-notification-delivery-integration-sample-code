@@ -30,7 +30,7 @@ jobs:
     
     # Set gcloud project and account
     - name: GCloud auth
-    run: |-
+      run: |-
         gcloud config set project $PROJECT_ID
         gcloud config set account $ACCOUNT
         
