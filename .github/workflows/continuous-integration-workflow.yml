@@ -22,6 +22,10 @@ jobs:
         pip install -r requirements.txt
     - name: Test with pytest
       run: export FLASK_APP_ENV=test; pytest
+    - name: 'grc.io/cloud-builders/docker'
+      args: ['build', '-t', 'grc.io/$PROJECT_ID/pubsub_endpoint:$COMMIT_SHA', '.']
+    - name: 'grc.io/cloud-builders/docker'
+      args: ['push', 'grc.io/$PROJECT_ID/pubsub_endpoint:$COMMIT_SHA']
 
   lint:
     runs-on: ubuntu-latest
