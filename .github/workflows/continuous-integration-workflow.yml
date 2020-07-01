@@ -27,7 +27,10 @@ jobs:
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-      run: |-
+    
+    # Set gcloud project and account
+    - name: GCloud auth
+    run: |-
         gcloud config set project $PROJECT_ID
         gcloud config set account $ACCOUNT
         
