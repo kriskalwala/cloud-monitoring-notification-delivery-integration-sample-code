@@ -49,8 +49,10 @@ Optional; useful if you want to see what changes will be made without applying t
 ```
 terraform plan
 ``` 
+When prompted for `var.project`, enter the GCP project ID.
+
 Apply configuration changes:
 ```
 terraform apply
 ```
-Information about the created resources should appear in the output.
+When prompted, type `yes` to confirm changes. Once finished, information about the created resources should appear in the output.
