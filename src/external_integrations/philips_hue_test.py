@@ -78,7 +78,11 @@ def test_trigger_from_incident_invalid_state():
     with pytest.raises(philips_hue.UnknownIncidentStateError) as e:
         assert philips_hue.get_target_hue_from_monitoring_notification(
             notification, policy_hue_mapping)
-    assert 'Incident state must be "open" or "closed"' in str(e.value)
+        
+    expected_error_value = ("Incident state for policy 'unknown_policy' "
+                            "must be one of: ['open', 'closed']; actual: 'unknown'")
+    assert str(e.value) == expected_error_value
+
 
 def test_trigger_hue_with_nondefault_open_incident():
     policy_name = 'policyB'

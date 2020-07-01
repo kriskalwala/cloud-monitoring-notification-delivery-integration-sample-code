@@ -117,12 +117,17 @@ def get_target_hue_from_monitoring_notification(notification,
     except KeyError:
         raise NotificationParseError("Notification is missing required dict key")
 
+    if policy_name in policy_hue_mapping:
+        incident_state_to_hue_mapping = policy_hue_mapping[policy_name]
+    else:
+        incident_state_to_hue_mapping = policy_hue_mapping["default"]
+
     try:
-        if policy_name in policy_hue_mapping:
-            hue_value = policy_hue_mapping[policy_name][incident_state]
-        else:
-            hue_value = policy_hue_mapping["default"][incident_state]
+        hue_value = incident_state_to_hue_mapping[incident_state]
     except KeyError:
-        raise UnknownIncidentStateError(f'Incident state must be "open" or "closed"; actual: {incident_state}')
+        expected_states = list(incident_state_to_hue_mapping.keys())
+        raise UnknownIncidentStateError(
+            f"Incident state for policy '{policy_name}' must be one of: "
+            f"{expected_states}; actual: '{incident_state}'")
 
     return hue_value
