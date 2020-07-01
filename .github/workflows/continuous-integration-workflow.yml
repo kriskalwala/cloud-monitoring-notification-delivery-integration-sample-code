@@ -1,8 +1,9 @@
 name: Continuous Integration
 
-on: [push, pull_request]
-  branches:
-    - cloud-build-setup
+on: 
+  push:
+    branches:
+      - cloud-build-setup
 
 env:
   PROJECT_ID: alertmanager-2020-intern-a
