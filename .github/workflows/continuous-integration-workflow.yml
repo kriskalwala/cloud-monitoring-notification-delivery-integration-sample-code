@@ -9,7 +9,7 @@ env:
   PROJECT_ID: alertmanager-2020-intern-a
   RUN_REGION: us-west1
   SERVICE_NAME: pubsub_endpoint
-  SERVICE_ACCOUNT: build-gcloud-image@$PROJECT_ID.iam.gserviceaccount.com
+  SERVICE_ACCOUNT: build-gcloud-image@alertmanager-2020-intern-a.iam.gserviceaccount.com
 
 jobs:
   build:
