@@ -32,7 +32,7 @@ jobs:
     - name: GCloud auth
       run: |-
         gcloud config set project $PROJECT_ID
-        gcloud auth activate-service-account $SERVICE_ACCOUNT
+        gcloud config set account $SERVICE_ACCOUNT
         
     # Build and push image to Google Container Registry
     - name: Build image
