@@ -34,3 +34,23 @@ Apache header:
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+    
+## Terraform Setup
+
+Terraform configurations are used to create the infrastructure needed for this integration, such as Pub/Sub topics and subscriptions, alerting policies, custom metrics, and Cloud Run instances. The `dev` and `prod` environments each have their own Terraform configurations, which can be found in the ```environments/``` directory. Terraform modules can be found in the ```modules/``` directory.
+
+Deployment with Terraform will be automated through source code changes in GitHub. To test the deployment manually, navigate to the desired environment folder (`environments/dev` or `environments/prod`) and run the following:
+
+Initialize a working directory containing Terraform configuration files:
+```
+terraform init
+```
+Optional; useful if you want to see what changes will be made without applying them yet:
+```
+terraform plan
+``` 
+Apply configuration changes:
+```
+terraform apply
+```
+Information about the created resources should appear in the output.
