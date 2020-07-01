@@ -26,7 +26,7 @@ import philips_hue_mock
 def config():
     configs = {
         'BRIDGE_IP_ADDRESS': '127.0.0.1',
-        'USERNAME': 'test-user',
+        'USERNAME': 'test-user'
     }
     return configs
 
