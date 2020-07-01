@@ -9,6 +9,7 @@ env:
   PROJECT_ID: alertmanager-2020-intern-a
   RUN_REGION: us-west1
   SERVICE_NAME: pubsub_endpoint
+  ACCOUNT: aprilxie@google.com
 
 jobs:
   build:
@@ -26,11 +27,13 @@ jobs:
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-
+      run: |-
+        gcloud config set project $PROJECT_ID
+        gcloud config set account $ACCOUNT
+        
     # Build and push image to Google Container Registry
     - name: Build image
       run: |-
-        gcloud config set project $PROJECT_ID
         gcloud builds submit \
           --quiet \
           --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
