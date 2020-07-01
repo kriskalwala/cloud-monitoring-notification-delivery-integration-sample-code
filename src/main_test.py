@@ -122,8 +122,10 @@ def test_nondefault_open_incident_alert_message(flask_client, philips_hue_client
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                 ['policyB']['open']).encode()
+
+    expected_response_data = repr(config['POLICY_HUE_MAPPING']
+                                  ['policyB']['open']).encode()
+    assert response.data == expected_response_data
 
 
 def test_nondefault_closed_incident_alert_message(flask_client, philips_hue_client,
@@ -139,8 +141,10 @@ def test_nondefault_closed_incident_alert_message(flask_client, philips_hue_clie
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                 ['policyB']['closed']).encode()
+
+    expected_response_data = repr(config['POLICY_HUE_MAPPING']
+                                  ['policyB']['closed']).encode()
+    assert response.data == expected_response_data
 
 
 def test_default_open_incident_alert_message(flask_client, philips_hue_client,
@@ -156,8 +160,10 @@ def test_default_open_incident_alert_message(flask_client, philips_hue_client,
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                 ['default']['open']).encode()
+
+    expected_response_data = repr(config['POLICY_HUE_MAPPING']
+                                  ['default']['open']).encode()
+    assert response.data == expected_response_data
 
 
 def test_default_closed_incident_alert_message(flask_client, philips_hue_client,
@@ -173,5 +179,7 @@ def test_default_closed_incident_alert_message(flask_client, philips_hue_client,
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 200
-    assert response.data == repr(config['POLICY_HUE_MAPPING']
-                                 ['default']['closed']).encode()
+
+    expected_response_data = repr(config['POLICY_HUE_MAPPING']
+                                  ['default']['closed']).encode()
+    assert response.data == expected_response_data

@@ -92,15 +92,16 @@ def get_target_hue_from_monitoring_notification(notification,
     """Gets the target hue value (color) of a Philips Hue light based on
     a monitoring notification and returns this hue value
 
-    Gets the hue value based off of the name of the policy that
-    triggered the incident that the notification is about and
-    whether the incident is open or closed.
+    Gets the hue value based off of the name of the Google Cloud
+    alerting policy that triggered the incident that the notification
+    is about and whether the incident is open or closed.
 
     Args:
         notification: A dictionary containing the notification data.
-        policy_hue_mapping: A dictionary mapping policy names to hue
-            values. Indicates what hue the light bulb should change
-            to due to a notification from a specific policy.
+        policy_hue_mapping: A dictionary mapping Google Cloud alerting
+            policy names to hue values. Indicates what hue the light
+            bulb should light up when receiving a notification about an
+            "open" or "closed" incident regarding a specific policy.
 
 
     Returns:
@@ -127,7 +128,7 @@ def get_target_hue_from_monitoring_notification(notification,
     except KeyError:
         expected_states = list(incident_state_to_hue_mapping.keys())
         raise UnknownIncidentStateError(
-            f"Incident state for policy '{policy_name}' must be one of: "
-            f"{expected_states}; actual: '{incident_state}'")
+            f"Incident state for Google Cloud alerting policy '{policy_name}' "
+            f"must be one of: {expected_states}; actual: '{incident_state}'")
 
     return hue_value

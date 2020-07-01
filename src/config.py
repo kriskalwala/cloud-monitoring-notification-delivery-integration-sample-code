@@ -28,14 +28,15 @@ class Config:
     DEBUG = False
     LIGHT_ID = '1'
 
-    # Mappings between policy names and philips hue (color)
-    # values (0 to 65535). Each mapping indicates what
-    # hues the light bulb should light up when receiving
-    # a notification about an "open" or "closed" incident
-    # regarding a specific policy. The default mapping
-    # indicates the hues it should light up for notifications
-    # about "open" or "closed" incidents regarding any
-    # other unspecified policy.
+    # Mappings between Google Cloud alerting policy names
+    # and philips hue (color) values (0 to 65535). Each
+    # mapping indicates what hues the light bulb should
+    # light up when receiving a notification about an
+    # "open" or "closed" incident regarding a specific
+    # policy. The default mapping indicates the hues
+    # it should light up for notifications about "open"
+    # or "closed" incidents regarding any other unspecified
+    # policy.
     POLICY_HUE_MAPPING = {
         'policyA': {
             'open': 5620, # orange
