@@ -20,18 +20,24 @@
 """Runs Cloud Monitoring Notification Integration app with Flask."""
 
 # [START run_pubsub_server_setup]
+import logging
 import os
 import json
 
 from flask import Flask, request
 
 from external_integrations import philips_hue
-import config
-import pubsub
+from notification_delivery import config, pubsub
 
+
+app_config = config.load()
+logging.basicConfig(level=app_config.LOGGING_LEVEL)
+
+# logger inherits the logging level and handlers of the root logger
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.config.from_object(config.load())
+app.config.from_object(app_config)
 # [END run_pubsub_server_setup]
 
 
@@ -44,14 +50,14 @@ def handle_pubsub_message():
     try:
         pubsub_data_string = pubsub.parse_data_from_message(pubsub_received_message)
     except pubsub.DataParseError as e:
-        print(e)
+        logger.error(e)
         return (str(e), 400)
 
     # load the notification from the data
     try:
         monitoring_notification_dict = json.loads(pubsub_data_string)
     except json.JSONDecodeError as e:
-        print(e)
+        logger.error(e)
         return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
 
@@ -63,7 +69,7 @@ def handle_pubsub_message():
             monitoring_notification_dict, app.config["POLICY_HUE_MAPPING"])
         philips_hue_client.set_color(app.config['LIGHT_ID'], hue_value)
     except philips_hue.Error as e:
-        print(e)
+        logger.error(e)
         return (str(e), 400)
 
 

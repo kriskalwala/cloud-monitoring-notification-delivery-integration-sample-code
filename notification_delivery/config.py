@@ -14,9 +14,9 @@
 
 """Flask config."""
 
-import secrets
 import os
 from dotenv import load_dotenv
+from notification_delivery import secrets
 
 load_dotenv()
 
@@ -24,6 +24,7 @@ class Config:
     """Base config."""
 
     FLASK_ENV = 'production'
+    LOGGING_LEVEL = 'INFO'
     TESTING = False
     DEBUG = False
     LIGHT_ID = '1'
@@ -55,6 +56,7 @@ class Config:
 
 
 class ProdConfig(Config):
+    """Production config."""
 
     def __init__(self):
         self._philips_hue_ip = None
@@ -84,7 +86,9 @@ class ProdConfig(Config):
 
 class DevConfig(Config):
     """Development config."""
+
     FLASK_ENV = 'development'
+    LOGGING_LEVEL = 'DEBUG'
     DEBUG = True
     TESTING = True
 
@@ -115,7 +119,9 @@ class DevConfig(Config):
 
 class TestConfig(Config):
     """Test config."""
+
     FLASK_ENV = 'test'
+    LOGGING_LEVEL = 'DEBUG'
     DEBUG = True
     TESTING = True
 
