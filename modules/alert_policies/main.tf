@@ -17,7 +17,7 @@ resource "google_monitoring_notification_channel" "pubsub" {
   display_name = "Alert notifications"
   type         = "pubsub"
   labels       = {
-    "topic" = "projects/${var.project}/topics/tf-topic"
+    "topic" = "projects/${var.project}/topics/${var.pubsub_topic}"
   }
 }
 

@@ -32,4 +32,5 @@ module "pubsub" {
 module "alert_policies" {
   source  = "../../modules/alert_policies"
   project = "${var.project}"
+  pubsub_topic = "${module.pubsub.topic}"
 }
