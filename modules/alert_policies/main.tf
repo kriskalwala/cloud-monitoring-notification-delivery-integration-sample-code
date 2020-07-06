@@ -13,6 +13,14 @@
 # limitations under the License.
 
 
+resource "google_monitoring_notification_channel" "pubsub" {
+  display_name = "Alert notifications"
+  type         = "pubsub"
+  labels       = {
+    "topic" = "projects/${var.project}/topics/tf-topic"
+  }
+}
+
 resource "google_monitoring_alert_policy" "alert_policy" {
   display_name = "My Metric Alert Policy"
   combiner     = "OR"
@@ -25,4 +33,5 @@ resource "google_monitoring_alert_policy" "alert_policy" {
       threshold_value = "3"
     }
   }
+  notification_channels = ["${google_monitoring_notification_channel.pubsub.channel_id}"]
 }
