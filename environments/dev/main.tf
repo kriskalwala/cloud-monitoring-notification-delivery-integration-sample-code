@@ -29,15 +29,7 @@ module "pubsub" {
   project_id         = "${var.project}"
 }
 
-resource "google_monitoring_alert_policy" "alert_policy" {
-  display_name = "My Metric Alert Policy"
-  conditions {
-    display_name = "test condition"
-    condition_threshold {
-      filter     = "metric.type=\"custom.googleapis.com/testing_metric""
-      duration   = "60s"
-      comparison = "COMPARISON_GT"
-      threshold_value = "3"
-    }
-  }
+module "alert_policies" {
+  source  = "../../modules/alert_policies"
+  project = "${var.project}"
 }

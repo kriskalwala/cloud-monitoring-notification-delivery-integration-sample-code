@@ -28,3 +28,8 @@ module "pubsub" {
   topic              = "tf-topic"
   project_id         = "${var.project}"
 }
+
+module "alert_policies" {
+  source  = "../../modules/alert_policies"
+  project = "${var.project}"
+}

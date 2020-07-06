@@ -18,7 +18,7 @@ resource "google_monitoring_alert_policy" "alert_policy" {
   conditions {
     display_name = "test condition"
     condition_threshold {
-      filter     = "metric.type=\"custom.googleapis.com/testing_metric""
+      filter     = "metric.type=\"custom.googleapis.com/testing_metric\" AND resource.type=\"gce_instance\""
       duration   = "60s"
       comparison = "COMPARISON_GT"
       threshold_value = "3"
