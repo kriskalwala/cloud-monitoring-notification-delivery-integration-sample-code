@@ -16,3 +16,7 @@
 output "topic" {
   value = "${module.pubsub.topic}"
 }
+
+output "alert_policy" {
+  value = "${module.alert_policies.alert_policy_name}"
+}
