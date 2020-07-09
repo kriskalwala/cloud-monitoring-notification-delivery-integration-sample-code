@@ -5,11 +5,12 @@ on:
     branches:
       - cloud-build-setup
 
+
 env:
-  PROJECT_ID: alertmanager-2020-intern-a
+  PROJECT_ID: alertmanager-cloudmon-test
   RUN_REGION: us-west1
   SERVICE_NAME: pubsub_endpoint
-  ACCOUNT: 467970956959@cloudbuild.gserviceaccount.com
+  ACCOUNT: cloud-registry-push-accessor@alertmanager-cloudmon-test.iam.gserviceaccount.com
 
 jobs:
   build:
@@ -27,12 +28,14 @@ jobs:
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
+        export_default_credentials: true
+    # - uses: GoogleCloudPlatform/github-actions/get-secretmanager-secrets@master
     
     # Set gcloud project and account
     - name: GCloud auth
       run: |-
         gcloud config set project $PROJECT_ID
-        gcloud auth activate-service-account ACCOUNT
+        # gcloud auth activate-service-account ACCOUNT
         gcloud config set account $ACCOUNT
         
     # Build and push image to Google Container Registry
