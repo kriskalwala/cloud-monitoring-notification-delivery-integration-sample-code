@@ -28,6 +28,7 @@ jobs:
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
+        project_id: $PROJECT_ID
         export_default_credentials: true
     - uses: GoogleCloudPlatform/github-actions/get-secretmanager-secrets@master
       with:
@@ -37,7 +38,8 @@ jobs:
     # Set gcloud project and account
     - name: GCloud auth
       run: |-
-        gcloud config set project $PROJECT_ID
+        gcloud info
+        # gcloud config set project $PROJECT_ID
         gcloud auth activate-service-account ACCOUNT --key-file=${{steps.secrets.outputs.key}}
         gcloud config set account $ACCOUNT
         
