@@ -24,12 +24,12 @@
 #  Google pubsub pull: https://cloud.google.com/pubsub/docs/pull
 #  Jira library: https://jira.readthedocs.io/
 
-from concurrent.futures import TimeoutError
-from google.cloud import pubsub_v1
-from jira import JIRA
+import concurrent.futures
 import json
 import logging
 import os
+from jira import JIRA
+from google.cloud import pubsub_v1
 
 logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -56,21 +56,21 @@ jira = JIRA(jira_url, basic_auth=(jira_username, jira_password))
 
 # Called for every published message.
 def callback(message):
-  data = json.loads(message.data)['incident']
-  logging.info('Received pubsub incident %s' % data)
-  # Ignore anything but new issues.
-  # A more advanced implementation could update or close existing jira issues
-  # based on the state field and a jira-google issue id mapping.
-  if data['state'] == 'open':
-    summary = '%s - %s' % (data['condition_name'], data['resource_name'])
-    description = '%s\nSee: %s' % (data['summary'], data['url'])
-    issue = jira.create_issue(
-        project=jira_project,
-        summary=summary,
-        description=description,
-        issuetype={'name': 'Bug'})
-    logging.info('Created jira issue %s' % issue)
-  message.ack()
+    data = json.loads(message.data)['incident']
+    logging.info('Received pubsub incident %s', data)
+    # Ignore anything but new issues.
+    # A more advanced implementation could update or close existing jira issues
+    # based on the state field and a jira-google issue id mapping.
+    if data['state'] == 'open':
+        summary = '%s - %s' % (data['condition_name'], data['resource_name'])
+        description = '%s\nSee: %s' % (data['summary'], data['url'])
+        issue = jira.create_issue(
+            project=jira_project,
+            summary=summary,
+            description=description,
+            issuetype={'name': 'Bug'})
+        logging.info('Created jira issue %s', issue)
+    message.ack()
 
 
 subscriber = pubsub_v1.SubscriberClient()
@@ -81,10 +81,9 @@ print('Listening for messages on %s..' % subscription_path)
 
 # Wrap subscriber in a 'with' block to automatically call close() when done.
 with subscriber:
-  try:
-    # When `timeout` is not set, result() will block indefinitely,
-    # unless an exception is encountered first.
-    streaming_pull_future.result(timeout=timeout)
-  except TimeoutError:
-    streaming_pull_future.cancel()
-
+    try:
+        # When `timeout` is not set, result() will block indefinitely,
+        # unless an exception is encountered first.
+        streaming_pull_future.result(timeout=timeout)
+    except concurrent.futures.TimeoutError:
+        streaming_pull_future.cancel()
