@@ -9,7 +9,7 @@ env:
   PROJECT_ID: alertmanager-2020-intern-a
   RUN_REGION: us-west1
   SERVICE_NAME: pubsub_endpoint
-  ACCOUNT: aprilxie@google.com
+  ACCOUNT: 467970956959@cloudbuild.gserviceaccount.com
 
 jobs:
   build:
@@ -32,7 +32,6 @@ jobs:
     - name: GCloud auth
       run: |-
         gcloud config set project $PROJECT_ID
-        gcloud auth login $ACCOUNT
         gcloud config set account $ACCOUNT
         
     # Build and push image to Google Container Registry
