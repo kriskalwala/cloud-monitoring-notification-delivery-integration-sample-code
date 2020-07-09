@@ -128,6 +128,11 @@ class TestConfig(Config):
     BRIDGE_IP_ADDRESS = '127.0.0.1'
     USERNAME = 'test-user'
 
+    # Overide this mapping to ensure unit tests
+    # in main_test.py always use the same mapping even
+    # if the mapping in the base Config is modified.
+    # This is important since the tests are based of /
+    # assume the values in this specific mapping.
     POLICY_HUE_MAPPING = {
         'policyA': {
             'open': 5620,
