@@ -51,7 +51,7 @@ def test_set_color(philips_hue_client, requests_mock):
     assert "{'success': {'/lights/1/state/hue': '0'}}" in response.text
 
 
-def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
+def test_set_color_bad_url(philips_hue_client, requests_mock):
     bridge_ip_address = philips_hue_client.bridge_ip_address
     username = philips_hue_client.username
     matcher = re.compile(f'http://{bridge_ip_address}/api/{username}')
@@ -63,7 +63,7 @@ def test_trigger_from_incident_bad_url(philips_hue_client, requests_mock):
     assert str(e.value) == 'invalid Philips Hue url'
 
 
-def test_trigger_from_incident_invalid_state():
+def test_get_target_hue_from_incident_invalid_state():
     policy_name = 'unknown_policy'
     incident_state = 'unknown'
     notification = {'incident': {'policy_name': policy_name, "state": incident_state}}
@@ -84,7 +84,7 @@ def test_trigger_from_incident_invalid_state():
     assert str(e.value) == expected_error_value
 
 
-def test_trigger_hue_with_nondefault_open_incident():
+def test_get_target_hue_with_nondefault_open_incident():
     policy_name = 'policyB'
     incident_state = 'open'
     expected_hue_value = 10126
@@ -106,7 +106,7 @@ def test_trigger_hue_with_nondefault_open_incident():
     assert actual_hue_value == expected_hue_value
 
 
-def test_trigger_hue_with_nondefault_closed_incident():
+def test_get_target_hue_with_nondefault_closed_incident():
     policy_name = 'policyB'
     incident_state = 'closed'
     expected_hue_value = 48013
@@ -128,7 +128,7 @@ def test_trigger_hue_with_nondefault_closed_incident():
     assert actual_hue_value == expected_hue_value
 
 
-def test_trigger_hue_with_default_open_incident():
+def test_get_target_hue_with_default_open_incident():
     policy_name = 'unknown_policy'
     incident_state = 'open'
     expected_hue_value = 65280
@@ -146,7 +146,7 @@ def test_trigger_hue_with_default_open_incident():
     assert actual_hue_value == expected_hue_value
 
 
-def test_trigger_hue_with_default_closed_incident():
+def test_get_target_hue_with_default_closed_incident():
     policy_name = 'unknown_policy'
     incident_state = 'closed'
     expected_hue_value = 24432
