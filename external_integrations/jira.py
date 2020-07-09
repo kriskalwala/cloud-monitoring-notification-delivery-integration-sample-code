@@ -28,8 +28,8 @@ import concurrent.futures
 import json
 import logging
 import os
-from jira import JIRA
 from google.cloud import pubsub_v1
+from jira import JIRA
 
 logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
