@@ -29,6 +29,30 @@ class Config:
     DEBUG = False
     LIGHT_ID = '1'
 
+    # Mappings between Google Cloud alerting policy names
+    # and HSB color system hue values between 0 and 65535.
+    # Each mapping indicates what hues the light bulb should
+    # light up when receiving a notification about an
+    # "open" or "closed" incident regarding a specific
+    # policy. The default mapping indicates the hues
+    # it should light up for notifications about "open"
+    # or "closed" incidents regarding any other unspecified
+    # policy.
+    POLICY_HUE_MAPPING = {
+        'policyA': {
+            'open': 5620, # orange
+            'closed': 42237  # blue
+        },
+        'policyB': {
+            'open': 10126,  # yellow
+            'closed': 48013  # purple
+        },
+        'default': {
+            'open': 65280,  # red
+            'closed': 24432  # green
+        }
+    }
+
 
 
 class ProdConfig(Config):
@@ -103,6 +127,26 @@ class TestConfig(Config):
 
     BRIDGE_IP_ADDRESS = '127.0.0.1'
     USERNAME = 'test-user'
+
+    # Overide this mapping to ensure unit tests
+    # in main_test.py always use the same mapping even
+    # if the mapping in the base Config is modified.
+    # This is important since the tests are based of /
+    # assume the values in this specific mapping.
+    POLICY_HUE_MAPPING = {
+        'policyA': {
+            'open': 5620,
+            'closed': 42237
+        },
+        'policyB': {
+            'open': 10126,
+            'closed': 48013
+        },
+        'default': {
+            'open': 65280,
+            'closed': 24432
+        }
+    }
 
 
 _ENVIRONMENT_TO_CONFIG_MAPPING = {
