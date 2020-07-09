@@ -70,9 +70,10 @@ class PhilipsHueClient():
         Args:
             light_id:  The id to pass to the Philips Hue API to
                 specify the light to set a color for.
-            hue: Hue of the light. Takes values from 0 to 65535.
-                Programming 0 and 65535 would mean that the light will resemble
-                the color red, 25500 for green and 46920 for blue.
+            hue: Hue of the light (corresponding to HSB color system).
+                Takes values from 0 to 65535. Programming 0 and 65535
+                would mean that the light will resemble the color red,
+                25500 for green and 46920 for blue.
 
         Returns:
             HTTP Response from the Philips Hue API.
@@ -106,7 +107,8 @@ def get_target_hue_from_monitoring_notification(notification,
 
     Returns:
         The target hue value (color) of a Philips Hue light based on
-        the given notification. A value between 0 and 65535.
+        the given notification. A value between 0 and 65535 that
+        corresponds to the HSB color system.
 
     Raises:
         UnknownIncidentStateError: If the incident state is not open or closed.
