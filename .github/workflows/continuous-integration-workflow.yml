@@ -28,7 +28,7 @@ jobs:
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-        project_id: ${{PROJECT_ID}}
+        project_id: ${{ env.PROJECT_ID }}
         export_default_credentials: true
     - uses: GoogleCloudPlatform/github-actions/get-secretmanager-secrets@master
       with:
