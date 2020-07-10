@@ -65,14 +65,15 @@ def handle_pubsub_message():
                                                       app.config['USERNAME'])
 
     try:
-        hue_state = philips_hue.trigger_light_from_monitoring_notification(
-            philips_hue_client, monitoring_notification_dict, app.config['LIGHT_ID'])
+        hue_value = philips_hue.get_target_hue_from_monitoring_notification(
+            monitoring_notification_dict, app.config["POLICY_HUE_MAPPING"])
+        philips_hue_client.set_color(app.config['LIGHT_ID'], hue_value)
     except philips_hue.Error as e:
         logger.error(e)
         return (str(e), 400)
 
 
-    return (repr(hue_state), 200)
+    return (repr(hue_value), 200)
 # [END run_pubsub_handler]
 
 
