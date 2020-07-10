@@ -14,7 +14,3 @@
 
 
 variable "project" {}
-
-variable "push_endpoint" {
-  default = "https://pubsub-tutorial-uvbet5mdya-uw.a.run.app/"
-}

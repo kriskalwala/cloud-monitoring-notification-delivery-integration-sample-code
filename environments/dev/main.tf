@@ -27,6 +27,7 @@ module "pubsub" {
   
   topic              = "tf-topic"
   project_id         = "${var.project}"
+
   push_subscriptions = [
     {
       name              = "alert-push-subscription"

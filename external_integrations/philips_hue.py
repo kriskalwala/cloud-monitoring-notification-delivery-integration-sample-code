@@ -20,8 +20,6 @@ This module defines Philips Hue classes, as well as
 callback functions that interact with a Philips Hue client.
 """
 
-from enum import Enum, unique
-
 import json
 import requests
 
@@ -40,13 +38,6 @@ class UnknownIncidentStateError(Error):
 
 class BadAPIRequestError(Error):
     """Exception raised for errors in a Philips Hue API request."""
-
-
-@unique
-class PhilipsHueState(Enum):
-    """Enum mapping an incident state to hue of Philips Hue bulb."""
-    OPEN = 0
-    CLOSED = 25500
 
 
 class PhilipsHueClient():
@@ -79,9 +70,10 @@ class PhilipsHueClient():
         Args:
             light_id:  The id to pass to the Philips Hue API to
                 specify the light to set a color for.
-            hue: Hue of the light. Takes values from 0 to 65535.
-                Programming 0 and 65535 would mean that the light will resemble
-                the color red, 25500 for green and 46920 for blue.
+            hue: Hue of the light (corresponding to HSB color system).
+                Takes values from 0 to 65535. Programming 0 and 65535
+                would mean that the light will resemble the color red,
+                25500 for green and 46920 for blue.
 
         Returns:
             HTTP Response from the Philips Hue API.
@@ -96,40 +88,49 @@ class PhilipsHueClient():
 # TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/10):
 # Currently specific to Philips Hue, but will be generalized to trigger
 # whatever notification system the client chooses.
-def trigger_light_from_monitoring_notification(client, notification, light_id):
-    """Changes the color of a Philips Hue light based on a monitoring notification
-    and returns the response.
+def get_target_hue_from_monitoring_notification(notification,
+                                                policy_hue_mapping):
+    """Gets the target hue value (color) of a Philips Hue light based on
+    a monitoring notification and returns this hue value
 
-    The color of the Philips Hue light is set through the client,
-    which makes an HTTP PUT request to the Philips Hue API.
-    Sets the color of the light to red if the incident is open and green if the incident is closed.
+    Gets the hue value based off of the name of the Google Cloud
+    alerting policy that triggered the incident that the notification
+    is about and whether the incident is open or closed.
 
     Args:
-        client: The PhilipsHueClient object to trigger a response from.
         notification: A dictionary containing the notification data.
-        light_id: The id of the light to set the color for.
+        policy_hue_mapping: A dictionary mapping Google Cloud alerting
+            policy names to hue values. Indicates what hue the light
+            bulb should light up when receiving a notification about an
+            "open" or "closed" incident regarding a specific policy.
+
 
     Returns:
-        The state of the provided Philips Hue after the monitoring notification
-        was translated into a light signal, and then forwarded to the bulb.
-        One of PhilipsHueState.
+        The target hue value (color) of a Philips Hue light based on
+        the given notification. A value between 0 and 65535 that
+        corresponds to the HSB color system.
 
     Raises:
         UnknownIncidentStateError: If the incident state is not open or closed.
-        BadAPIRequestError: If there was an error in calling the Philips Hue API.
+        NotificationParseError: If notification is missing required dict key.
     """
     try:
+        policy_name = notification["incident"]["policy_name"]
         incident_state = notification["incident"]["state"]
     except KeyError:
         raise NotificationParseError("Notification is missing required dict key")
 
-    if incident_state == "open":
-        open_state = PhilipsHueState.OPEN
-        client.set_color(light_id, open_state.value)  # set to red
-        return open_state
-    if incident_state == "closed":
-        closed_state = PhilipsHueState.CLOSED
-        client.set_color(light_id, closed_state.value)  # set to green
-        return closed_state
+    if policy_name in policy_hue_mapping:
+        incident_state_to_hue_mapping = policy_hue_mapping[policy_name]
+    else:
+        incident_state_to_hue_mapping = policy_hue_mapping["default"]
 
-    raise UnknownIncidentStateError(f'Incident state must be "open" or "closed"; actual: {incident_state}')
+    try:
+        hue_value = incident_state_to_hue_mapping[incident_state]
+    except KeyError:
+        expected_states = list(incident_state_to_hue_mapping.keys())
+        raise UnknownIncidentStateError(
+            f"Incident state for Google Cloud alerting policy '{policy_name}' "
+            f"must be one of: {expected_states}; actual: '{incident_state}'")
+
+    return hue_value

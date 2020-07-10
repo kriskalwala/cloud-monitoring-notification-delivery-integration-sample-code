@@ -1,1 +1,0 @@
-{"Modules":[{"Key":"pubsub","Source":"terraform-google-modules/pubsub/google","Version":"1.3.0","Dir":".terraform/modules/pubsub/terraform-google-pubsub-1.3.0"},{"Key":"","Source":"","Dir":"."}]}
