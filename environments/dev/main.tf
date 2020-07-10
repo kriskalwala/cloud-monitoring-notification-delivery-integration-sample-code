@@ -28,3 +28,7 @@ module "pubsub" {
   topic              = "tf-topic"
   project_id         = "${var.project}"
 }
+
+module "cloud_build_trigger" {
+  source  = "../../modules/cloud_build_trigger"
+}
