@@ -1,5 +1,6 @@
 resource "google_cloudbuild_trigger" "filename-trigger" {
   provider = google-beta
+  name = "test-terraform-trigger"
   github {
     owner = var.owner
     name = var.repo
