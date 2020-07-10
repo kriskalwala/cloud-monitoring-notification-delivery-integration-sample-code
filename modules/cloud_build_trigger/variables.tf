@@ -2,8 +2,12 @@ variable "branch" {
   default = "terraform-cloud-build-trigger"
 }
 
+variable "owner" {
+  default = "googleinterns"
+}
+
 variable "repo" {
-  default = "googleinterns/cloud-monitoring-notification-delivery-integration-sample-code"
+  default = "cloud-monitoring-notification-delivery-integration-sample-code"
 }
 
 variable "image_name" {
