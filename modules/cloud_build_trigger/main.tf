@@ -1,7 +1,9 @@
 resource "google_cloudbuild_trigger" "filename-trigger" {
-  trigger_template {
-    branch_name = var.branch
-    repo_name   = var.repo
+  github {
+    name = var.repo
+    push {
+      branch = var.branch
+    }
   }
 
   substitutions = {
