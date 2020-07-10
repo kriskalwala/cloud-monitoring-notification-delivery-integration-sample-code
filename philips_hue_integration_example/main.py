@@ -26,9 +26,8 @@ import json
 
 from flask import Flask, request
 
-from external_integrations import philips_hue
-from philips_hue_notification_delivery import config
-from utilities import pubsub
+import config
+from utilities import pubsub, philips_hue
 
 
 app_config = config.load()
