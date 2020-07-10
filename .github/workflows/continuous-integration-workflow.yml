@@ -1,16 +1,6 @@
 name: Continuous Integration
 
-on: 
-  push:
-    branches:
-      - cloud-build-setup
-
-
-env:
-  PROJECT_ID: alertmanager-cloudmon-test
-  RUN_REGION: us-west1
-  SERVICE_NAME: pubsub_endpoint
-  ACCOUNT: cloud-registry-push-accessor@alertmanager-cloudmon-test.iam.gserviceaccount.com
+on: [push, pull_request]
 
 jobs:
   build:
@@ -21,30 +11,6 @@ jobs:
         python: [3.6, 3.7]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # Setup gcloud CLI
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-      with:
-        version: '290.0.1'
-        project_id: ${{ env.PROJECT_ID }}
-        export_default_credentials: true
-    
-    # Set gcloud project and account
-    # - name: GCloud auth
-    #   run: |-
-    #     gcloud config set project $PROJECT_ID
-    #     gcloud auth activate-service-account ACCOUNT --key-file=${{steps.secrets.outputs.key}}
-    #     gcloud config set account $ACCOUNT
-        
-    # Build and push image to Google Container Registry
-    # - name: Build image
-    #   run: |-
-    #     gcloud builds submit \
-    #       --quiet \
-    #       --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
-
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v2
