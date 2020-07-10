@@ -1,5 +1,5 @@
 variable "branch" {
-  default = "terraform-cloud-build-trigger"
+  default = "^terraform-cloud-build-trigger$"
 }
 
 variable "owner" {
