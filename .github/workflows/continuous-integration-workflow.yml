@@ -28,28 +28,22 @@ jobs:
     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '290.0.1'
-        project_id: "$PROJECT_ID"
-        # TODO: add key to github secrets
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ env.PROJECT_ID }}
         export_default_credentials: true
-    - uses: GoogleCloudPlatform/github-actions/get-secretmanager-secrets@master
-      with:
-        secrets: |-
-          key:$PROJECT_ID/cloud-registry-push-key
     
     # Set gcloud project and account
-    - name: GCloud auth
-      run: |-
-        gcloud config set project $PROJECT_ID
-        gcloud auth activate-service-account ACCOUNT --key-file=${{steps.secrets.outputs.key}}
-        gcloud config set account $ACCOUNT
+    # - name: GCloud auth
+    #   run: |-
+    #     gcloud config set project $PROJECT_ID
+    #     gcloud auth activate-service-account ACCOUNT --key-file=${{steps.secrets.outputs.key}}
+    #     gcloud config set account $ACCOUNT
         
     # Build and push image to Google Container Registry
-    - name: Build image
-      run: |-
-        gcloud builds submit \
-          --quiet \
-          --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
+    # - name: Build image
+    #   run: |-
+    #     gcloud builds submit \
+    #       --quiet \
+    #       --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
 
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python }}
