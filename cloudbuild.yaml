@@ -18,11 +18,6 @@ steps:
   # Uses the docker build step to build an image called cloud-run-pubsub-service
   name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME', '.']
-#- id: 'create Cloud Storage bucket'
-#  name: 'gcr.io/cloud-builders/gsutil'
-#  args: ['mb', 'gs://$PROJECT_ID-tfstate']
-#- name: 'gcr.io/cloud-builders/gsutil'
-#  args: ['versioning', 'set', 'on', 'gs://$PROJECT_ID-tfstate']
 
 - id: 'branch name'
   name: 'alpine'
@@ -33,6 +28,7 @@ steps:
       echo "***********************"
       echo "$BRANCH_NAME"
       echo "***********************"
+
 - id: 'tf init'
   name: 'hashicorp/terraform:0.12.28'
   entrypoint: 'sh'
@@ -56,6 +52,7 @@ steps:
           cd ../../
         done
       fi 
+
 # [START tf-refresh]
 - id: 'tf refresh'
   name: 'hashicorp/terraform:0.12.28'
