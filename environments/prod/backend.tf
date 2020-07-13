@@ -15,7 +15,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "alertmanager-2020-intern-a-tfstate"
+    bucket = "${var.tf_state_bucket}"
     prefix = "env/prod"
   }
 }
