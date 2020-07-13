@@ -13,6 +13,8 @@
 # limitations under the License.
 
 
+variable "project" {}
+
 variable "branch" {
   default = "^terraform-cloud-build-trigger$"
 }
