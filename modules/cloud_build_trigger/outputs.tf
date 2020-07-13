@@ -14,5 +14,5 @@
 
 
 output "id" {
-  value="${cloud_build_trigger.id}"
+  value="${google_cloudbuild_trigger.filename-trigger.id}"
 }
