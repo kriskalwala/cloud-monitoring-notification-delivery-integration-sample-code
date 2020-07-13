@@ -17,11 +17,11 @@ steps:
 - id: 'build docker image'
   # Uses the docker build step to build an image called cloud-run-pubsub-service
   name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/cloud-run-pubsub-service', '.']
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME', '.']
 
 # cloud-run-pubsub-service is pushed to Container Registry
 images:
-- 'gcr.io/$PROJECT_ID/cloud-run-pubsub-service'
+- 'gcr.io/$PROJECT_ID/$_IMAGE_NAME'
 
 steps:
 #- id: 'create Cloud Storage bucket'
@@ -45,11 +45,9 @@ steps:
   args: 
   - '-c'
   - |
-      sed -i s/PROJECT_ID/$PROJECT_ID/g environments/*/terraform.tfvars
-      sed -i s/PROJECT_ID/$PROJECT_ID/g environments/*/backend.tf
       if [ -d "environments/$BRANCH_NAME/" ]; then
         cd environments/$BRANCH_NAME
-        terraform init
+        terraform init -backend-config "bucket=$PROJECT_ID-tfstate"
       else
         for dir in environments/*/
         do 
@@ -60,7 +58,7 @@ steps:
           echo "*************** TERRAFORM INIT ******************"
           echo "******* At environment: ${env} ********"
           echo "*************************************************"
-          terraform init || exit 1
+          terraform init -backend-config "bucket=$PROJECT_ID-tfstate" || exit 1
           cd ../../
         done
       fi 
@@ -110,7 +108,7 @@ steps:
           echo "*************** TERRAFOM PLAN ******************"
           echo "******* At environment: ${env} ********"
           echo "*************************************************"
-          terraform plan || exit 1
+          terraform plan -var="project=$PROJECT_ID" || exit 1
           cd ../../
         done
       fi 
@@ -136,7 +134,7 @@ steps:
           echo "*************** TERRAFOM PLAN ******************"
           echo "******* At environment: ${env} ********"
           echo "*************************************************"
-          terraform apply -auto-approve
+          terraform apply -var="project=$PROJECT_ID" -auto-approve
         done
         echo "***************************** SKIPPING APPLYING *******************************"
         echo "Branch '$BRANCH_NAME' does not represent an official environment."
