@@ -14,3 +14,7 @@
 
 
 variable "project" {}
+
+variable "push_endpoint" {
+  default = "https://cloud-run-pubsub-service.a.run.app/"
+}
