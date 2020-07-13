@@ -14,5 +14,5 @@
 
 
 output "url" {
-  value = "${google_cloud_run_service.cloud_run_pubsub_service.url}"
+  value = "${google_cloud_run_service.cloud_run_pubsub_service.status[0].url}"
 }

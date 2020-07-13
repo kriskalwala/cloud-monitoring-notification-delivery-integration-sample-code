@@ -16,3 +16,7 @@
 output "topic" {
   value = "${module.pubsub.topic}"
 }
+
+output "url" {
+  value = "${module.cloud_run_with_pubsub.url}"
+}
