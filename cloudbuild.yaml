@@ -1,7 +1,139 @@
-# Uses the docker build step to build an image called my-image
-- name: 'gcr.io/cloud-builders/docker'
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+steps:
+- id: 'build docker image'
+  # Uses the docker build step to build an image called cloud-run-pubsub-service
+  name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/cloud-run-pubsub-service', '.']
 
-# my-image is pushed to Container Registry
+- id: 'branch name'
+  name: 'alpine'
+  entrypoint: 'sh'  
+  args: 
+  - '-c'
+  - | 
+      echo "***********************"
+      echo "$BRANCH_NAME"
+      echo "***********************"
+
+- id: 'tf init'
+  name: 'hashicorp/terraform:0.12.28'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - |
+      if [ -d "environments/$BRANCH_NAME/" ]; then
+        cd environments/$BRANCH_NAME
+        terraform init -backend-config "bucket=$PROJECT_ID-tfstate"
+      else
+        for dir in environments/*/
+        do 
+          cd ${dir}   
+          env=${dir%*/}
+          env=${env#*/}
+          echo ""
+          echo "*************** TERRAFORM INIT ******************"
+          echo "******* At environment: ${env} ********"
+          echo "*************************************************"
+          terraform init -backend-config "bucket=$PROJECT_ID-tfstate" || exit 1
+          cd ../../
+        done
+      fi 
+
+# [START tf-refresh]
+- id: 'tf refresh'
+  name: 'hashicorp/terraform:0.12.28'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - |
+      if [ -d "environments/$BRANCH_NAME/" ]; then
+        cd environments/$BRANCH_NAME
+        terraform refresh -var="project=$PROJECT_ID"
+      else
+        for dir in environments/*/
+        do 
+          cd ${dir}   
+          env=${dir%*/}
+          env=${env#*/}
+          echo ""
+          echo "*************** TERRAFORM REFRESH ******************"
+          echo "******* At environment: ${env} ********"
+          echo "*************************************************"
+          terraform refresh -var="project=$PROJECT_ID" || exit 1
+          cd ../../
+        done
+      fi 
+# [END tf-refresh]
+
+# [START tf-plan]
+- id: 'tf plan'
+  name: 'hashicorp/terraform:0.12.28'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - | 
+      if [ -d "environments/$BRANCH_NAME/" ]; then
+        cd environments/$BRANCH_NAME
+        terraform plan -var="project=$PROJECT_ID"
+      else
+        for dir in environments/*/
+        do 
+          cd ${dir}   
+          env=${dir%*/}
+          env=${env#*/}  
+          echo ""
+          echo "*************** TERRAFOM PLAN ******************"
+          echo "******* At environment: ${env} ********"
+          echo "*************************************************"
+          terraform plan -var="project=$PROJECT_ID" || exit 1
+          cd ../../
+        done
+      fi 
+# [END tf-plan]
+
+# [START tf-apply]
+- id: 'tf apply'
+  name: 'hashicorp/terraform:0.12.28'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - | 
+      if [ -d "environments/$BRANCH_NAME/" ]; then
+        cd environments/$BRANCH_NAME      
+        terraform apply -auto-approve -var="project=$PROJECT_ID"
+      else
+        for dir in environments/*/
+        do 
+          cd ${dir}   
+          env=${dir%*/}
+          env=${env#*/}  
+          echo ""
+          echo "*************** TERRAFOM APPLY ******************"
+          echo "******* At environment: ${env} ********"
+          echo "*************************************************"
+          terraform apply -var="project=$PROJECT_ID" -auto-approve
+          cd ../..
+        done
+        #echo "***************************** SKIPPING APPLYING *******************************"
+        #echo "Branch '$BRANCH_NAME' does not represent an official environment."
+        #echo "*******************************************************************************"
+      fi
+# [END tf-apply]
+
+# cloud-run-pubsub-service is pushed to Container Registry
 images:
 - 'gcr.io/$PROJECT_ID/cloud-run-pubsub-service'
