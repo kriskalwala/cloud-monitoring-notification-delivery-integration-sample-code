@@ -31,4 +31,5 @@ module "pubsub" {
 
 module "cloud_build_trigger" {
   source  = "../../modules/cloud_build_trigger"
+  project = "${var.project}"
 }
