@@ -66,7 +66,7 @@ def handle_pubsub_message():
                                                                app.config['JIRA_PASSWORD']))
         jira_integration.update_jira_based_on_monitoring_notification(
             jira_client, app.config['JIRA_PROJECT'], monitoring_notification_dict)
-    except Exception as e:
+    except (jira_integration.Error, jira.JIRAError) as e:
         logger.error(e)
         return (str(e), 400)
 
