@@ -14,5 +14,5 @@
 
 
 output "id" {
-  value="${module.cloud_build_trigger.id}"
+  value="${cloud_build_trigger.id}"
 }
