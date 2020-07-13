@@ -13,4 +13,6 @@
 # limitations under the License.
 
 
-variable "project" {}
+output "url" {
+  value = "${google_cloud_run_service.cloud_run_pubsub_service.url}"
+}
