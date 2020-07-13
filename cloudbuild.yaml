@@ -65,7 +65,7 @@ steps:
   - |
       if [ -d "environments/$BRANCH_NAME/" ]; then
         cd environments/$BRANCH_NAME
-        terraform refresh
+        terraform refresh -var="project=$PROJECT_ID"
       else
         for dir in environments/*/
         do 
@@ -76,7 +76,7 @@ steps:
           echo "*************** TERRAFORM REFRESH ******************"
           echo "******* At environment: ${env} ********"
           echo "*************************************************"
-          terraform refresh || exit 1
+          terraform refresh -var="project=$PROJECT_ID" || exit 1
           cd ../../
         done
       fi 
