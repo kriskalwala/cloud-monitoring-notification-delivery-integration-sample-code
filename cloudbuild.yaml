@@ -23,11 +23,11 @@ images:
 - 'gcr.io/$PROJECT_ID/cloud-run-pubsub-service'
 
 steps:
-- id: 'create Cloud Storage bucket'
-  name: 'gcr.io/cloud-builders/gsutil'
-  args: ['mb', 'gs://$PROJECT_ID-tfstate']
-- name: 'gcr.io/cloud-builders/gsutil'
-  args: ['versioning', 'set', 'on', 'gs://$PROJECT_ID-tfstate']
+#- id: 'create Cloud Storage bucket'
+#  name: 'gcr.io/cloud-builders/gsutil'
+#  args: ['mb', 'gs://$PROJECT_ID-tfstate']
+#- name: 'gcr.io/cloud-builders/gsutil'
+#  args: ['versioning', 'set', 'on', 'gs://$PROJECT_ID-tfstate']
 
 - id: 'branch name'
   name: 'alpine'
