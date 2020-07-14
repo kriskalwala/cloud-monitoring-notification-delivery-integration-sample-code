@@ -22,13 +22,13 @@ import re
 
 import pytest
 
-from notification_delivery import main
-from external_integrations import philips_hue, philips_hue_mock
+import main
+from utilities import philips_hue, philips_hue_mock
 
 
 @pytest.fixture
 def config():
-    main.app.config.from_object('notification_delivery.config.TestConfig')
+    main.app.config.from_object('config.TestConfig')
     return main.app.config
 
 
