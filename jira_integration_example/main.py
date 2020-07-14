@@ -25,7 +25,7 @@ import os
 import json
 
 from flask import Flask, request
-from jira import JIRA
+from jira import JIRAError
 
 import config
 from utilities import pubsub, jira_integration
@@ -62,11 +62,12 @@ def handle_pubsub_message():
         return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
     try:
-        jira_client = JIRA(app.config['JIRA_URL'], basic_auth=(app.config['JIRA_USERNAME'],
-                                                               app.config['JIRA_PASSWORD']))
-        jira_integration.update_jira_based_on_monitoring_notification(
-            jira_client, app.config['JIRA_PROJECT'], monitoring_notification_dict)
-    except (jira_integration.Error, jira.JIRAError) as e:
+        jira_integration.update_jira_based_on_monitoring_notification(app.config['JIRA_URL'],
+                                                                      app.config['JIRA_PROJECT'],
+                                                                      app.config['JIRA_USERNAME'],
+                                                                      app.config['JIRA_PASSWORD'],
+                                                                      monitoring_notification_dict)
+    except (jira_integration.Error, JIRAError) as e:
         logger.error(e)
         return (str(e), 400)
 
