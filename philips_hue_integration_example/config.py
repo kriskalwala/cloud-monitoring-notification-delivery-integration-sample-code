@@ -16,7 +16,7 @@
 
 import os
 from dotenv import load_dotenv
-from notification_delivery import secrets
+from utilities import secrets
 
 load_dotenv()
 
