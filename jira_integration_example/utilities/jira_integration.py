@@ -37,23 +37,20 @@ class UnknownIncidentStateError(Error):
     """Exception raised for errors in an invalid incident state value."""
 
 
-def update_jira_based_on_monitoring_notification(jira_url, jira_project,
-                                                 jira_username, jira_password,
+def update_jira_based_on_monitoring_notification(jira_client, jira_project,
                                                  notification):
     """Updates a Jira server based off the data in a monitoring notification.
 
     If the monitoring notification is about an open incident, a new issue (of
-    type bug) is created on the specified Jira server under the specified
-    jira project.
+    type bug) is created on the jira server that the jira client is connected
+    to under the specified jira project.
 
     Args:
-        jira_url: The URL to the Jira server in which to create the issue.
+        jira_client: A JIRA object that acts as a client which allows
+            interaction with a specific Jira server. It is used to create
+            the new Jira issue.
         jira_project: The key or id of the Jira project under which to create
             the Jira issue.
-        jira_username: Username of the account to use to access the Jira server
-            and create the Jira issue.
-        jira_password: Password of the account to use to access the Jira server
-            and create the Jira issue.
         notification: The dictionary containing the notification data.
 
     Raises:
@@ -73,8 +70,6 @@ def update_jira_based_on_monitoring_notification(jira_url, jira_project,
         raise NotificationParseError("Notification is missing required dict key")
 
     if incident_state == 'open':
-        jira_client = JIRA(jira_url, basic_auth=(jira_username, jira_password))
-        
         summary = '%s - %s' % (incident_condition_name, incident_resource_name)
         description = '%s\nSee: %s' % (incident_summary, incident_url)
         issue = jira_client.create_issue(
@@ -85,4 +80,4 @@ def update_jira_based_on_monitoring_notification(jira_url, jira_project,
         logger.info('Created jira issue %s', issue)
     elif incident_state != 'closed':
         raise UnknownIncidentStateError(
-            f'Condition state must be "open" or "closed"')
+            f'Incident state must be "open" or "closed"')

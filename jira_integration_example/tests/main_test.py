@@ -15,7 +15,6 @@
 # Source code from https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/main_test.py
 
 import base64
-import re
 
 import pytest
 from pytest_mock import mocker
@@ -90,41 +89,44 @@ def test_invalid_notification_message(flask_client):
     assert b'Notification could not be decoded' in response.data
 
 
-def test_invalid_incident_message(flask_client):
-    message = '{"invalid": "error"}'
+def test_incident_alert_message_with_missing_data(flask_client, mocker):
+    message = '{"incident": {}}'
     data = base64.b64encode(message.encode()).decode()
 
+    mocker.patch('main.JIRA', autospec=True)
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 400
     assert b'Notification is missing required dict key' in response.data
 
-def test_incident_alert_message_with_invalid_state(flask_client):
+
+def test_incident_alert_message_with_invalid_state(flask_client, mocker):
     message = ('{"incident": {"state": "unknown_state", "condition_name": "test_condition",'
                '"resource_name": "test_resource", "summary": "test_summary",'
                '"url": "http://test-cloud.com"}}')
     data = base64.b64encode(message.encode()).decode()
 
+    mocker.patch('main.JIRA', autospec=True)
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 400
-    assert b'Condition state must be "open" or "closed"' in response.data
+    assert b'Incident state must be "open" or "closed"' in response.data
 
-def test_open_incident_alert_message(flask_client, config, mocker):
+
+def test_incident_alert_message(flask_client, config, mocker):
     message = ('{"incident": {"state": "open", "condition_name": "test_condition",'
                '"resource_name": "test_resource", "summary": "test_summary",'
                '"url": "http://test-cloud.com"}}')
     data = base64.b64encode(message.encode()).decode()
-    
+
     mocker.patch('main.jira_integration.update_jira_based_on_monitoring_notification',
                  autospec=True)
+    mocker.patch('main.JIRA', autospec=True)
+    jira_client = main.JIRA.return_value # JIRA client to be used when handling pub/sub message
 
     response = flask_client.post('/', json={'message': {'data': data}})
 
     main.jira_integration.update_jira_based_on_monitoring_notification.assert_called_once_with(
-        config['JIRA_URL'], config['JIRA_PROJECT'], config['JIRA_USERNAME'],
-        config['JIRA_PASSWORD'], json.loads(message))
+        jira_client, config['JIRA_PROJECT'], json.loads(message))
 
     assert response.status_code == 200
-
-
