@@ -54,7 +54,7 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
     Raises:
         UnknownIncidentStateError: If the incident state is not open or closed.
         NotificationParseError: If notification is missing required dict key.
-        JIRAError: If error occurs when initializing or using the jira client
+        JIRAError: If error occurs when using the jira client
     """
 
     try:

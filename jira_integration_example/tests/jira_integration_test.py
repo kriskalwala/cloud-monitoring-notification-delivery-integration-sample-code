@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for functions in philips_hue.py."""
+"""Unit tests for functions in jira_integration.py."""
 
 import pytest
 
@@ -24,7 +24,8 @@ def test_update_jira_with_open_incident(mocker):
     jira_client = mocker.create_autospec(JIRA, instance=True)
 
     jira_project = 'test_project'
-    notification = {'incident': {'state': 'open', 'condition_name': 'test_condition',
+    incident_state = 'open'
+    notification = {'incident': {'state': incident_state, 'condition_name': 'test_condition',
                                  'resource_name': 'test_resource', 'summary': 'test_summary',
                                  'url': 'http://test.com'}}
 
@@ -47,7 +48,8 @@ def test_update_jira_with_closed_incident(mocker):
     jira_client = mocker.create_autospec(JIRA, instance=True)
 
     jira_project = 'test_project'
-    notification = {'incident': {'state': 'closed', 'condition_name': 'test_condition',
+    incident_state = 'closed'
+    notification = {'incident': {'state': incident_state, 'condition_name': 'test_condition',
                                  'resource_name': 'test_resource', 'summary': 'test_summary',
                                  'url': 'http://test.com'}}
 
