@@ -7,4 +7,3 @@ google-cloud-secret-manager==1.0.0
 python-dotenv==0.13.0
 requests==2.23.0
 requests-mock==1.8.0
-google-cloud-monitoring==1.0.0
