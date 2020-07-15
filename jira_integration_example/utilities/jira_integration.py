@@ -19,9 +19,7 @@ monitoring notification occurs. In addition, it defines error
 classes to be used by the function.
 """
 
-from jira import JIRA
 import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -80,4 +78,4 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
         logger.info('Created jira issue %s', issue)
     elif incident_state != 'closed':
         raise UnknownIncidentStateError(
-            f'Incident state must be "open" or "closed"')
+            'Incident state must be "open" or "closed"')

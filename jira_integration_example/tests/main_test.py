@@ -15,10 +15,9 @@
 # Source code from https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/run/pubsub/main_test.py
 
 import base64
+import json
 
 import pytest
-from pytest_mock import mocker
-import json
 
 import main
 

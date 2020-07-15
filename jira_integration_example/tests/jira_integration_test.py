@@ -15,10 +15,9 @@
 """Unit tests for functions in philips_hue.py."""
 
 import pytest
-from pytest_mock import mocker
 
-from utilities import jira_integration
 from jira import JIRA
+from utilities import jira_integration
 
 
 def test_update_jira_with_open_incident(mocker):
@@ -63,14 +62,14 @@ def test_update_jira_with_invalid_incident_state(mocker):
     jira_project = 'test_project'
     incident_state = 'unknown_state'
     notification = {'incident': {'state': incident_state, 'condition_name': 'test_condition',
-                                     'resource_name': 'test_resource', 'summary': 'test_summary',
-                                     'url': 'http://test.com'}}
+                                 'resource_name': 'test_resource', 'summary': 'test_summary',
+                                 'url': 'http://test.com'}}
 
     with pytest.raises(jira_integration.UnknownIncidentStateError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, notification)
 
-    expected_error_value = f'Incident state must be "open" or "closed"'
+    expected_error_value = 'Incident state must be "open" or "closed"'
     assert str(e.value) == expected_error_value
 
 
@@ -85,4 +84,3 @@ def test_update_jira_with_missing_notification_data(mocker):
 
     expected_error_value = 'Notification is missing required dict key'
     assert str(e.value) == expected_error_value
-
