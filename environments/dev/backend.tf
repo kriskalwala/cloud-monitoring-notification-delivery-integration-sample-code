@@ -15,7 +15,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "alertmanager-cloudmon-test-tfstate"
+    bucket = "${var.tf_state_bucket}"
     prefix = "env/dev"
   }
 }

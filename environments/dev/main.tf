@@ -25,6 +25,6 @@ module "pubsub" {
   source  = "terraform-google-modules/pubsub/google"
   version = "~> 1.3"
   
-  topic              = "tf-topic-changed"
+  topic              = "tf-topic-normal"
   project_id         = "${var.project}"
 }
