@@ -28,3 +28,13 @@ module "pubsub" {
   topic              = "tf-topic"
   project_id         = "${var.project}"
 }
+
+resource "google_project_iam_binding" "project" {
+  project = var.project
+  role    = "roles/iam.serviceAccountTokenCreator"
+  
+  members = [
+    "service-${var.project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  ]
+}
+    
