@@ -28,7 +28,6 @@ class Config:
     TESTING = False
     DEBUG = False
     LIGHT_ID = '1'
-    PROJECT_ID = os.environ.get('PROJECT_ID')
 
     # Mappings between Google Cloud alerting policy names
     # and HSB color system hue values between 0 and 65535.
@@ -62,13 +61,14 @@ class ProdConfig(Config):
     def __init__(self):
         self._philips_hue_ip = None
         self._philips_hue_username = None
+        self._project_id = os.environ.get('PROJECT_ID')
 
 
     @property
     def BRIDGE_IP_ADDRESS(self):
         if self._philips_hue_ip is None:
             secret = secrets.GoogleSecretManagerSecret(
-                PROJECT_ID, 'philips_ip')
+                self._project_id, 'philips_ip')
             self._philips_hue_ip = secret.get_secret_value()
 
         return self._philips_hue_ip
@@ -78,7 +78,7 @@ class ProdConfig(Config):
     def USERNAME(self):
         if self._philips_hue_username is None:
             secret = secrets.GoogleSecretManagerSecret(
-                PROJECT_ID, 'philips_username')
+                self._project_id, 'philips_username')
             self._philips_hue_username = secret.get_secret_value()
 
         return self._philips_hue_username
