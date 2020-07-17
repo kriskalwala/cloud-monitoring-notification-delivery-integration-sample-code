@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This is the Cloud Build build configuration file. It builds and submits the
+# Docker image to Container Registry, and also applies Terraform configurations
+# for the project based on the current GitHub branch.
+# 
+# The build can be triggered manually by running the following:
+# cd ~/cloud-monitoring-notification-delivery-integration-sample-code (or wherever the cloudbuild.yaml file is located)
+# gcloud builds submit --config cloudbuild.yaml .
 
 steps:
 - id: 'build docker image'
