@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Flask config."""
+"""Flask config for Jira integration."""
 
 import os
 from dotenv import load_dotenv
@@ -20,8 +20,8 @@ from utilities import secrets
 
 load_dotenv()
 
-class Config:
-    """Base config."""
+class JiraConfig:
+    """Base Jira config."""
 
     FLASK_ENV = 'production'
     LOGGING_LEVEL = 'INFO'
@@ -30,8 +30,8 @@ class Config:
 
 
 
-class ProdConfig(Config):
-    """Production config."""
+class ProdJiraConfig(JiraConfig):
+    """Production Jira config."""
 
     def __init__(self):
         self._jira_url = None
@@ -81,8 +81,8 @@ class ProdConfig(Config):
 
 
 
-class DevConfig(Config):
-    """Development config."""
+class DevJiraConfig(JiraConfig):
+    """Development Jira config."""
 
     FLASK_ENV = 'development'
     LOGGING_LEVEL = 'DEBUG'
@@ -134,8 +134,8 @@ class DevConfig(Config):
 
 
 
-class TestConfig(Config):
-    """Test config."""
+class TestJiraConfig(JiraConfig):
+    """Test Jira config."""
 
     FLASK_ENV = 'test'
     LOGGING_LEVEL = 'DEBUG'
@@ -150,10 +150,10 @@ class TestConfig(Config):
 
 
 _ENVIRONMENT_TO_CONFIG_MAPPING = {
-    'prod': ProdConfig,
-    'dev': DevConfig,
-    'test': TestConfig,
-    'default': ProdConfig
+    'prod': ProdJiraConfig,
+    'dev': DevJiraConfig,
+    'test': TestJiraConfig,
+    'default': ProdJiraConfig
 }
 
 

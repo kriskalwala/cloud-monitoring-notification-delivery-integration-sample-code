@@ -24,7 +24,7 @@ import main
 
 @pytest.fixture
 def config():
-    main.app.config.from_object('config.TestConfig')
+    main.app.config.from_object('config.TestJiraConfig')
     return main.app.config
 
 
