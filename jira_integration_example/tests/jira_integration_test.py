@@ -75,14 +75,94 @@ def test_update_jira_with_invalid_incident_state(mocker):
     assert str(e.value) == expected_error_value
 
 
-def test_update_jira_with_missing_notification_data(mocker):
+def test_update_jira_with_missing_incident_data(mocker):
     jira_client = mocker.create_autospec(JIRA, instance=True)
     jira_project = 'test_project'
-    notification = {'incident': {}}
+    notification = {}
 
     with pytest.raises(jira_integration.NotificationParseError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, notification)
 
-    expected_error_value = 'Notification is missing required dict key'
+    expected_error_value = "Notification is missing required dict key: 'incident'"
+    assert str(e.value) == expected_error_value
+
+
+def test_update_jira_with_missing_state_data(mocker):
+    jira_client = mocker.create_autospec(JIRA, instance=True)
+    jira_project = 'test_project'
+    notification = {'incident': {'condition_name': 'test_condition',
+                                 'resource_name': 'test_resource',
+                                 'summary': 'test_summary',
+                                 'url': 'http://test.com'}}
+
+    with pytest.raises(jira_integration.NotificationParseError) as e:
+        assert jira_integration.update_jira_based_on_monitoring_notification(
+            jira_client, jira_project, notification)
+
+    expected_error_value = "Notification is missing required dict key: 'state'"
+    assert str(e.value) == expected_error_value
+
+
+def test_update_jira_with_missing_condition_name_data(mocker):
+    jira_client = mocker.create_autospec(JIRA, instance=True)
+    jira_project = 'test_project'
+    notification = {'incident': {'state': 'open',
+                                 'resource_name': 'test_resource',
+                                 'summary': 'test_summary',
+                                 'url': 'http://test.com'}}
+
+    with pytest.raises(jira_integration.NotificationParseError) as e:
+        assert jira_integration.update_jira_based_on_monitoring_notification(
+            jira_client, jira_project, notification)
+
+    expected_error_value = "Notification is missing required dict key: 'condition_name'"
+    assert str(e.value) == expected_error_value
+
+
+def test_update_jira_with_missing_resource_name_data(mocker):
+    jira_client = mocker.create_autospec(JIRA, instance=True)
+    jira_project = 'test_project'
+    notification = {'incident': {'state': 'open',
+                                 'condition_name': 'test_condition',
+                                 'summary': 'test_summary',
+                                 'url': 'http://test.com'}}
+
+    with pytest.raises(jira_integration.NotificationParseError) as e:
+        assert jira_integration.update_jira_based_on_monitoring_notification(
+            jira_client, jira_project, notification)
+
+    expected_error_value = "Notification is missing required dict key: 'resource_name'"
+    assert str(e.value) == expected_error_value
+
+
+def test_update_jira_with_missing_summary_data(mocker):
+    jira_client = mocker.create_autospec(JIRA, instance=True)
+    jira_project = 'test_project'
+    notification = {'incident': {'state': 'open',
+                                 'condition_name': 'test_condition',
+                                 'resource_name': 'test_resource',
+                                 'url': 'http://test.com'}}
+
+    with pytest.raises(jira_integration.NotificationParseError) as e:
+        assert jira_integration.update_jira_based_on_monitoring_notification(
+            jira_client, jira_project, notification)
+
+    expected_error_value = "Notification is missing required dict key: 'summary'"
+    assert str(e.value) == expected_error_value
+
+
+def test_update_jira_with_missing_url_data(mocker):
+    jira_client = mocker.create_autospec(JIRA, instance=True)
+    jira_project = 'test_project'
+    notification = {'incident': {'state': 'open',
+                                 'condition_name': 'test_condition',
+                                 'resource_name': 'test_resource',
+                                 'summary': 'test_summary'}}
+
+    with pytest.raises(jira_integration.NotificationParseError) as e:
+        assert jira_integration.update_jira_based_on_monitoring_notification(
+            jira_client, jira_project, notification)
+
+    expected_error_value = "Notification is missing required dict key: 'url'"
     assert str(e.value) == expected_error_value

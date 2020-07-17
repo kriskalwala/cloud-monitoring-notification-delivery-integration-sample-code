@@ -64,8 +64,8 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
         incident_resource_name = incident_data['resource_name']
         incident_summary = incident_data['summary']
         incident_url = incident_data['url']
-    except KeyError:
-        raise NotificationParseError("Notification is missing required dict key")
+    except KeyError as e:
+        raise NotificationParseError(f"Notification is missing required dict key: {str(e)}")
 
     if incident_state == 'open':
         summary = '%s - %s' % (incident_condition_name, incident_resource_name)

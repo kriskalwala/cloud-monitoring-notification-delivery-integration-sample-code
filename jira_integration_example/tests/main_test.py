@@ -96,7 +96,6 @@ def test_incident_alert_message_with_missing_data(flask_client, mocker):
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 400
-    assert b'Notification is missing required dict key' in response.data
 
 
 def test_incident_alert_message_with_invalid_state(flask_client, mocker):
@@ -109,7 +108,6 @@ def test_incident_alert_message_with_invalid_state(flask_client, mocker):
     response = flask_client.post('/', json={'message': {'data': data}})
 
     assert response.status_code == 400
-    assert b'Incident state must be "open" or "closed"' in response.data
 
 
 def test_incident_alert_message(flask_client, config, mocker):
