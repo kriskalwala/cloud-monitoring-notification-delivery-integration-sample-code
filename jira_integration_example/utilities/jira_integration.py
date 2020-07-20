@@ -59,6 +59,7 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
 
     try:
         incident_data = notification['incident']
+        incident_id = incident_data['incident_id']
         incident_state = incident_data['state']
         incident_condition_name = incident_data['condition_name']
         incident_resource_name = incident_data['resource_name']
@@ -67,6 +68,8 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
     except KeyError as e:
         raise NotificationParseError(f"Notification is missing required dict key: {str(e)}")
 
+    incident_id_label = f'monitoring_incident_id_{incident_id}'
+
     if incident_state == 'open':
         summary = '%s - %s' % (incident_condition_name, incident_resource_name)
         description = '%s\nSee: %s' % (incident_summary, incident_url)
@@ -74,8 +77,14 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
             project=jira_project,
             summary=summary,
             description=description,
-            issuetype={'name': 'Bug'})
+            issuetype={'name': 'Bug'},
+            labels=[incident_id_label])
         logger.info('Created jira issue %s', issue)
-    elif incident_state != 'closed':
+    elif incident_state == 'closed':
+        incident_issues = jira_client.search_issues(f'labels = {incident_id_label} AND status != Done')
+        for issue in incident_issues:
+            jira_client.transition_issue(issue, "done")
+            logger.info('Closed jira issue %s', issue)
+    else:
         raise UnknownIncidentStateError(
             'Incident state must be "open" or "closed"')

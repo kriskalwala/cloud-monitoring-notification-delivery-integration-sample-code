@@ -27,7 +27,7 @@ def test_update_jira_with_open_incident(mocker):
     incident_state = 'open'
     notification = {'incident': {'state': incident_state, 'condition_name': 'test_condition',
                                  'resource_name': 'test_resource', 'summary': 'test_summary',
-                                 'url': 'http://test.com'}}
+                                 'url': 'http://test.com', 'incident_id': '0.abcdef123456'}}
 
     expected_summary = '%s - %s' % (notification['incident']['condition_name'],
                                     notification['incident']['resource_name'])
@@ -51,7 +51,7 @@ def test_update_jira_with_closed_incident(mocker):
     incident_state = 'closed'
     notification = {'incident': {'state': incident_state, 'condition_name': 'test_condition',
                                  'resource_name': 'test_resource', 'summary': 'test_summary',
-                                 'url': 'http://test.com'}}
+                                 'url': 'http://test.com', 'incident_id': '0.abcdef123456'}}
 
     jira_integration.update_jira_based_on_monitoring_notification(jira_client, jira_project,
                                                                   notification)
@@ -65,7 +65,7 @@ def test_update_jira_with_invalid_incident_state(mocker):
     incident_state = 'unknown_state'
     notification = {'incident': {'state': incident_state, 'condition_name': 'test_condition',
                                  'resource_name': 'test_resource', 'summary': 'test_summary',
-                                 'url': 'http://test.com'}}
+                                 'url': 'http://test.com', 'incident_id': '0.abcdef123456'}}
 
     with pytest.raises(jira_integration.UnknownIncidentStateError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
@@ -94,7 +94,8 @@ def test_update_jira_with_missing_state_data(mocker):
     notification = {'incident': {'condition_name': 'test_condition',
                                  'resource_name': 'test_resource',
                                  'summary': 'test_summary',
-                                 'url': 'http://test.com'}}
+                                 'url': 'http://test.com',
+                                 'incident_id': '0.abcdef123456'}}
 
     with pytest.raises(jira_integration.NotificationParseError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
@@ -110,7 +111,8 @@ def test_update_jira_with_missing_condition_name_data(mocker):
     notification = {'incident': {'state': 'open',
                                  'resource_name': 'test_resource',
                                  'summary': 'test_summary',
-                                 'url': 'http://test.com'}}
+                                 'url': 'http://test.com',
+                                 'incident_id': '0.abcdef123456'}}
 
     with pytest.raises(jira_integration.NotificationParseError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
@@ -126,7 +128,8 @@ def test_update_jira_with_missing_resource_name_data(mocker):
     notification = {'incident': {'state': 'open',
                                  'condition_name': 'test_condition',
                                  'summary': 'test_summary',
-                                 'url': 'http://test.com'}}
+                                 'url': 'http://test.com',
+                                 'incident_id': '0.abcdef123456'}}
 
     with pytest.raises(jira_integration.NotificationParseError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
@@ -142,7 +145,8 @@ def test_update_jira_with_missing_summary_data(mocker):
     notification = {'incident': {'state': 'open',
                                  'condition_name': 'test_condition',
                                  'resource_name': 'test_resource',
-                                 'url': 'http://test.com'}}
+                                 'url': 'http://test.com',
+                                 'incident_id': '0.abcdef123456'}}
 
     with pytest.raises(jira_integration.NotificationParseError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
@@ -158,11 +162,29 @@ def test_update_jira_with_missing_url_data(mocker):
     notification = {'incident': {'state': 'open',
                                  'condition_name': 'test_condition',
                                  'resource_name': 'test_resource',
-                                 'summary': 'test_summary'}}
+                                 'summary': 'test_summary',
+                                 'incident_id': '0.abcdef123456'}}
 
     with pytest.raises(jira_integration.NotificationParseError) as e:
         assert jira_integration.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, notification)
 
     expected_error_value = "Notification is missing required dict key: 'url'"
+    assert str(e.value) == expected_error_value
+
+
+def test_update_jira_with_missing_incident_id_data(mocker):
+    jira_client = mocker.create_autospec(JIRA, instance=True)
+    jira_project = 'test_project'
+    notification = {'incident': {'state': 'open',
+                                 'condition_name': 'test_condition',
+                                 'resource_name': 'test_resource',
+                                 'summary': 'test_summary',
+                                 'url': 'http://test.com'}}
+
+    with pytest.raises(jira_integration.NotificationParseError) as e:
+        assert jira_integration.update_jira_based_on_monitoring_notification(
+            jira_client, jira_project, notification)
+
+    expected_error_value = "Notification is missing required dict key: 'incident_id'"
     assert str(e.value) == expected_error_value
