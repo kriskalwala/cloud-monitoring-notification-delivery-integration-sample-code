@@ -19,12 +19,14 @@
 #
 # For dev and prod branches, the following steps are executed:
 # 1. terraform init
-# 2. terraform plan
-# 3. terraform apply
+# 2. terraform refresh
+# 3. terraform plan
+# 4. terraform apply
 #
 # For any other branch, the following steps are executed:
 # 1. terraform init for all environments subfolders
-# 2. terraform plan for all environment subfolders
+# 2. terraform refresh for all environments subfolders
+# 3. terraform plan for all environment subfolders
 #
 # This is to ensure that changes being proposed hold for every single environment.
 # 
@@ -51,6 +53,7 @@ steps:
   # Uses the docker build step to build an image
   name: 'gcr.io/cloud-builders/docker'
   args: ['build', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './philips_hue_integration_example']
+  timeout: 300s
 
 - id: 'print branch name'
   name: 'bash'
@@ -58,7 +61,8 @@ steps:
   - '-c'
   - | 
       echo "***********************"
-      echo "$BRANCH_NAME"
+      echo "currently on branch $BRANCH_NAME"
+      echo "on project $PROJECT_ID$"
       echo "***********************"
 
 - id: 'tf init'
@@ -67,9 +71,15 @@ steps:
   args: 
   - '-c'
   - |
-      if [ -d "environments/$BRANCH_NAME/" ]; then
+      # terraform initialization for dev or prod environments
+      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
         cd environments/$BRANCH_NAME
+        echo ""
+        echo "*************** TERRAFORM INIT ******************"
+        echo "******* At environment: $BRANCH_NAME ********"
+        echo "*************************************************"
         terraform init -backend-config "bucket=$PROJECT_ID-tfstate"
+      # terraform initialization for all environments
       else
         for dir in environments/*/
         do 
@@ -84,6 +94,7 @@ steps:
           cd ../../
         done
       fi 
+  timeout: 300s
 
 - id: 'tf refresh'
   name: 'hashicorp/terraform:0.12.28'
@@ -91,9 +102,15 @@ steps:
   args: 
   - '-c'
   - |
-      if [ -d "environments/$BRANCH_NAME/" ]; then
+      # refresh terraform state for dev or prod environments
+      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
         cd environments/$BRANCH_NAME
+        echo ""
+        echo "*************** TERRAFORM REFRESH ******************"
+        echo "******* At environment: $BRANCH_NAME ********"
+        echo "*************************************************"
         terraform refresh -var="project=$PROJECT_ID"
+      # refresh terraform state for all environments
       else
         for dir in environments/*/
         do 
@@ -108,6 +125,7 @@ steps:
           cd ../../
         done
       fi 
+  timeout: 300s
 
 - id: 'tf plan'
   name: 'hashicorp/terraform:0.12.28'
@@ -115,9 +133,15 @@ steps:
   args: 
   - '-c'
   - | 
-      if [ -d "environments/$BRANCH_NAME/" ]; then
+      # plan terraform changes for dev or prod environments
+      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
         cd environments/$BRANCH_NAME
+        echo ""
+        echo "*************** TERRAFORM PLAN ******************"
+        echo "******* At environment: $BRANCH_NAME ********"
+        echo "*************************************************"
         terraform plan -var="project=$PROJECT_ID"
+      # plan terraform changes for all environments
       else
         for dir in environments/*/
         do 
@@ -132,6 +156,7 @@ steps:
           cd ../../
         done
       fi 
+  timeout: 300s
 
 - id: 'tf apply'
   name: 'hashicorp/terraform:0.12.28'
@@ -139,14 +164,20 @@ steps:
   args: 
   - '-c'
   - | 
-      if [ -d "environments/$BRANCH_NAME/" ]; then
+      # apply terraform changes for dev or prod environments only
+      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
         cd environments/$BRANCH_NAME      
+        echo ""
+        echo "*************** TERRAFORM APPLY ******************"
+        echo "******* At environment: $BRANCH_NAME ********"
+        echo "*************************************************"
         terraform apply -auto-approve -var="project=$PROJECT_ID"
       else
         echo "***************************** SKIPPING APPLYING *******************************"
         echo "Branch '$BRANCH_NAME' does not represent an official environment."
         echo "*******************************************************************************"
       fi
+   timeout: 300s
 
 # set substitution variables
 substitutions:
