@@ -72,7 +72,7 @@ steps:
   - '-c'
   - |
       # terraform initialization for dev or prod environments
-      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
+      if [ "$BRANCH_NAME" = "dev" ] || [ "$BRANCH_NAME" = "prod" ]; then
         cd environments/$BRANCH_NAME
         echo ""
         echo "*************** TERRAFORM INIT ******************"
@@ -103,7 +103,7 @@ steps:
   - '-c'
   - |
       # refresh terraform state for dev or prod environments
-      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
+      if [ "$BRANCH_NAME" = "dev" ] || [ "$BRANCH_NAME" = "prod" ]; then
         cd environments/$BRANCH_NAME
         echo ""
         echo "*************** TERRAFORM REFRESH ******************"
@@ -134,7 +134,7 @@ steps:
   - '-c'
   - | 
       # plan terraform changes for dev or prod environments
-      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
+      if [ "$BRANCH_NAME" = "dev" ] || [ "$BRANCH_NAME" = "prod" ]; then
         cd environments/$BRANCH_NAME
         echo ""
         echo "*************** TERRAFORM PLAN ******************"
@@ -165,7 +165,7 @@ steps:
   - '-c'
   - | 
       # apply terraform changes for dev or prod environments only
-      if [ $BRANCH_NAME = "dev" ] || [ $BRANCH_NAME = "prod" ]; then
+      if [ "$BRANCH_NAME" = "dev" ] || [ "$BRANCH_NAME" = "prod" ]; then
         cd environments/$BRANCH_NAME      
         echo ""
         echo "*************** TERRAFORM APPLY ******************"
