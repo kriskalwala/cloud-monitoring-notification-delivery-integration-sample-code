@@ -12,13 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 # This is the Cloud Build build configuration file. It builds and submits the
 # Docker image to Container Registry, and also applies Terraform configurations
-# for the project based on the current GitHub branch.
+# for the gcloud project based on the current GitHub branch.
+#
+# For dev and prod branches, the following steps are executed:
+# 1. terraform init
+# 2. terraform plan
+# 3. terraform apply
+#
+# For any other branch, the following steps are executed:
+# 1. terraform init for all environments subfolders
+# 2. terraform plan for all environment subfolders
+#
+# This is to ensure that changes being proposed hold for every single environment.
 # 
-# The build can be triggered manually by running the following:
-# cd ~/cloud-monitoring-notification-delivery-integration-sample-code (or wherever the cloudbuild.yaml file is located)
-# gcloud builds submit --config cloudbuild.yaml .
+# To test a build on dev manually:
+# 1. Make sure you are using the correct glcoud project for your dev environment:
+#    gcloud config set project PROJECT_ID
+# 2. Make sure you are on the dev branch:
+#    git checkout dev
+# 3. Build and deploy the project
+#    cd ~/cloud-monitoring-notification-delivery-integration-sample-code
+#    gcloud builds submit --config cloudbuild.yaml .
+#
+# To test a build on prod manually:
+# 1. Make sure you are using the correct glcoud project for your prod environment:
+#    gcloud config set project PROJECT_ID
+# 2. Make sure you are on the prod branch:
+#    git checkout prod
+# 3. Build and deploy the project
+#    cd ~/cloud-monitoring-notification-delivery-integration-sample-code
+#    gcloud builds submit --config cloudbuild.yaml .
 
 steps:
 - id: 'build docker image'
