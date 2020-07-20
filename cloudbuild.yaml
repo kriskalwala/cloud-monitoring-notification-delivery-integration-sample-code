@@ -62,7 +62,7 @@ steps:
   - | 
       echo "***********************"
       echo "currently on branch $BRANCH_NAME"
-      echo "on project $PROJECT_ID$"
+      echo "on project $PROJECT_ID"
       echo "***********************"
 
 - id: 'tf init'
@@ -81,6 +81,9 @@ steps:
         terraform init -backend-config "bucket=$PROJECT_ID-tfstate"
       # terraform initialization for all environments
       else
+        echo "***********************"
+        echo "initializing terraform for all environments"
+        echo "***********************"
         for dir in environments/*/
         do 
           cd ${dir}   
@@ -112,6 +115,9 @@ steps:
         terraform refresh -var="project=$PROJECT_ID"
       # refresh terraform state for all environments
       else
+        echo "***********************"
+        echo "refreshing terraform for all environments"
+        echo "***********************"
         for dir in environments/*/
         do 
           cd ${dir}   
@@ -143,6 +149,9 @@ steps:
         terraform plan -var="project=$PROJECT_ID"
       # plan terraform changes for all environments
       else
+        echo "***********************"
+        echo "planning terraform for all environments"
+        echo "***********************"
         for dir in environments/*/
         do 
           cd ${dir}   
