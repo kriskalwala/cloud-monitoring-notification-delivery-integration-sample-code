@@ -29,12 +29,19 @@ module "pubsub" {
   project_id         = "${var.project}"
 }
 
+data "google_project" "project" {}
+
+output "project_number" {
+  value = data.google_project.project.number
+}
+
+# enable Pub/Sub to create authentication tokens in the project
 resource "google_project_iam_binding" "project" {
   project = var.project
   role    = "roles/iam.serviceAccountTokenCreator"
   
   members = [
-    "service-${var.project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+    "service-${project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
   ]
 }
     
