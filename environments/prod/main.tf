@@ -42,3 +42,14 @@ module "cloud_run_with_pubsub" {
   source  = "../../modules/cloud_run_with_pubsub"
   project = "${var.project}"
 }
+
+data "google_project" "project" {}
+
+resource "google_project_iam_binding" "project" {
+  project = var.project
+  role    = "roles/iam.serviceAccountTokenCreator"
+  
+  members = [
+    "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  ]
+}
