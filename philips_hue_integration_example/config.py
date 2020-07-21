@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Flask config."""
+"""Flask config for Philips Hue Integration."""
 
 import os
 from dotenv import load_dotenv
@@ -20,8 +20,8 @@ from utilities import secrets
 
 load_dotenv()
 
-class Config:
-    """Base config."""
+class PhilipsHueConfig:
+    """Base Philips Hue config."""
 
     FLASK_ENV = 'production'
     LOGGING_LEVEL = 'INFO'
@@ -55,8 +55,8 @@ class Config:
 
 
 
-class ProdConfig(Config):
-    """Production config."""
+class ProdPhilipsHueConfig(PhilipsHueConfig):
+    """Production Philips Hue config."""
 
     def __init__(self):
         self._philips_hue_ip = None
@@ -85,8 +85,8 @@ class ProdConfig(Config):
 
 
 
-class DevConfig(Config):
-    """Development config."""
+class DevPhilipsHueConfig(PhilipsHueConfig):
+    """Development Philips Hue config."""
 
     FLASK_ENV = 'development'
     LOGGING_LEVEL = 'DEBUG'
@@ -118,8 +118,8 @@ class DevConfig(Config):
 
 
 
-class TestConfig(Config):
-    """Test config."""
+class TestPhilipsHueConfig(PhilipsHueConfig):
+    """Test Philips Hue config."""
 
     FLASK_ENV = 'test'
     LOGGING_LEVEL = 'DEBUG'
@@ -131,9 +131,9 @@ class TestConfig(Config):
 
     # Overide this mapping to ensure unit tests
     # in main_test.py always use the same mapping even
-    # if the mapping in the base Config is modified.
-    # This is important since the tests are based of /
-    # assume the values in this specific mapping.
+    # if the mapping in the base Philips Hue Config is
+    # modified. This is important since the tests are
+    # based off / assume the values in this specific mapping.
     POLICY_HUE_MAPPING = {
         'policyA': {
             'open': 5620,
@@ -151,10 +151,10 @@ class TestConfig(Config):
 
 
 _ENVIRONMENT_TO_CONFIG_MAPPING = {
-    'prod': ProdConfig,
-    'dev': DevConfig,
-    'test': TestConfig,
-    'default': ProdConfig
+    'prod': ProdPhilipsHueConfig,
+    'dev': DevPhilipsHueConfig,
+    'test': TestPhilipsHueConfig,
+    'default': ProdPhilipsHueConfig
 }
 
 
