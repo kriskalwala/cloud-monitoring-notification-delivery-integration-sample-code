@@ -16,3 +16,7 @@
 output "topic" {
   value = "${module.pubsub.topic}"
 }
+
+output "pubsub_service_account" {
+  value = "${module.pubsub_service_account.account_id}"
+}
