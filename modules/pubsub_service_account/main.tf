@@ -14,6 +14,7 @@
 
 
 resource "google_service_account" "service_acount" {
-  account_id = "cloud-run-pubsub-invoker"
+  account_id   = "cloud-run-pubsub-invoker"
   display_name = "Cloud Run Pubsub Invoker"
+  project      = var.project
 }
