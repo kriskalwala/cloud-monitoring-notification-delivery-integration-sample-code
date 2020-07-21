@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-resource "google_service_account" "service_acount" {
+resource "google_service_account" "service_account" {
   account_id   = "cloud-run-pubsub-invoker"
   display_name = "Cloud Run Pubsub Invoker"
   project      = var.project
