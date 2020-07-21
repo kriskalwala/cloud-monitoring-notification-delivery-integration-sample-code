@@ -73,7 +73,7 @@ steps:
         echo "Then, rerun Cloud Build."
         echo "***********************"
       fi
-      # check branch
+      # check current branch
       if [ "$BRANCH_NAME" = "dev" ] || [ "$BRANCH_NAME" = "prod" ]; then
         echo "***********************"
         echo "Applying terraform configs from git branch $BRANCH_NAME"
