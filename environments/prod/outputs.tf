@@ -18,5 +18,5 @@ output "topic" {
 }
 
 output "pubsub_service_account" {
-  value = "${module.pubsub_service_account.account_id}"
+  value = "${module.pubsub_service_account.service_account_id}"
 }
