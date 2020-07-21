@@ -61,13 +61,14 @@ class ProdPhilipsHueConfig(PhilipsHueConfig):
     def __init__(self):
         self._philips_hue_ip = None
         self._philips_hue_username = None
+        self._project_id = os.environ.get('PROJECT_ID')
 
 
     @property
     def BRIDGE_IP_ADDRESS(self):
         if self._philips_hue_ip is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'philips_ip')
+                self._project_id, 'philips_ip')
             self._philips_hue_ip = secret.get_secret_value()
 
         return self._philips_hue_ip
@@ -77,7 +78,7 @@ class ProdPhilipsHueConfig(PhilipsHueConfig):
     def USERNAME(self):
         if self._philips_hue_username is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'philips_username')
+                self._project_id, 'philips_username')
             self._philips_hue_username = secret.get_secret_value()
 
         return self._philips_hue_username
