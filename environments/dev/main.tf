@@ -28,3 +28,16 @@ module "pubsub" {
   topic              = "tf-topic"
   project_id         = "${var.project}"
 }
+
+data "google_project" "project" {}
+
+# enable Pub/Sub to create authentication tokens in the project
+resource "google_project_iam_binding" "project" {
+  project = var.project
+  role    = "roles/iam.serviceAccountTokenCreator"
+  
+  members = [
+    "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  ]
+}
+    
