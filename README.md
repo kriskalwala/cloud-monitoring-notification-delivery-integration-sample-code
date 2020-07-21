@@ -38,7 +38,7 @@ Apache header:
 
 ## Terraform Setup
 
-Terraform configurations are used to create the infrastructure needed for this integration, such as Pub/Sub topics and subscriptions and Cloud Run instances. The `dev` and `prod` environments each have their own Terraform configurations, which can be found in the ```environments/``` directory. Terraform modules can be found in the ```modules/``` directory.
+Terraform configurations are used to create the infrastructure needed for this integration, such as Pub/Sub topics and subscriptions and Cloud Run instances. The `dev` and `prod` environments each have their own Terraform configurations, which can be found in the ```environments/``` directory. Terraform modules can be found in the ```modules/``` directory. The configs store state remotely in a Cloud Storage bucket so that anyone running the configs has a consistent version of the Terraform state.
 
 Deployment with Terraform will be automated through source code changes in GitHub. To test the deployment manually, first create a Cloud Storage bucket in Cloud Shell that Terraform will use to store state:
 ```
