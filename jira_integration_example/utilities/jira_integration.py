@@ -36,7 +36,7 @@ class UnknownIncidentStateError(Error):
 
 
 def update_jira_based_on_monitoring_notification(jira_client, jira_project,
-                                                 jira_status, jira_notification):
+                                                 jira_status, notification):
     """Updates a Jira server based off the data in a monitoring notification.
 
     If the monitoring notification is about an open incident, a new issue (of
@@ -84,12 +84,14 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
             issuetype={'name': 'Bug'},
             labels=[incident_id_label])
         logger.info('Created jira issue %s', issue)
+
     elif incident_state == 'closed':
         incident_issues = jira_client.search_issues(
             f'labels = {incident_id_label} AND status != {jira_status}')
         for issue in incident_issues:
             jira_client.transition_issue(issue, jira_status)
-            logger.info('Jira issue %s transitioned to %s status', issue, jira_state)
+            logger.info('Jira issue %s transitioned to %s status', issue, jira_status)
+
     else:
         raise UnknownIncidentStateError(
             'Incident state must be "open" or "closed"')
