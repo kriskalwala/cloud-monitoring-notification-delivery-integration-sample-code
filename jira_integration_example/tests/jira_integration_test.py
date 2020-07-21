@@ -51,7 +51,8 @@ def test_update_jira_with_open_incident(mocker):
 
 def test_update_jira_with_closed_incident_corresponding_to_jira_issues(mocker):
     jira_client = mocker.create_autospec(JIRA, instance=True)
-    mock_searched_issues = []
+    mock_searched_issues = [mocker.create_autospec(Issue, instance=True),
+                            mocker.create_autospec(Issue, instance=True)]
     jira_client.search_issues.return_value = mock_searched_issues
 
     jira_project = 'test_project'
