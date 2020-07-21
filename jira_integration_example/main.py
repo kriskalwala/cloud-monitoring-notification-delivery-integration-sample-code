@@ -67,7 +67,7 @@ def handle_pubsub_message():
         jira_integration.update_jira_based_on_monitoring_notification(
             jira_client,
             app.config['JIRA_PROJECT'],
-            app.config['JIRA_CLOSED_INCIDENT_STATUS'],
+            app.config['CLOSED_JIRA_ISSUE_STATUS'],
             monitoring_notification_dict)
 
     except (jira_integration.Error, JIRAError) as e:

@@ -124,7 +124,7 @@ def test_incident_alert_message(flask_client, config, mocker):
     response = flask_client.post('/', json={'message': {'data': data}})
 
     main.jira_integration.update_jira_based_on_monitoring_notification.assert_called_once_with(
-        jira_client, config['JIRA_PROJECT'], config['JIRA_CLOSED_INCIDENT_STATUS'],
+        jira_client, config['JIRA_PROJECT'], config['CLOSED_JIRA_ISSUE_STATUS'],
         json.loads(message))
 
     assert response.status_code == 200
