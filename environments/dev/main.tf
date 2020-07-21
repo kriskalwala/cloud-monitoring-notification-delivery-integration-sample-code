@@ -51,7 +51,7 @@ resource "google_project_iam_binding" "project" {
   role    = "roles/iam.serviceAccountTokenCreator"
   
   members = [
-    "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
   ]
 }
 
