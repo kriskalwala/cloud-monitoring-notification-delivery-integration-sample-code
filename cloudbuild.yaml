@@ -16,6 +16,10 @@
 # This is the Cloud Build build configuration file. It builds and submits the
 # Docker image to Container Registry, and also applies Terraform configurations
 # for the gcloud project based on the current GitHub branch.
+# For more information about Cloud Build, you can find the documentation here:
+# https://cloud.google.com/cloud-build/docs
+# For more information about Terraform, you can find the documentation here:
+# https://www.terraform.io/docs/index.html
 #
 # For dev and prod branches, the following steps are executed:
 # 1. terraform init
@@ -53,17 +57,35 @@ steps:
   # Uses the docker build step to build an image
   name: 'gcr.io/cloud-builders/docker'
   args: ['build', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './philips_hue_integration_example']
-  timeout: 300s
+  timeout: 300s # 5 minutes
 
-- id: 'print branch name'
+- id: 'check branch and project'
   name: 'bash'
   args: 
   - '-c'
   - | 
-      echo "***********************"
-      echo "currently on branch $BRANCH_NAME"
-      echo "on project $PROJECT_ID"
-      echo "***********************"
+      # check if project id is set
+      if [ -z "$PROJECT_ID" ]; then
+        echo "***********************"
+        echo "Missing required environment variable project_id."
+        echo "Set the project id by running 'gcloud config set project PROJECT_ID',"
+        echo "where PROJECT_ID is the Google Cloud Project ID that you want to deploy to."
+        echo "Then, rerun Cloud Build."
+        echo "***********************"
+      fi
+      # check branch
+      if [ "$BRANCH_NAME" = "dev" ] || [ "$BRANCH_NAME" = "prod" ]; then
+        echo "***********************"
+        echo "Applying terraform configs from git branch $BRANCH_NAME"
+        echo "to google cloud monitoring project $PROJECT_ID"
+        echo "***********************"  
+      else
+        echo "***********************"
+        echo "[dry run mode] Planning terraform configs from git branch $BRANCH_NAME"
+        echo "to google cloud monitoring project $PROJECT_ID."
+        echo "To apply the configs, rerun this command from git branch 'dev' or 'prod'."
+        echo "***********************"  
+      fi
 
 - id: 'tf init'
   name: 'hashicorp/terraform:0.12.28'
@@ -97,7 +119,7 @@ steps:
           cd ../../
         done
       fi 
-  timeout: 300s
+  timeout: 300s # 5 minutes
 
 - id: 'tf refresh'
   name: 'hashicorp/terraform:0.12.28'
@@ -131,7 +153,7 @@ steps:
           cd ../../
         done
       fi 
-  timeout: 300s
+  timeout: 300s # 5 minutes
 
 - id: 'tf plan'
   name: 'hashicorp/terraform:0.12.28'
@@ -165,7 +187,7 @@ steps:
           cd ../../
         done
       fi 
-  timeout: 300s
+  timeout: 300s # 5 minutes
 
 - id: 'tf apply'
   name: 'hashicorp/terraform:0.12.28'
@@ -186,7 +208,7 @@ steps:
         echo "Branch '$BRANCH_NAME' does not represent an official environment."
         echo "*******************************************************************************"
       fi
-  timeout: 300s
+  timeout: 300s # 5 minutes
 
 # set substitution variables
 substitutions:
