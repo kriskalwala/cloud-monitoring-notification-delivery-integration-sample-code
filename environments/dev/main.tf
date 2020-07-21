@@ -40,4 +40,10 @@ resource "google_project_iam_binding" "project" {
     "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
   ]
 }
+
+module "pubsub_service_account" {
+  source  = "../../modules/pubsub_service_account"
+  project = var.project
+}
+  
     
