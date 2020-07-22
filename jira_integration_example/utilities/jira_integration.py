@@ -36,19 +36,23 @@ class UnknownIncidentStateError(Error):
 
 
 def update_jira_based_on_monitoring_notification(jira_client, jira_project,
-                                                 notification):
+                                                 jira_status, notification):
     """Updates a Jira server based off the data in a monitoring notification.
 
     If the monitoring notification is about an open incident, a new issue (of
-    type bug) is created on the jira server that the jira client is connected
-    to under the specified jira project.
+    type bug) is created. If it is about a closed incident, the issues corresponding
+    to the incident (if any) will be searched for and transitioned to the specified
+    jira status. These issues will be created / searched for in the jira server that
+    the jira client is connected to under the specified jira project.
 
     Args:
         jira_client: A JIRA object that acts as a client which allows
-            interaction with a specific Jira server. It is used to create
-            the new Jira issue.
-        jira_project: The key or id of the Jira project under which to create
-            the Jira issue.
+            interaction with a specific Jira server. This is the server
+            where issues will be created / searched for.
+        jira_project: The key or id of the Jira project under which to create /
+            search for Jira issues.
+        jira_status: The status to transition issues corresponding to
+                    closed incidents to.
         notification: The dictionary containing the notification data.
 
     Raises:
@@ -59,6 +63,7 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
 
     try:
         incident_data = notification['incident']
+        incident_id = incident_data['incident_id']
         incident_state = incident_data['state']
         incident_condition_name = incident_data['condition_name']
         incident_resource_name = incident_data['resource_name']
@@ -67,6 +72,8 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
     except KeyError as e:
         raise NotificationParseError(f"Notification is missing required dict key: {str(e)}")
 
+    incident_id_label = f'monitoring_incident_id_{incident_id}'
+
     if incident_state == 'open':
         summary = '%s - %s' % (incident_condition_name, incident_resource_name)
         description = '%s\nSee: %s' % (incident_summary, incident_url)
@@ -74,8 +81,22 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
             project=jira_project,
             summary=summary,
             description=description,
-            issuetype={'name': 'Bug'})
+            issuetype={'name': 'Bug'},
+            labels=[incident_id_label])
         logger.info('Created jira issue %s', issue)
-    elif incident_state != 'closed':
+
+    elif incident_state == 'closed':
+        incident_issues = jira_client.search_issues(
+            f'labels = {incident_id_label} AND status != {jira_status}')
+
+        if incident_issues:
+            for issue in incident_issues:
+                jira_client.transition_issue(issue, jira_status)
+                logger.info('Jira issue %s transitioned to %s status', issue, jira_status)
+        else:
+            logger.warning('No Jira issues corresponding to incident id %s found to '
+                           'transition to %s status', incident_id, jira_status)
+
+    else:
         raise UnknownIncidentStateError(
             'Incident state must be "open" or "closed"')
