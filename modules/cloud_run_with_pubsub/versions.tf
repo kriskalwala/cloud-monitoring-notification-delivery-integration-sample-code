@@ -1,3 +1,4 @@
+ 
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +15,5 @@
 
 
 terraform {
-  backend "gcs" {
-    bucket = ${var.tf_state_bucket}"
-    prefix = "env/prod"
-  }
+  required_version = "~> 0.12.0"
 }
