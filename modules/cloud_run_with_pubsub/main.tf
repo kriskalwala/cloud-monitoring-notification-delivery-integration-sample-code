@@ -13,9 +13,28 @@
 # limitations under the License.
 
 
-terraform {
-  backend "gcs" {
-    bucket = ${var.tf_state_bucket}"
-    prefix = "env/prod"
+resource "google_project_service" "run" {
+  service = "run.googleapis.com"
+  project  = var.project
+}
+
+resource "google_cloud_run_service" "cloud_run_pubsub_service" {
+  name     = "cloud-run-pubsub-service"
+  location = "us-west1"
+  project  = var.project
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/${var.project}/cloud-run-pubsub-service"
+      }
+    }
   }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+  
+  depends_on = [google_project_service.run]
 }

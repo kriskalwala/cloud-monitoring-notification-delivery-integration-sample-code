@@ -27,6 +27,20 @@ module "pubsub" {
   
   topic              = "tf-topic"
   project_id         = "${var.project}"
+
+  push_subscriptions = [
+    {
+      name              = "alert-push-subscription"
+      
+      # this will later be an output from a Cloud Run Terraform module
+      push_endpoint     = "${module.cloud_run_with_pubsub.url}"
+    }
+  ]
+}
+
+module "cloud_run_with_pubsub" {
+  source  = "../../modules/cloud_run_with_pubsub"
+  project = "${var.project}"
 }
 
 data "google_project" "project" {}
