@@ -27,6 +27,7 @@ class JiraConfig:
     LOGGING_LEVEL = 'INFO'
     TESTING = False
     DEBUG = False
+    CLOSED_JIRA_ISSUE_STATUS = 'Done'
 
 
 
@@ -142,6 +143,7 @@ class TestJiraConfig(JiraConfig):
     DEBUG = True
     TESTING = True
 
+    CLOSED_JIRA_ISSUE_STATUS = 'Done'
     JIRA_URL = 'https://jira.atlassian.com'
     JIRA_USERNAME = 'test-user'
     JIRA_PASSWORD = 'test-password'

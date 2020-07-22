@@ -99,9 +99,9 @@ def test_incident_alert_message_with_missing_data(flask_client, mocker):
 
 
 def test_incident_alert_message_with_invalid_state(flask_client, mocker):
-    message = ('{"incident": {"state": "unknown_state", "condition_name": "test_condition",'
+    message = ('{"incident": {"state": "invalid_state", "condition_name": "test_condition",'
                '"resource_name": "test_resource", "summary": "test_summary",'
-               '"url": "http://test-cloud.com"}}')
+               '"url": "http://test-cloud.com", "incident_id": "0.abcdef123456"}}')
     data = base64.b64encode(message.encode()).decode()
 
     mocker.patch('main.JIRA', autospec=True)
@@ -113,7 +113,7 @@ def test_incident_alert_message_with_invalid_state(flask_client, mocker):
 def test_incident_alert_message(flask_client, config, mocker):
     message = ('{"incident": {"state": "open", "condition_name": "test_condition",'
                '"resource_name": "test_resource", "summary": "test_summary",'
-               '"url": "http://test-cloud.com"}}')
+               '"url": "http://test-cloud.com", "incident_id": "0.abcdef123456"}}')
     data = base64.b64encode(message.encode()).decode()
 
     mocker.patch('main.jira_integration.update_jira_based_on_monitoring_notification',
@@ -124,6 +124,7 @@ def test_incident_alert_message(flask_client, config, mocker):
     response = flask_client.post('/', json={'message': {'data': data}})
 
     main.jira_integration.update_jira_based_on_monitoring_notification.assert_called_once_with(
-        jira_client, config['JIRA_PROJECT'], json.loads(message))
+        jira_client, config['JIRA_PROJECT'], config['CLOSED_JIRA_ISSUE_STATUS'],
+        json.loads(message))
 
     assert response.status_code == 200

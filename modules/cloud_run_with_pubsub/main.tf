@@ -14,7 +14,7 @@
 
 
 resource "google_project_service" "run" {
-  service = "run.googleapis.com"
+  service  = "run.googleapis.com"
   project  = var.project
 }
 
@@ -37,4 +37,14 @@ resource "google_cloud_run_service" "cloud_run_pubsub_service" {
   }
   
   depends_on = [google_project_service.run]
+}
+
+resource "google_cloud_run_service_iam_binding" "binding" {
+  location  = google_cloud_run_service.cloud_run_pubsub_service.location
+  project   = var.project
+  service   = google_cloud_run_service.cloud_run_pubsub_service.name
+  role      = "roles/run.invoker"
+  members   = [
+    "serviceAccount:${var.pubsub_service_account_email}"
+  ]
 }
