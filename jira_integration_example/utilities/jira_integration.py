@@ -88,9 +88,14 @@ def update_jira_based_on_monitoring_notification(jira_client, jira_project,
     elif incident_state == 'closed':
         incident_issues = jira_client.search_issues(
             f'labels = {incident_id_label} AND status != {jira_status}')
-        for issue in incident_issues:
-            jira_client.transition_issue(issue, jira_status)
-            logger.info('Jira issue %s transitioned to %s status', issue, jira_status)
+
+        if incident_issues:
+            for issue in incident_issues:
+                jira_client.transition_issue(issue, jira_status)
+                logger.info('Jira issue %s transitioned to %s status', issue, jira_status)
+        else:
+            logger.warning('No Jira issues corresponding to incident id %s found to '
+                           'transition to %s status', incident_id, jira_status)
 
     else:
         raise UnknownIncidentStateError(
