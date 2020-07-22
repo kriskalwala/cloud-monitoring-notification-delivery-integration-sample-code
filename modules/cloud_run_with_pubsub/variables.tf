@@ -13,14 +13,4 @@
 # limitations under the License.
 
 
-output "topic" {
-  value = "${module.pubsub.topic}"
-}
-
-output "url" {
-  value = "${module.cloud_run_with_pubsub.url}"
-}
-
-output "pubsub_service_account" {
-  value = "${module.pubsub_service_account.service_account_id}"
-}
+variable "project" {}
