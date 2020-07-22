@@ -40,9 +40,11 @@ resource "google_cloud_run_service" "cloud_run_pubsub_service" {
 }
 
 resource "google_cloud_run_service_iam_binding" "binding" {
-  location = google_cloud_run_service.cloud_run_pubsub_service.location
-  project  = var.project
-  service  = google_cloud_run_service.cloud_run_pubsub_service.name
-  role = "roles/run.invoker"
-  member   = "serviceAccount:${modules.pubsub_service_account.email}"
+  location  = google_cloud_run_service.cloud_run_pubsub_service.location
+  project   = var.project
+  service   = google_cloud_run_service.cloud_run_pubsub_service.name
+  role      = "roles/run.invoker"
+  members   = [
+    "serviceAccount:${modules.pubsub_service_account.email}"
+  ]
 }
