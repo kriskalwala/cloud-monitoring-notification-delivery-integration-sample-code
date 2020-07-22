@@ -13,14 +13,8 @@
 # limitations under the License.
 
 
-output "topic" {
-  value = "${module.pubsub.topic}"
-}
-
-output "url" {
-  value = "${module.cloud_run_with_pubsub.url}"
-}
-
-output "pubsub_service_account" {
-  value = "${module.pubsub_service_account.service_account_id}"
+resource "google_service_account" "service_account" {
+  account_id   = "cloud-run-pubsub-invoker"
+  display_name = "Cloud Run Pubsub Invoker"
+  project      = var.project
 }

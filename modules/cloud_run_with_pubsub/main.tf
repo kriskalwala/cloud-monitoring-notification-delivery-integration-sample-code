@@ -13,14 +13,28 @@
 # limitations under the License.
 
 
-output "topic" {
-  value = "${module.pubsub.topic}"
+resource "google_project_service" "run" {
+  service = "run.googleapis.com"
+  project  = var.project
 }
 
-output "url" {
-  value = "${module.cloud_run_with_pubsub.url}"
-}
+resource "google_cloud_run_service" "cloud_run_pubsub_service" {
+  name     = "cloud-run-pubsub-service"
+  location = "us-west1"
+  project  = var.project
 
-output "pubsub_service_account" {
-  value = "${module.pubsub_service_account.service_account_id}"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/${var.project}/cloud-run-pubsub-service"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+  
+  depends_on = [google_project_service.run]
 }
