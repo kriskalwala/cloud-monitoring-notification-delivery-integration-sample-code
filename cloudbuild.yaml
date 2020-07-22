@@ -21,6 +21,12 @@
 # For more information about Terraform, you can find the documentation here:
 # https://www.terraform.io/docs/index.html
 #
+# If Cloud Build is run from a git branch named either "dev" or "prod", 
+# the configuration will be applied to the cloud project provided via
+# environment variable $PROJECT_ID. Otherwise, the changes will be planned,
+# but not applied (dry run mode, which is useful when testing config changes
+# from a development branch).
+#
 # For dev and prod branches, the following steps are executed:
 # 1. terraform init
 # 2. terraform refresh
