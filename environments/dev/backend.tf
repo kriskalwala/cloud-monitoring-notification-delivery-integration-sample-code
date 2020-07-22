@@ -15,7 +15,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = ${var.tf_state_bucket}"
+    bucket = "${var.tf_state_bucket}"
     prefix = "env/dev"
   }
 }

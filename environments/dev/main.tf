@@ -41,6 +41,8 @@ module "pubsub" {
 module "cloud_run_with_pubsub" {
   source  = "../../modules/cloud_run_with_pubsub"
   project = "${var.project}"
+  
+  pubsub_service_account_email = "${module.pubsub_service_account.service_account_email}"
 }
 
 data "google_project" "project" {}
