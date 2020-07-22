@@ -13,6 +13,6 @@
 # limitations under the License.
 
 
-output "service_account_email" {
-  value = "${google_service_account.service_account.email}"
+output "topic" {
+  value = "${google_pubsub_topic.tf.name}"
 }
