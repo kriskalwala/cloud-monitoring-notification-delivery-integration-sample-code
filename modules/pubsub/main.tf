@@ -19,13 +19,13 @@ resource "google_pubsub_topic" "tf" {
 }
 
 resource "google_pubsub_subscription" "push" {
-  name = var.push_subscription
+  name = var.push_subscription.name
   topic = google_pubsub_topic.tf.name
   
   push_config {
-    push_endpoint = "${var.push_subscription.push_endpoint}"
+    push_endpoint = var.push_subscription.push_endpoint
     oidc_token {
-      service_account_email = "${var.push_subscription.auth_account}"
+      service_account_email = var.push_subscription.auth_account
     }
   }
 }
