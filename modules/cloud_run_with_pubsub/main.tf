@@ -45,6 +45,6 @@ resource "google_cloud_run_service_iam_binding" "binding" {
   service   = google_cloud_run_service.cloud_run_pubsub_service.name
   role      = "roles/run.invoker"
   members   = [
-    "serviceAccount:${modules.pubsub_service_account.email}"
+    "serviceAccount:${module.pubsub_service_account.email}"
   ]
 }
