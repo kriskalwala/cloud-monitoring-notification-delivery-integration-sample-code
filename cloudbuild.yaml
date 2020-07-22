@@ -66,7 +66,7 @@ steps:
   args: ['build', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './philips_hue_integration_example']
   timeout: 300s # 5 minutes
 
-- id: 'check for required environment variables"
+- id: 'check for required environment variables'
   name: 'bash'
   args: 
   - '-c'
