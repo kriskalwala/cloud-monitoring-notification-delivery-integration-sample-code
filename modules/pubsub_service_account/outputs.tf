@@ -13,10 +13,6 @@
 # limitations under the License.
 
 
-output "topic" {
-  value = "${module.pubsub.topic}"
-}
-
-output "pubsub_service_account" {
-  value = "${module.pubsub_service_account.service_account_id}"
+output "service_account_id" {
+  value = "${google_service_account.service_account.account_id}"
 }
