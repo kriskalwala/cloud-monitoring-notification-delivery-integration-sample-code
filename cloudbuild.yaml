@@ -66,7 +66,7 @@ steps:
   args: ['build', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './philips_hue_integration_example']
   timeout: 300s # 5 minutes
 
-- id: 'check branch and project'
+- id: 'check for required environment variables"
   name: 'bash'
   args: 
   - '-c'
@@ -80,6 +80,12 @@ steps:
         echo "Then, rerun Cloud Build."
         echo "***********************"
       fi
+
+- id: 'check branch'
+  name: 'bash'
+  args: 
+  - '-c'
+  - | 
       # check current branch
       if [ "$BRANCH_NAME" = "dev" ] || [ "$BRANCH_NAME" = "prod" ]; then
         echo "***********************"
