@@ -22,20 +22,16 @@ provider "google" {
 }
 
 module "pubsub" {
-  source  = "terraform-google-modules/pubsub/google"
-  version = "~> 1.3"
+  source  = "../../modules/pubsub"
   
   topic              = "tf-topic"
-  project_id         = "${var.project}"
+  project            = "${var.project}"
 
-  push_subscriptions = [
-    {
+  push_subscription = {
       name              = "alert-push-subscription"
-      
-      # this will later be an output from a Cloud Run Terraform module
       push_endpoint     = "${module.cloud_run_with_pubsub.url}"
-    }
-  ]
+      auth_account      = "${module.pubsub_service_account.service_account_email}"
+  }
 }
 
 module "cloud_run_with_pubsub" {

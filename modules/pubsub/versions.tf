@@ -13,6 +13,6 @@
 # limitations under the License.
 
 
-variable "project" {}
-variable "pubsub_service_account_email" {}
-  
+terraform {
+  required_version = "~> 0.12.0"
+}

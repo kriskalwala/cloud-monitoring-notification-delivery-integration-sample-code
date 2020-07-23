@@ -13,6 +13,6 @@
 # limitations under the License.
 
 
-variable "project" {}
-variable "pubsub_service_account_email" {}
-  
+output "topic" {
+  value = "${google_pubsub_topic.tf.name}"
+}
