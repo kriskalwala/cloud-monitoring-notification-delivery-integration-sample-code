@@ -150,7 +150,7 @@ class TestPolicyClient():
             policy_name: the name of the policy to trigger
         """
         name = self._policy_client.project_path(self._project_id)
-        policy = self._policy_client.list_alert_policies(name=name, filter_=f'display_name={policy_name}')[0]
+        policy = list(self._policy_client.list_alert_policies(name=name, filter_=f'display_name={policy_name}'))[0]
         metric_name = policy.user_labels['metric']
         self._metric_client.append_to_time_series(metric_name, self._threshold_value + 1)
     
