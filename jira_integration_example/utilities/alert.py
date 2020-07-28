@@ -28,12 +28,12 @@ class TestCustomMetricClient():
     
     Attributes:
         _project_id: The id of the project to store metrics
-        _client: A monitoring_v3.MetricsServiceClient instance to modify metric data
+        _client: A monitoring_v3.MetricServiceClient instance to modify metric data
     """
     
     def __init__(self, project_id):
         self._project_id = project_id
-        self._client = monitoring_v3.MetricsServiceClient()
+        self._client = monitoring_v3.MetricServiceClient()
         
         
     def create_custom_metric(self, metric_name):
