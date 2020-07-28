@@ -122,6 +122,7 @@ class TestPolicyClient():
             metric_name: metric to attach the policy to
         """
         name = self._policy_client.project_path(self._project_id)
+        self._metric_client.create_custom_metric(metric_name)
 
         condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
             filter=f'metric.type = "custom.googleapis.com/{metric_name}" AND resource.type = "gce_instance"',
@@ -135,7 +136,7 @@ class TestPolicyClient():
         )
         alert_policy = monitoring_v3.types.AlertPolicy(
             display_name=policy_name,
-            user_labels={'type': 'test policy', 'metric': metric_name},
+            user_labels={'type': 'test_policy', 'metric': metric_name},
             conditions=[condition],
             combiner='AND'
         )
