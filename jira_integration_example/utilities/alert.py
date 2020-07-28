@@ -38,7 +38,11 @@ class TestCustomMetricClient():
         
         
     def create_custom_metric(self, metric_name):
-        # [START monitoring_create_metric]
+        """Creates a custom metric with the given metric name.
+        
+        Args:
+            metric_name: The name of the metric
+        """
         project_name = self._client.project_path(self._project_id)
         descriptor = monitoring_v3.types.MetricDescriptor()
         descriptor.type = 'custom.googleapis.com/' + metric_name
@@ -49,11 +53,15 @@ class TestCustomMetricClient():
         descriptor.description = 'A custom metric meant for testing purposes'
         descriptor = self._client.create_metric_descriptor(project_name, descriptor)
         print('Created {}.'.format(descriptor.name))
-        # [END monitoring_create_metric]
 
 
     def append_to_time_series(self, metric_name, point_value):
-        # [START monitoring_write_timeseries]
+        """Add a data point with the given point value to the specified metric.
+        
+        Args:
+            metric_name: The name of the metric to modify
+            point_value: The value of the data point to add
+        """
         project_name = self._client.project_path(self._project_id)
 
         series = monitoring_v3.types.TimeSeries()
@@ -68,7 +76,18 @@ class TestCustomMetricClient():
         point.interval.end_time.nanos = int(
             (now - point.interval.end_time.seconds) * 10**9)
         self._client.create_time_series(project_name, [series])
-        # [END monitoring_write_timeseries]
+        
+        
+    def delete_custom_metric(self, metric_name):
+        """Delete the given custom metric.
+        
+        Args:
+            metric_name: Name of metric to delete
+        """
+        project_name = self._client.project_path(self._project_id)
+        descriptor_name = f'{project_name}/metricDescriptors/custom.googleapis.com/{metric_name}'
+        self._client.delete_metric_descriptor(descriptor_name)
+        print('Deleted metric descriptor {}.'.format(descriptor_name))
 
 
 class TestPolicyClient():
@@ -87,7 +106,7 @@ class TestPolicyClient():
         self._project_id = project_id
         self._policy_client = monitoring_v3.AlertPolicyServiceClient()
         self._metric_client = TestCustomMetricClient(self._project_id)
-        self._threshold_value = 3.0
+        self._threshold_value = TRIGGER_VALUE
         
     
     def create_policy(self, display_name, metric_name):
@@ -100,9 +119,9 @@ class TestPolicyClient():
             metric_name: metric to attach the policy to
         """
         name = self._policy_client.project_path(self._project_id)
-        # TODO: fill in
+
         condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
-            filter=f'metric.type = "custom.googleapis.com/${metric_name}" AND resource.type = "gce_instance"',
+            filter=f'metric.type = "custom.googleapis.com/{metric_name}" AND resource.type = "gce_instance"',
             comparison=monitoring_v3.enums.ComparisonType.COMPARISON_GT,
             threshold_value=self._threshold_value,
             duration=Duration(seconds=0)
@@ -113,17 +132,18 @@ class TestPolicyClient():
         )
         alert_policy = monitoring_v3.types.AlertPolicy(
             display_name=display_name,
-            conditions=[condition]
+            conditions=[condition],
+            combiner='AND'
         )
         self._policy_client.create_alert_policy(name, alert_policy)
     
 
     def trigger_incident(self, metric_name):
-        append_to_time_series(PROJECT_ID, metric_name, TRIGGER_VALUE + 1)
+        self._metric_client.append_to_time_series(metric_name, self._threshold_value + 1)
     
     
     def resolve_incident(self, metric_name):
-        append_to_time_series(PROJECT_ID, metric_name, TRIGGER_VALUE - 1)
+        self._metric_client.append_to_time_series(metric_name, self._threshold_value - 1)
 
 
 def main():
