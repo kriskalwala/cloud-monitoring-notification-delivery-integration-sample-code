@@ -52,7 +52,7 @@ class TestCustomMetricClient():
             monitoring_v3.enums.MetricDescriptor.ValueType.DOUBLE)
         descriptor.description = 'A custom metric meant for testing purposes'
         descriptor = self._client.create_metric_descriptor(project_name, descriptor)
-        print('Created {}.'.format(descriptor.name))
+        print(f'Created {descriptor_name}.')
 
 
     def append_to_time_series(self, metric_name, point_value):
@@ -87,7 +87,7 @@ class TestCustomMetricClient():
         project_name = self._client.project_path(self._project_id)
         descriptor_name = f'{project_name}/metricDescriptors/custom.googleapis.com/{metric_name}'
         self._client.delete_metric_descriptor(descriptor_name)
-        print('Deleted metric descriptor {}.'.format(descriptor_name))
+        print(f'Deleted metric descriptor {descriptor_name}.')
 
 
 class TestPolicyClient():
@@ -112,13 +112,13 @@ class TestPolicyClient():
         
     
     def create_policy(self, policy_name, metric_name):
-        """Creates an alert policy with the given display name.
+        """Creates an alert policy with the given policy display name.
         
         By default, a policy is made with a single condition that triggers
         if a custom metric with the given metric name is above the threshold value.
         
         Args:
-            display_name: the name to identify the policy by
+            policy_name: the name to identify the policy by
             metric_name: metric to attach the policy to
         """
         name = self._policy_client.project_path(self._project_id)
@@ -141,19 +141,43 @@ class TestPolicyClient():
             combiner='AND'
         )
         self._policy_client.create_alert_policy(name, alert_policy)
-    
+        print(f'Created {policy_name}.')
+        
+        
+    def delete_policy(self, policy_name):
+        """Deletes all policies with the given policy display name.
+        
+        Args:
+            policy_name: the display name of the policy to delete
+        """
+        name = self._policy_client.project_path(self._project_id)
+        policies = list(self._policy_client.list_alert_policies(name=name, filter_=f'display_name = "{policy_name}"'))
+        
+        for policy in policies:
+            self._policy_client.delete_alert_policy(policy.name)
+        
+        
+    def delete_test_policies(self):
+        """Deletes all test policies."""
+        name = self._policy_client.project_path(self._project_id)
+        policies = list(self._policy_client.list_alert_policies(name=name, filter_=f'user_labels["type"] = "test_policy"'))
+        
+        for policy in policies:
+            self._policy_client.delete_alert_policy(policy.name)
 
+            
     def trigger_incident(self, policy_name):
-        """Trigger an incident for the given policy.
+        """Trigger an incident for the given policy. 
         
         Args:
             policy_name: the name of the policy to trigger
         """
         name = self._policy_client.project_path(self._project_id)
-        policy = list(self._policy_client.list_alert_policies(name=name, filter_=f'display_name={policy_name}'))[0]
+        policy = list(self._policy_client.list_alert_policies(name=name, filter_=f'display_name = "{policy_name}"'))[0]
         metric_name = policy.user_labels['metric']
         self._metric_client.append_to_time_series(metric_name, self._threshold_value + 1)
-    
+        print(f'Triggered incident for {policy_name}.')
+        
     
     def resolve_incident(self, policy_name):
         """Resolve incidents for the given policy.
@@ -162,15 +186,16 @@ class TestPolicyClient():
             policy_name: the name of the policy to resolve incidents for
         """
         name = self._policy_client.project_path(self._project_id)
-        policy = self._policy_client.list_alert_policies(name=name, filter=f'display_name={policy_name}')
+        policy = list(self._policy_client.list_alert_policies(name=name, filter_=f'display_name = "{policy_name}"'))[0]
         metric_name = policy.user_labels['metric']
         self._metric_client.append_to_time_series(metric_name, self._threshold_value - 1)
+        print(f'Resolved incident(s) for {policy_name}.')
 
 
 def main():
     client = TestPolicyClient('alertmanager-cloudmon-test')
     client.create_policy('test_policy', 'test_metric')
-    client.trigger_incident('test_policy')
+    client.delete_policy('test_policy')
     
 
 if __name__ == '__main__':
