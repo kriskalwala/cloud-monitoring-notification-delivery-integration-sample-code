@@ -42,7 +42,8 @@ def add_secret_version(client, project_id, secret_id, payload):
 
     # Convert the string payload into a bytes. This step can be omitted if you
     # pass in bytes instead of a str for the payload argument.
-    payload = payload.encode('UTF-8')
+    if not isinstance(payload, bytes):
+        payload = payload.encode('UTF-8')
 
     # Add the secret version.
     response = client.add_secret_version(parent, {'data': payload})
@@ -136,15 +137,15 @@ except AlreadyExists as e:
     print('Secret already exists: "jira_consumer_key"')
 
 try:
-    create_secret(client, project_id, "jira_cert_key")
+    create_secret(client, project_id, "jira_key_cert")
 except AlreadyExists as e:
-    print('Secret already exists: "jira_cert_key"')
+    print('Secret already exists: "jira_key_cert"')
 
 
 add_secret_version(client, project_id, "jira_access_token", oauth_token)
 add_secret_version(client, project_id, "jira_access_token_secret", oauth_token_secret)
 add_secret_version(client, project_id, "jira_consumer_key", CONSUMER_KEY)
-add_secret_version(client, project_id, "jira_cert_key", private_key_pem)
+add_secret_version(client, project_id, "jira_key_cert", private_key_pem)
 
 
 

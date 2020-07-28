@@ -39,7 +39,8 @@ class ProdJiraConfig(JiraConfig):
         self._jira_access_token = None
         self._jira_access_token_secret = None
         self._jira_consumer_key = None
-        self._jira_cert_key = None
+        self._jira_key_cert = None
+        self._jira_project = None
 
 
     @property
@@ -83,13 +84,23 @@ class ProdJiraConfig(JiraConfig):
 
 
     @property
-    def JIRA_CERT_KEY(self):
-        if self._jira_cert_key is None:
+    def JIRA_KEY_CERT(self):
+        if self._jira_key_cert is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'jira_cert_key')
-            self._jira_cert_key = secret.get_secret_value()
+                'alertmanager-2020-intern-r', 'jira_key_cert')
+            self._jira_key_cert = secret.get_secret_value()
 
-        return self._jira_cert_key
+        return self._jira_key_cert
+
+
+    @property
+    def JIRA_PROJECT(self):
+        if self._jira_project is None:
+            secret = secrets.GoogleSecretManagerSecret(
+                'alertmanager-2020-intern-r', 'jira_project')
+            self._jira_project = secret.get_secret_value()
+
+        return self._jira_project
 
 
 
@@ -107,7 +118,8 @@ class DevJiraConfig(JiraConfig):
         self._jira_access_token = None
         self._jira_access_token_secret = None
         self._jira_consumer_key = None
-        self._jira_cert_key = None
+        self._jira_key_cert = None
+        self._jira_project = None
 
 
     @property
@@ -147,12 +159,21 @@ class DevJiraConfig(JiraConfig):
 
 
     @property
-    def JIRA_CERT_KEY(self):
-        if self._jira_cert_key is None:
-            secret = secrets.EnvironmentVariableSecret('JIRA_CERT_KEY')
-            self._jira_cert_key = secret.get_secret_value()
+    def JIRA_KEY_CERT(self):
+        if self._jira_key_cert is None:
+            secret = secrets.EnvironmentVariableSecret('JIRA_KEY_CERT')
+            self._jira_key_cert = secret.get_secret_value()
 
-        return self._jira_cert_key
+        return self._jira_key_cert
+
+
+    @property
+    def JIRA_PROJECT(self):
+        if self._jira_project is None:
+            secret = secrets.EnvironmentVariableSecret('JIRA_PROJECT')
+            self._jira_project = secret.get_secret_value()
+
+        return self._jira_project
 
 
 
@@ -169,7 +190,8 @@ class TestJiraConfig(JiraConfig):
     JIRA_ACCESS_TOKEN = 'test-access-token'
     JIRA_ACCESS_TOKEN_SECRET = 'test-access-token-secret'
     JIRA_CONSUMER_KEY = 'test-consumer-key'
-    JIRA_CERT_KEY = 'test-cert-key'
+    JIRA_KEY_CERT = 'test-key-cert'
+    JIRA_PROJECT = 'test-project'
 
 
 
