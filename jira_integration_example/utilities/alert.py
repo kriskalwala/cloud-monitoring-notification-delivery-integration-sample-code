@@ -16,6 +16,7 @@ import os
 import time
 
 from google.cloud import monitoring_v3
+from google.protobuf import Duration
 
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
@@ -100,11 +101,11 @@ class TestPolicyClient():
         """
         name = self._policy_client.project_path(self._project_id)
         # TODO: fill in
-        condition_threshold = monitoring_v3.types.AlertPolicy.MetricThreshold(
+        condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
             filter=f'metric.type = "custom.googleapis.com/${metric_name}" AND resource.type = "gce_instance"',
-            comparison=COMPARISON_GT,
+            comparison=monitoring_v3.enums.ComparisonType.COMPARISON_GT,
             threshold_value=self._threshold_value,
-            duration=0
+            duration=Duration(seconds=0)
         )
         condition = monitoring_v3.types.AlertPolicy.Condition(condition_threshold=condition_threshold)
         alert_policy = monitoring_v3.types.AlertPolicy(
