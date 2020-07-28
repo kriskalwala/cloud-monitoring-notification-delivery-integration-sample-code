@@ -16,7 +16,7 @@ import os
 import time
 
 from google.cloud import monitoring_v3
-from google.protobuf import Duration
+from google.protobuf.duration_pb2 import Duration
 
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
