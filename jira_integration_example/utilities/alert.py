@@ -110,6 +110,15 @@ class TestPolicyClient():
         self._metric_client = TestCustomMetricClient(self._project_id)
         self._threshold_value = TRIGGER_VALUE
         
+        
+    def get_metric_client(self):
+        """Get the TestCustomMetricClient instance.
+        
+        Returns:
+            The TestCustomMetricClient instance for this client.
+        """
+        return self._metric_client
+        
     
     def create_policy(self, policy_name, metric_name):
         """Creates an alert policy with the given policy display name.
