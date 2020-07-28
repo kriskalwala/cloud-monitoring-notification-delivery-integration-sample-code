@@ -37,7 +37,7 @@ class TestCustomMetricClient():
         self._client = monitoring_v3.MetricServiceClient()
         
         
-    def async create_custom_metric(self, metric_name):
+    def create_custom_metric(self, metric_name):
         """Creates a custom metric with the given metric name.
         
         Args:
@@ -51,7 +51,7 @@ class TestCustomMetricClient():
         descriptor.value_type = (
             monitoring_v3.enums.MetricDescriptor.ValueType.DOUBLE)
         descriptor.description = 'A custom metric meant for testing purposes'
-        await descriptor = self._client.create_metric_descriptor(project_name, descriptor)
+        descriptor = self._client.create_metric_descriptor(project_name, descriptor)
         print(f'Created {descriptor.name}.')
 
 
@@ -111,7 +111,7 @@ class TestPolicyClient():
         self._threshold_value = TRIGGER_VALUE
         
     
-    async def create_policy(self, policy_name, metric_name):
+    def create_policy(self, policy_name, metric_name):
         """Creates an alert policy with the given policy display name.
         
         By default, a policy is made with a single condition that triggers
@@ -122,7 +122,7 @@ class TestPolicyClient():
             metric_name: metric to attach the policy to
         """
         name = self._policy_client.project_path(self._project_id)
-        await self._metric_client.create_custom_metric(metric_name)
+        self._metric_client.create_custom_metric(metric_name)
 
         condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
             filter=f'metric.type = "custom.googleapis.com/{metric_name}" AND resource.type = "gce_instance"',
@@ -140,7 +140,7 @@ class TestPolicyClient():
             conditions=[condition],
             combiner='AND'
         )
-        await self._policy_client.create_alert_policy(name, alert_policy)
+        self._policy_client.create_alert_policy(name, alert_policy)
         print(f'Created {policy_name}.')
         
         
