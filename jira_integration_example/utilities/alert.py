@@ -108,7 +108,7 @@ class TestPolicyClient():
             duration=Duration(seconds=0)
         )
         condition = monitoring_v3.types.AlertPolicy.Condition(
-            display_name='test condition'
+            display_name='test condition',
             condition_threshold=condition_threshold
         )
         alert_policy = monitoring_v3.types.AlertPolicy(
