@@ -21,7 +21,7 @@ from google.protobuf.duration_pb2 import Duration
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
 TRIGGER_VALUE = 3.0
-
+    
 
 class TestCustomMetricClient():
     """Client that can create and modify custom metrics
@@ -94,6 +94,8 @@ class TestPolicyClient():
     """Client that can create and modify alerting policies and
     trigger/resolve incidents for testing purposes.
     
+    For simplicity, a 1-1 mapping is used between policies and metrics.
+    
     Attributes:
         _project_id: The id of the project to add or modify policies to
         _policy_client: A monitoring_v3.AlertPolicyServiceClient instance to call the alertPolicies API
@@ -109,8 +111,9 @@ class TestPolicyClient():
         self._threshold_value = TRIGGER_VALUE
         
     
-    def create_policy(self, display_name, metric_name):
+    def create_policy(self, policy_name, metric_name):
         """Creates an alert policy with the given display name.
+        
         By default, a policy is made with a single condition that triggers
         if a custom metric with the given metric name is above the threshold value.
         
@@ -131,25 +134,42 @@ class TestPolicyClient():
             condition_threshold=condition_threshold
         )
         alert_policy = monitoring_v3.types.AlertPolicy(
-            display_name=display_name,
+            display_name=policy_name,
+            user_labels={'type': 'test policy', 'metric': metric_name},
             conditions=[condition],
             combiner='AND'
         )
         self._policy_client.create_alert_policy(name, alert_policy)
     
 
-    def trigger_incident(self, metric_name):
+    def trigger_incident(self, policy_name):
+        """Trigger an incident for the given policy.
+        
+        Args:
+            policy_name: the name of the policy to trigger
+        """
+        name = self._policy_client.project_path(self._project_id)
+        policy = self._policy_client.list_alert_policies(name=name, filter=f'display_name={policy_name}')
+        metric_name = policy.user_labels['metric']
         self._metric_client.append_to_time_series(metric_name, self._threshold_value + 1)
     
     
-    def resolve_incident(self, metric_name):
+    def resolve_incident(self, policy_name):
+        """Resolve incidents for the given policy.
+        
+        Args:
+            policy_name: the name of the policy to resolve incidents for
+        """
+        name = self._policy_client.project_path(self._project_id)
+        policy = self._policy_client.list_alert_policies(name=name, filter=f'display_name={policy_name}')
+        metric_name = policy.user_labels['metric']
         self._metric_client.append_to_time_series(metric_name, self._threshold_value - 1)
 
 
 def main():
     client = TestPolicyClient('alertmanager-cloudmon-test')
-    client.create_policy('test', 'custom_metric')
-    
+    client.create_policy('test_policy', 'test_metric')
+    client.trigger_incident('test_policy')
     
 
 if __name__ == '__main__':
