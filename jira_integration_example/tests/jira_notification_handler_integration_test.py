@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for functions in jira_integration.py."""
+"""Integration tests for the Jira integration."""
 
 import pytest
 
 from jira import JIRA, Issue
-from utilities import jira_integration
+from utilities import alert
 
 
 def test_update_jira_with_open_incident(mocker):
