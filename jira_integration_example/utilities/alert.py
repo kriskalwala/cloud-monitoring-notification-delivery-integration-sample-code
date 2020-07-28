@@ -107,10 +107,14 @@ class TestPolicyClient():
             threshold_value=self._threshold_value,
             duration=Duration(seconds=0)
         )
-        condition = monitoring_v3.types.AlertPolicy.Condition(condition_threshold=condition_threshold)
+        condition = monitoring_v3.types.AlertPolicy.Condition(
+            display_name='test condition'
+            condition_threshold=condition_threshold
+        )
         alert_policy = monitoring_v3.types.AlertPolicy(
             display_name=display_name,
-            conditions=[condition])
+            conditions=[condition]
+        )
         self._policy_client.create_alert_policy(name, alert_policy)
     
 
