@@ -108,10 +108,10 @@ def main():
 
     # Create or load in RSA public and private keys
     if args.m:
-        with open('private.pem') as f:
+        with open('private.pem', 'rb') as f:
             private_key_pem = f.read()
 
-        with open('public.pem') as f:
+        with open('public.pem', 'rb') as f:
             public_key_pem = f.read()
 
         print("RSA public and private keys loaded")
@@ -139,7 +139,7 @@ def main():
     4. On next screen of the 'Link applications' dialog, enter the following consumer details:
         * Consumer Key: {consumer_key}
         * Consumer Name: Cloud Monitoring App
-        * Public Key:\n{public_key_pem}
+        * Public Key:\n{public_key_pem.decode('utf-8')}
     5: Click 'Continue'
 
     (Note the previous steps are based off of the instructions at https://developer.atlassian.com/server/jira/platform/oauth/#create-an-application-link)
