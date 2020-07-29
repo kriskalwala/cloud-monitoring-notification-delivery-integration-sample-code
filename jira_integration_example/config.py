@@ -41,13 +41,14 @@ class ProdJiraConfig(JiraConfig):
         self._jira_consumer_key = None
         self._jira_key_cert = None
         self._jira_project = None
+        self._gcloud_project_id = os.environ.get('PROJECT_ID')
 
 
     @property
     def JIRA_URL(self):
         if self._jira_url is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'jira_url')
+                self._gcloud_project_id, 'jira_url')
             self._jira_url = secret.get_secret_value()
 
         return self._jira_url
@@ -57,7 +58,7 @@ class ProdJiraConfig(JiraConfig):
     def JIRA_ACCESS_TOKEN(self):
         if self._jira_access_token is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'jira_access_token')
+                self._gcloud_project_id, 'jira_access_token')
             self._jira_access_token = secret.get_secret_value()
 
         return self._jira_access_token
@@ -67,7 +68,7 @@ class ProdJiraConfig(JiraConfig):
     def JIRA_ACCESS_TOKEN_SECRET(self):
         if self._jira_access_token_secret is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'jira_access_token_secret')
+                self._gcloud_project_id, 'jira_access_token_secret')
             self._jira_access_token_secret = secret.get_secret_value()
 
         return self._jira_access_token_secret
@@ -77,7 +78,7 @@ class ProdJiraConfig(JiraConfig):
     def JIRA_CONSUMER_KEY(self):
         if self._jira_consumer_key is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'jira_consumer_key')
+                self._gcloud_project_id, 'jira_consumer_key')
             self._jira_consumer_key = secret.get_secret_value()
 
         return self._jira_consumer_key
@@ -87,7 +88,7 @@ class ProdJiraConfig(JiraConfig):
     def JIRA_KEY_CERT(self):
         if self._jira_key_cert is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'jira_key_cert')
+                self._gcloud_project_id, 'jira_key_cert')
             self._jira_key_cert = secret.get_secret_value()
 
         return self._jira_key_cert
@@ -97,7 +98,7 @@ class ProdJiraConfig(JiraConfig):
     def JIRA_PROJECT(self):
         if self._jira_project is None:
             secret = secrets.GoogleSecretManagerSecret(
-                'alertmanager-2020-intern-r', 'jira_project')
+                self._gcloud_project_id, 'jira_project')
             self._jira_project = secret.get_secret_value()
 
         return self._jira_project
