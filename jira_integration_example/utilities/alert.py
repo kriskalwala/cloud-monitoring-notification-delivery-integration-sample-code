@@ -255,7 +255,7 @@ def main():
     metric_client = TestCustomMetricClient('alertmanager-cloudmon-test')
     client = TestPolicyClient('alertmanager-cloudmon-test', metric_client)
     
-    @retry.Retry(predicate=retry.if_exception_type(NotFound), deadline=10)
+    @retry.Retry(predicate=retry.if_exception_type(CustomMetricNotFoundError), deadline=10)
     def call_get_metric():
         return metric_client.get_custom_metric('test_metric')
 
