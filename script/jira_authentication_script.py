@@ -1,11 +1,18 @@
-import argparse
-from requests_oauthlib import OAuth1Session
-from oauthlib.oauth1 import SIGNATURE_RSA
-from Crypto.PublicKey import RSA
-from google.cloud import secretmanager
-from google.api_core.exceptions import AlreadyExists
+# Copyright 2020 Google, LLC.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-"""Generate necessary values and set up Jira server and Google Cloud project
+"""Generate necessary keys/tokens and set up Jira server and Google Cloud project
 such that the Cloud Monitoring Jira integration app can authenticate a Jira
 client using OAuth.
 
@@ -13,6 +20,7 @@ This program first either creates or loads in RSA public and private keys
 based on whether or not the -m flag was used. Then part of the 'OAuth dance'
 is performed and an access token and access token secret are generated to be
 used to access the Jira server in the Cloud Monitoring Jira Integration app.
+Note, this 'Oauth dance' step prompts the user to complete certain steps manually.
 Lastly, all the values needed to authenticate a Jira client using OAuth are
 stored as secrets in the secret manager of the Google Cloud project where
 the Jira integration app will be running.
@@ -24,6 +32,15 @@ the Jira integration app will be running.
   $ python3 jira_authentication_script.py PROJECT_ID JIRA_URL
   $ python3 jira_authentication_script.py -m PROJECT_ID JIRA_URL
 """
+
+
+import argparse
+from requests_oauthlib import OAuth1Session
+from oauthlib.oauth1 import SIGNATURE_RSA
+from Crypto.PublicKey import RSA
+from google.cloud import secretmanager
+from google.api_core.exceptions import AlreadyExists
+
 
 def create_secret(client, project_id, secret_id):
     """Create a new secret with the given name in Secret Manager. A secret
@@ -57,7 +74,7 @@ def add_secret_version(client, project_id, secret_id, payload):
         secret_id: The name of the secret to add a new version to
         payload: The payload of the new secret version
     """
-    
+
     parent = client.secret_path(project_id, secret_id)
 
     if not isinstance(payload, bytes):
@@ -70,22 +87,23 @@ def add_secret_version(client, project_id, secret_id, payload):
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description=('Generate necessary values and set up Jira server and Secret '
+        description=('Generate necessary keys/secrets and set up Jira server and Secret '
                      'Manager such that the Cloud Monitoring Jira integration app can '
                      'authenticate a Jira client using OAuth.'))
 
     parser.add_argument('project_id',
-                        help='id of the Google Cloud project to store Jira OAuth secrets in.')
+                        help=('id of the Google Cloud project whose Secret Manager '
+                              'to store Jira OAuth secrets in.'))
 
     parser.add_argument('jira_url',
                         help='URL of the Jira Server to setup OAuth for')
 
     parser.add_argument('-m',
                         action='store_true',
-                        help='Use already generated private/public RSA keys called private.pem and public.pem')
+                        help=('Use already generated private/public RSA keys called '
+                              'private.pem and public.pem'))
 
     args = parser.parse_args()
-
 
 
     # Create or load in RSA public and private keys
@@ -109,7 +127,6 @@ def main():
             f.write(public_key_pem)
 
         print("RSA public and private keys created")
-
 
 
     # Setup Jira Oauth
@@ -141,7 +158,7 @@ def main():
     oauth_token = fetch_response.get('oauth_token')
     oauth_token_secret = fetch_response.get('oauth_token_secret')
 
-    base_authorization_url =  f'{args.jira_url}/plugins/servlet/oauth/authorize'
+    base_authorization_url = f'{args.jira_url}/plugins/servlet/oauth/authorize'
     authorization_url = oauth.authorization_url(base_authorization_url)
     print(f'Go to the following URL and click allow: {authorization_url}\n')
     input('Once complete, press "Enter" to proceed\n')
@@ -152,11 +169,11 @@ def main():
     oauth_token_secret = oauth_tokens.get('oauth_token_secret')
 
     with open('jira_access_token.txt', 'w') as f:
-            f.write(oauth_token)
+        f.write(oauth_token)
     print('Jira access token stored in jira_access_token.txt')
 
     with open('jira_access_token_secret.txt', 'w') as f:
-            f.write(oauth_token_secret)
+        f.write(oauth_token_secret)
     print('Jira access token secret stored in jira_access_token_secret.txt')
 
 
@@ -166,22 +183,22 @@ def main():
 
     try:
         create_secret(client, args.project_id, 'jira_access_token')
-    except AlreadyExists as e:
+    except AlreadyExists:
         print('Secret already exists: "jira_access_token"')
 
     try:
         create_secret(client, args.project_id, 'jira_access_token_secret')
-    except AlreadyExists as e:
+    except AlreadyExists:
         print('Secret already exists: "jira_access_token_secret"')
 
     try:
         create_secret(client, args.project_id, 'jira_consumer_key')
-    except AlreadyExists as e:
+    except AlreadyExists:
         print('Secret already exists: "jira_consumer_key"')
 
     try:
         create_secret(client, args.project_id, 'jira_key_cert')
-    except AlreadyExists as e:
+    except AlreadyExists:
         print('Secret already exists: "jira_key_cert"')
 
 
@@ -190,7 +207,7 @@ def main():
     add_secret_version(client, args.project_id, 'jira_consumer_key', consumer_key)
     add_secret_version(client, args.project_id, 'jira_key_cert', private_key_pem)
 
-    print("Successfully setup Jira Authentication for !")
+    print("Successfully setup Jira OAuth")
 
 
 if __name__ == '__main__':
