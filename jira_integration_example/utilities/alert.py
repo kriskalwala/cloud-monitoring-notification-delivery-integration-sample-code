@@ -74,7 +74,18 @@ class TestCustomMetricClient():
         
         
     def get_custom_metric(self, metric_name):
-        return client.get_metric_descriptor(f'projects/{self._project_id}/metricDescriptors/custom.googleapis.com/{metric_name}')
+        """Get the custom metric with the given metric name.
+        
+        Args:
+            metric_name: the name of the metric descriptor
+        
+        Raises:
+            CustomMetricNotFoundError: if the metric doesn't exist
+        """
+        try:
+            return self._client.get_metric_descriptor(f'projects/{self._project_id}/metricDescriptors/custom.googleapis.com/{metric_name}')
+        except NotFound:
+            raise CustomMetricNotFoundError(f'{metric_name} does not exist.')
 
 
     def append_to_time_series(self, metric_name, point_value):
@@ -253,6 +264,7 @@ def main():
     client.create_policy('test_policy', 'test_metric')
     client.delete_policy('test_policy')
     metric_client.delete_custom_metric('test_metric')
+    metric_client.get_custom_metric('test_metric')
     
 
 if __name__ == '__main__':
