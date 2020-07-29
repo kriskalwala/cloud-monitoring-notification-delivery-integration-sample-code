@@ -28,7 +28,7 @@ from flask import Flask, request
 from jira import JIRA, JIRAError
 
 import config
-from utilities import pubsub, jira_integration
+from utilities import pubsub, jira_notification_handler
 
 
 app_config = config.load()
