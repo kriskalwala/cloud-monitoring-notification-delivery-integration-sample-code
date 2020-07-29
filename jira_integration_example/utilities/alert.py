@@ -18,6 +18,7 @@ import time
 from google.cloud import monitoring_v3
 from google.protobuf.duration_pb2 import Duration
 from google.api_core.exceptions import NotFound
+from google.api_core import retry
 
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
@@ -239,7 +240,7 @@ def main():
     metric_client = TestCustomMetricClient('alertmanager-cloudmon-test')
     client = TestPolicyClient('alertmanager-cloudmon-test', metric_client)
     
-    @retry.Retry(predicate=if_exception_type(NotFound), deadline=10)
+    @retry.Retry(predicate=retry.if_exception_type(NotFound), deadline=10)
     def call_create_policy():
         return client.create_policy('test_policy', 'test_metric')
 
