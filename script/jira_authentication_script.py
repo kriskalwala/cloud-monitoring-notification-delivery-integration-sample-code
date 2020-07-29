@@ -5,12 +5,36 @@ from Crypto.PublicKey import RSA
 from google.cloud import secretmanager
 from google.api_core.exceptions import AlreadyExists
 
+"""Generate necessary values and set up Jira server and Google Cloud project
+such that the Cloud Monitoring Jira integration app can authenticate a Jira
+client using OAuth.
+
+This program first either creates or loads in RSA public and private keys
+based on whether or not the -m flag was used. Then part of the 'OAuth dance'
+is performed and an access token and access token secret are generated to be
+used to access the Jira server in the Cloud Monitoring Jira Integration app.
+Lastly, all the values needed to authenticate a Jira client using OAuth are
+stored as secrets in the secret manager of the Google Cloud project where
+the Jira integration app will be running.
+
+
+  How to use:
+
+  $ python3 jira_authentication_script.py -h
+  $ python3 jira_authentication_script.py PROJECT_ID JIRA_URL
+  $ python3 jira_authentication_script.py -m PROJECT_ID JIRA_URL
+"""
 
 def create_secret(client, project_id, secret_id):
-    """
-    Create a new secret with the given name. A secret is a logical wrapper
-    around a collection of secret versions. Secret versions hold the actual
-    secret material.
+    """Create a new secret with the given name in Secret Manager. A secret
+    is a logical wrapper around a collection of secret versions. Secret
+    versions hold the actual secret material.
+
+    Args:
+        client: A Secret Manager client to use to create the secret
+        project_id: The id of the Google Cloud project in which to
+                    in which to create the secret
+        secret_id: The name of the secret to create
     """
 
     parent = client.project_path(project_id)
@@ -25,6 +49,13 @@ def create_secret(client, project_id, secret_id):
 def add_secret_version(client, project_id, secret_id, payload):
     """
     Add a new secret version to the given secret with the provided payload.
+
+    Args:
+        client: A Secret Manager client to use to add the secret version
+        project_id: The id of the Google Cloud project in which to
+                    in which to add the secret version
+        secret_id: The name of the secret to add a new version to
+        payload: The payload of the new secret version
     """
     
     parent = client.secret_path(project_id, secret_id)
@@ -37,22 +68,27 @@ def add_secret_version(client, project_id, secret_id, payload):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=('Setup Jira Server OAuth'))
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description=('Generate necessary values and set up Jira server and Secret '
+                     'Manager such that the Cloud Monitoring Jira integration app can '
+                     'authenticate a Jira client using OAuth.'))
 
     parser.add_argument('project_id',
-                        help='id of Google Cloud project to store secrets in')
+                        help='id of the Google Cloud project to store Jira OAuth secrets in.')
 
     parser.add_argument('jira_url',
                         help='URL of the Jira Server to setup OAuth for')
 
     parser.add_argument('-m',
                         action='store_true',
-                        help='use already generated private/public RSA keys called private.pem and public.pem')
+                        help='Use already generated private/public RSA keys called private.pem and public.pem')
 
     args = parser.parse_args()
 
 
-    # Create or read in RSA public and private keys
+
+    # Create or load in RSA public and private keys
     if args.m:
         with open('private.pem') as f:
             private_key_pem = f.read()
@@ -89,7 +125,8 @@ def main():
         * Public Key:\n{public_key_pem}
     5: Click 'Continue'
 
-    (Note the previous steps are based off of the instructions at https://developer.atlassian.com/server/jira/platform/oauth/#create-an-application-link)\n""")
+    (Note the previous steps are based off of the instructions at https://developer.atlassian.com/server/jira/platform/oauth/#create-an-application-link)
+    """)
 
     input('Once complete, press "Enter" to proceed\n')
 
@@ -153,7 +190,7 @@ def main():
     add_secret_version(client, args.project_id, 'jira_consumer_key', consumer_key)
     add_secret_version(client, args.project_id, 'jira_key_cert', private_key_pem)
 
-    print("Successfully setup Jira Authentication!")
+    print("Successfully setup Jira Authentication for !")
 
 
 if __name__ == '__main__':
