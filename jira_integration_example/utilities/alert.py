@@ -27,6 +27,10 @@ class Error(Exception):
     """Base class for all errors raised in this module."""
 
 
+class CustomMetricNotFoundError(Error):
+    """Raised when a metric can't be found."""
+    
+
 class DuplicatePolicyError(Error):
     """Raised when policy creation is attempted with a display name that already exists."""
 
@@ -159,12 +163,16 @@ class TestPolicyClient():
         
         Raises:
             DuplicatePolicyError: If policy with given policy display name already exists.
+            CustomMetricNotFoundError: If the given metric doesn't exist.
         """
         try:
             self.get_policy(policy_name)
-        except PolicyNotFoundError:        
-            self._metric_client.create_custom_metric(metric_name)
-
+        except PolicyNotFoundError:
+            pass
+        else:
+            raise DuplicatePolicyError(f'policy with display name {policy_name} already exists.')
+            
+        try:            
             condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
                 filter=f'metric.type = "custom.googleapis.com/{metric_name}" AND resource.type = "gce_instance"',
                 comparison=monitoring_v3.enums.ComparisonType.COMPARISON_GT,
@@ -183,8 +191,8 @@ class TestPolicyClient():
             )
             self._policy_client.create_alert_policy(self._project_name, alert_policy)
             print(f'Created {policy_name}.')
-        else:
-            raise DuplicatePolicyError(f'policy with display name {policy_name} already exists.')
+        except google.api_core.exceptions.NotFound:
+            raise CustomMetricNotFoundError(f'{metric_name} does not exist.')
         
         
     def delete_policy(self, policy_name):
@@ -237,7 +245,6 @@ class TestPolicyClient():
 
 def main():
     client = TestPolicyClient('alertmanager-cloudmon-test')
-    client.get_policy('test_policy')
     client.create_policy('test_policy', 'test_metric')
     client.delete_policy('test_policy')
     
