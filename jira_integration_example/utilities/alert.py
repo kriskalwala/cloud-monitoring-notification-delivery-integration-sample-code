@@ -71,6 +71,10 @@ class TestCustomMetricClient():
         descriptor.description = 'A custom metric meant for testing purposes'
         descriptor = self._client.create_metric_descriptor(self._project_name, descriptor)
         print(f'Created {descriptor.name}.')
+        
+        
+    def get_custom_metric(self, metric_name):
+        return client.get_metric_descriptor(f'projects/{self._project_id}/metricDescriptors/custom.googleapis.com/{metric_name}')
 
 
     def append_to_time_series(self, metric_name, point_value):
@@ -235,17 +239,18 @@ class TestPolicyClient():
         self._metric_client.append_to_time_series(metric_name, self._threshold_value - 1)
         print(f'Resolved incident(s) for {policy_name}.')
 
-
+# all this will basically be run in the integration test file
 def main():
     metric_client = TestCustomMetricClient('alertmanager-cloudmon-test')
     client = TestPolicyClient('alertmanager-cloudmon-test', metric_client)
     
     @retry.Retry(predicate=retry.if_exception_type(NotFound), deadline=10)
-    def call_create_policy():
-        return client.create_policy('test_policy', 'test_metric')
+    def call_get_metric():
+        return metric_client.get_custom_metric('test_metric')
 
     metric_client.create_custom_metric('test_metric')
-    call_create_policy()
+    call_get_metric()
+    client.create_policy('test_policy', 'test_metric')
     client.delete_policy('test_policy')
     metric_client.delete_custom_metric('test_metric')
     
