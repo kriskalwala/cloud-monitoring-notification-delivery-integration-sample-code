@@ -20,9 +20,9 @@ This program first either creates or loads in RSA public and private keys
 based on whether or not the -m flag was used. Then part of the 'OAuth dance'
 is performed and an access token and access token secret are generated to be
 used to access the Jira server in the Cloud Monitoring Jira Integration app.
-Note, this 'Oauth dance' step prompts the user to complete certain steps manually.
+Note, this 'OAuth dance' step prompts the user to complete certain steps manually.
 Lastly, all the values needed to authenticate a Jira client using OAuth are
-stored as secrets in the secret manager of the Google Cloud project where
+stored as secrets in the Secret Manager of the Google Cloud project where
 the Jira integration app will be running.
 
 
@@ -50,7 +50,7 @@ def create_secret(client, project_id, secret_id):
     Args:
         client: A Secret Manager client to use to create the secret
         project_id: The id of the Google Cloud project in which to
-                    in which to create the secret
+                    create the secret
         secret_id: The name of the secret to create
     """
 
@@ -70,7 +70,7 @@ def add_secret_version(client, project_id, secret_id, payload):
     Args:
         client: A Secret Manager client to use to add the secret version
         project_id: The id of the Google Cloud project in which to
-                    in which to add the secret version
+                    add the secret version
         secret_id: The name of the secret to add a new version to
         payload: The payload of the new secret version
     """
