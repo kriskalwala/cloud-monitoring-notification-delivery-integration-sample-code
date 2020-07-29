@@ -249,23 +249,3 @@ class TestPolicyClient():
         metric_name = policy.user_labels['metric']
         self._metric_client.append_to_time_series(metric_name, self._threshold_value - 1)
         print(f'Resolved incident(s) for {policy_name}.')
-
-# all this will basically be run in the integration test file
-def main():
-    metric_client = TestCustomMetricClient('alertmanager-cloudmon-test')
-    client = TestPolicyClient('alertmanager-cloudmon-test', metric_client)
-    
-    @retry.Retry(predicate=retry.if_exception_type(CustomMetricNotFoundError), deadline=10)
-    def call_get_metric():
-        return metric_client.get_custom_metric('test_metric')
-
-    metric_client.create_custom_metric('test_metric')
-    call_get_metric()
-    client.create_policy('test_policy', 'test_metric')
-    client.delete_policy('test_policy')
-    metric_client.delete_custom_metric('test_metric')
-    metric_client.get_custom_metric('test_metric')
-    
-
-if __name__ == '__main__':
-    main()
