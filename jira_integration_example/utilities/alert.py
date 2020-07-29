@@ -17,6 +17,7 @@ import time
 
 from google.cloud import monitoring_v3
 from google.protobuf.duration_pb2 import Duration
+from google.api_core.exceptions import NotFound
 
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
@@ -191,7 +192,7 @@ class TestPolicyClient():
             )
             self._policy_client.create_alert_policy(self._project_name, alert_policy)
             print(f'Created {policy_name}.')
-        except google.api_core.exceptions.NotFound:
+        except NotFound:
             raise CustomMetricNotFoundError(f'{metric_name} does not exist.')
         
         
