@@ -107,7 +107,7 @@ def test_update_jira_with_invalid_incident_state(mocker):
                                  'resource_name': 'test_resource', 'summary': 'test_summary',
                                  'url': 'http://test.com', 'incident_id': '0.abcdef123456'}}
 
-    with pytest.raises(jira_integration.UnknownIncidentStateError) as e:
+    with pytest.raises(jira_notification_handler.UnknownIncidentStateError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 
@@ -121,7 +121,7 @@ def test_update_jira_with_missing_incident_data(mocker):
     jira_status = "Done"
     notification = {}
 
-    with pytest.raises(jira_integration.NotificationParseError) as e:
+    with pytest.raises(jira_notification_handler.NotificationParseError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 
@@ -139,7 +139,7 @@ def test_update_jira_with_missing_state_data(mocker):
                                  'url': 'http://test.com',
                                  'incident_id': '0.abcdef123456'}}
 
-    with pytest.raises(jira_integration.NotificationParseError) as e:
+    with pytest.raises(jira_notification_handler.NotificationParseError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 
@@ -157,7 +157,7 @@ def test_update_jira_with_missing_condition_name_data(mocker):
                                  'url': 'http://test.com',
                                  'incident_id': '0.abcdef123456'}}
 
-    with pytest.raises(jira_integration.NotificationParseError) as e:
+    with pytest.raises(jira_notification_handler.NotificationParseError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 
@@ -175,7 +175,7 @@ def test_update_jira_with_missing_resource_name_data(mocker):
                                  'url': 'http://test.com',
                                  'incident_id': '0.abcdef123456'}}
 
-    with pytest.raises(jira_integration.NotificationParseError) as e:
+    with pytest.raises(jira_notification_handler.NotificationParseError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 
@@ -193,7 +193,7 @@ def test_update_jira_with_missing_summary_data(mocker):
                                  'url': 'http://test.com',
                                  'incident_id': '0.abcdef123456'}}
 
-    with pytest.raises(jira_integration.NotificationParseError) as e:
+    with pytest.raises(jira_notification_handler.NotificationParseError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 
@@ -211,7 +211,7 @@ def test_update_jira_with_missing_url_data(mocker):
                                  'summary': 'test_summary',
                                  'incident_id': '0.abcdef123456'}}
 
-    with pytest.raises(jira_integration.NotificationParseError) as e:
+    with pytest.raises(jira_notification_handler.NotificationParseError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 
@@ -229,7 +229,7 @@ def test_update_jira_with_missing_incident_id_data(mocker):
                                  'summary': 'test_summary',
                                  'url': 'http://test.com'}}
 
-    with pytest.raises(jira_integration.NotificationParseError) as e:
+    with pytest.raises(jira_notification_handler.NotificationParseError) as e:
         assert jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client, jira_project, jira_status, notification)
 

@@ -64,13 +64,13 @@ def handle_pubsub_message():
     try:
         jira_client = JIRA(app.config['JIRA_URL'], basic_auth=(app.config['JIRA_USERNAME'],
                                                                app.config['JIRA_PASSWORD']))
-        jira_integration.update_jira_based_on_monitoring_notification(
+        jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client,
             app.config['JIRA_PROJECT'],
             app.config['CLOSED_JIRA_ISSUE_STATUS'],
             monitoring_notification_dict)
 
-    except (jira_integration.Error, JIRAError) as e:
+    except (jira_notification_handler.Error, JIRAError) as e:
         logger.error(e)
         return (str(e), 400)
 
