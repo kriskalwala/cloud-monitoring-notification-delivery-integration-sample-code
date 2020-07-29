@@ -96,7 +96,8 @@ def main():
                               'to store Jira OAuth secrets in.'))
 
     parser.add_argument('jira_url',
-                        help='URL of the Jira Server to setup OAuth for')
+                        help=('URL of the Jira Server to setup OAuth for, e.g '
+                             'https://jira.atlassian.com'))
 
     parser.add_argument('-m',
                         action='store_true',
@@ -135,7 +136,8 @@ def main():
     print(f"""\nComplete the following steps:
     1. In Jira, navigate to Jira Settings > Applications > Application Links
     2. In the 'Enter the URL of the application you want to link' field, enter http://example.com/
-    3. On the first screen of the 'Link applications' dialog, select the 'Create incoming link' checkbox and click 'Continue'
+    3. On the first screen of the 'Link applications' dialog, enter 'Cloud Monitoring App' for
+       'Application Name', select the 'Create incoming link' checkbox, and click 'Continue'
     4. On next screen of the 'Link applications' dialog, enter the following consumer details:
         * Consumer Key: {consumer_key}
         * Consumer Name: Cloud Monitoring App
