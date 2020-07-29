@@ -18,7 +18,6 @@ import time
 from google.cloud import monitoring_v3
 from google.protobuf.duration_pb2 import Duration
 from google.api_core.exceptions import NotFound
-from google.api_core import retry
 
 
 PROJECT_ID = os.environ['GOOGLE_CLOUD_PROJECT']
@@ -31,7 +30,7 @@ class Error(Exception):
 
 class CustomMetricNotFoundError(Error):
     """Raised when a metric can't be found."""
-    
+
 
 class DuplicatePolicyError(Error):
     """Raised when policy creation is attempted with a display name that already exists."""
@@ -44,21 +43,21 @@ class PolicyNotFoundError(Error):
 class TestCustomMetricClient():
     """Client that can create and modify custom metrics
     used as monitoring data for testing purposes.
-    
+
     Attributes:
         _project_id: The id of the project to store metrics
         _client: A monitoring_v3.MetricServiceClient instance to modify metric data
     """
-    
+
     def __init__(self, project_id):
         self._project_id = project_id
         self._client = monitoring_v3.MetricServiceClient()
         self._project_name = self._client.project_path(self._project_id)
-        
-        
+
+
     def create_custom_metric(self, metric_name):
         """Creates a custom metric with the given metric name.
-        
+
         Args:
             metric_name: The name of the metric
         """
@@ -71,14 +70,14 @@ class TestCustomMetricClient():
         descriptor.description = 'A custom metric meant for testing purposes'
         descriptor = self._client.create_metric_descriptor(self._project_name, descriptor)
         print(f'Created {descriptor.name}.')
-        
-        
+
+
     def get_custom_metric(self, metric_name):
         """Get the custom metric with the given metric name.
-        
+
         Args:
             metric_name: the name of the metric descriptor
-        
+
         Raises:
             CustomMetricNotFoundError: if the metric doesn't exist
         """
@@ -90,7 +89,7 @@ class TestCustomMetricClient():
 
     def append_to_time_series(self, metric_name, point_value):
         """Add a data point with the given point value to the specified metric.
-        
+
         Args:
             metric_name: The name of the metric to modify
             point_value: The value of the data point to add
@@ -107,11 +106,11 @@ class TestCustomMetricClient():
         point.interval.end_time.nanos = int(
             (now - point.interval.end_time.seconds) * 10**9)
         self._client.create_time_series(self._project_name, [series])
-        
-        
+
+
     def delete_custom_metric(self, metric_name):
         """Delete the given custom metric.
-        
+
         Args:
             metric_name: Name of metric to delete
         """
@@ -123,32 +122,32 @@ class TestCustomMetricClient():
 class TestPolicyClient():
     """Client that can create and modify alerting policies and
     trigger/resolve incidents for testing purposes.
-        
+
     Attributes:
         _project_id: The id of the project to add or modify policies to
         _policy_client: A monitoring_v3.AlertPolicyServiceClient instance to call the alertPolicies API
-        _metric_client: A TestCustomMetricClient() instance to modify metric data 
+        _metric_client: A TestCustomMetricClient() instance to modify metric data
         to trigger/resolve incidents
         _threshold_value: Value above which a policy triggers an incident
     """
-  
+
     def __init__(self, project_id, metric_client):
         self._project_id = project_id
         self._policy_client = monitoring_v3.AlertPolicyServiceClient()
         self._metric_client = metric_client
         self._threshold_value = TRIGGER_VALUE
         self._project_name = self._policy_client.project_path(self._project_id)
-    
-    
+
+
     def get_policy(self, policy_name):
         """Get the policy with the given policy display name.
-        
+
         Args:
             policy_name: the display name of the policy
-            
+
         Returns:
             the AlertPolicy instance with the given policy display name
-            
+
         Raises:
             PolicyNotFoundError: if the policy doesn't exist
         """
@@ -157,18 +156,18 @@ class TestPolicyClient():
             return policy
         except IndexError:
             raise PolicyNotFoundError()
-        
-    
+
+
     def create_policy(self, policy_name, metric_name):
         """Creates an alert policy with the given policy display name.
-        
+
         By default, a policy is made with a single condition that triggers
         if a custom metric with the given metric name is above the threshold value.
-        
+
         Args:
             policy_name: the name to identify the policy by
             metric_name: metric to attach the policy to
-        
+
         Raises:
             DuplicatePolicyError: If policy with given policy display name already exists.
             CustomMetricNotFoundError: If the given metric doesn't exist.
@@ -179,8 +178,8 @@ class TestPolicyClient():
             pass
         else:
             raise DuplicatePolicyError(f'policy with display name {policy_name} already exists.')
-            
-        try:            
+
+        try:
             condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
                 filter=f'metric.type = "custom.googleapis.com/{metric_name}" AND resource.type = "gce_instance"',
                 comparison=monitoring_v3.enums.ComparisonType.COMPARISON_GT,
@@ -201,35 +200,35 @@ class TestPolicyClient():
             print(f'Created {policy_name}.')
         except NotFound:
             raise CustomMetricNotFoundError(f'{metric_name} does not exist.')
-        
-        
+
+
     def delete_policy(self, policy_name):
         """Deletes all policies with the given policy display name.
-        
+
         Args:
             policy_name: the display name of the policy to delete
         """
         policies = list(self._policy_client.list_alert_policies(name=self._project_name, filter_=f'display_name = "{policy_name}"'))
-        
+
         for policy in policies:
             self._policy_client.delete_alert_policy(policy.name)
-        
+
         print(f'Deleted {policy_name}.')
-        
-        
+
+
     def delete_test_policies(self):
-        """Deletes all test policies."""      
-        policies = list(self._policy_client.list_alert_policies(name=self._project_name, filter_=f'user_labels["type"] = "test_policy"'))
-        
+        """Deletes all test policies."""
+        policies = list(self._policy_client.list_alert_policies(name=self._project_name, filter_='user_labels["type"] = "test_policy"'))
+
         for policy in policies:
             self._policy_client.delete_alert_policy(policy.name)
-            
+
         print('Deleted all test policies.')
 
-            
+
     def trigger_incident(self, policy_name):
-        """Trigger an incident for the given policy. 
-        
+        """Trigger an incident for the given policy.
+
         Args:
             policy_name: the name of the policy to trigger
         """
@@ -237,11 +236,11 @@ class TestPolicyClient():
         metric_name = policy.user_labels['metric']
         self._metric_client.append_to_time_series(metric_name, self._threshold_value + 1)
         print(f'Triggered incident for {policy_name}.')
-        
-    
+
+
     def resolve_incident(self, policy_name):
         """Resolve incidents for the given policy.
-        
+
         Args:
             policy_name: the name of the policy to resolve incidents for
         """

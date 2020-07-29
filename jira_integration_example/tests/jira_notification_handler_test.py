@@ -40,7 +40,7 @@ def test_update_jira_with_open_incident(mocker):
     expected_labels = [incident_id_label]
 
     jira_notification_handler.update_jira_based_on_monitoring_notification(jira_client, jira_project,
-                                                                  jira_status, notification)
+                                                                           jira_status, notification)
 
     jira_client.create_issue.assert_called_once_with(project=jira_project,
                                                      summary=expected_summary,
@@ -64,7 +64,7 @@ def test_update_jira_with_closed_incident_corresponding_to_jira_issues(mocker):
                                  'url': 'http://test.com', 'incident_id': incident_id}}
 
     jira_notification_handler.update_jira_based_on_monitoring_notification(jira_client, jira_project,
-                                                                  jira_status, notification)
+                                                                           jira_status, notification)
 
     incident_id_label = f'monitoring_incident_id_{incident_id}'
     expected_jira_query = f'labels = {incident_id_label} AND status != {jira_status}'
@@ -89,7 +89,7 @@ def test_update_jira_with_closed_incident_corresponding_to_no_jira_issues(mocker
                                  'url': 'http://test.com', 'incident_id': incident_id}}
 
     jira_notification_handler.update_jira_based_on_monitoring_notification(jira_client, jira_project,
-                                                                  jira_status, notification)
+                                                                           jira_status, notification)
 
     incident_id_label = f'monitoring_incident_id_{incident_id}'
     expected_jira_query = f'labels = {incident_id_label} AND status != {jira_status}'
