@@ -28,9 +28,9 @@ the Jira integration app will be running.
 
   How to use:
 
-  $ python3 jira_authentication_script.py -h
-  $ python3 jira_authentication_script.py PROJECT_ID JIRA_URL
-  $ python3 jira_authentication_script.py -m PROJECT_ID JIRA_URL
+  $ python3 jira_oauth_setup_script.py -h
+  $ python3 jira_oauth_setup_script.py PROJECT_ID JIRA_URL
+  $ python3 jira_oauth_setup_script.py -m PROJECT_ID JIRA_URL
 """
 
 
@@ -97,7 +97,7 @@ def main():
 
     parser.add_argument('jira_url',
                         help=('URL of the Jira Server to setup OAuth for, e.g '
-                             'https://jira.atlassian.com'))
+                              'https://jira.atlassian.com'))
 
     parser.add_argument('-m',
                         action='store_true',
