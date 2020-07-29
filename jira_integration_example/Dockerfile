@@ -35,6 +35,9 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY . ./
 
+ARG PROJECT_ID
+ENV PROJECT_ID=$PROJECT_ID
+
 # Run the web service on container startup. 
 # Use gunicorn webserver with one worker process and 8 threads.
 # For environments with multiple CPU cores, increase the number of workers
