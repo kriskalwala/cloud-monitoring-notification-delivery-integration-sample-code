@@ -14,6 +14,7 @@
 
 import os
 import time
+import threading
 
 from google.cloud import monitoring_v3
 from google.protobuf.duration_pb2 import Duration
@@ -116,21 +117,12 @@ class TestPolicyClient():
         _threshold_value: Value above which a policy triggers an incident
     """
   
-    def __init__(self, project_id):
+    def __init__(self, project_id, metric_client):
         self._project_id = project_id
         self._policy_client = monitoring_v3.AlertPolicyServiceClient()
-        self._metric_client = TestCustomMetricClient(self._project_id)
+        self._metric_client = metric_client
         self._threshold_value = TRIGGER_VALUE
         self._project_name = self._policy_client.project_path(self._project_id)
-        
-        
-    def get_metric_client(self):
-        """Get the TestCustomMetricClient instance.
-        
-        Returns:
-            The TestCustomMetricClient instance for this client.
-        """
-        return self._metric_client
     
     
     def get_policy(self, policy_name):
@@ -245,7 +237,11 @@ class TestPolicyClient():
 
 
 def main():
-    client = TestPolicyClient('alertmanager-cloudmon-test')
+    metric_client = TestCustomMetricClient('alertmanager-cloudmon-test')
+    client = TestPolicyClient('alertmanager-cloudmon-test', metric_client)
+    thread = threading.Thread(target=metric_client.create_custom_metric)
+    thread.start()
+    thread.join()
     client.create_policy('test_policy', 'test_metric')
     client.delete_policy('test_policy')
     
