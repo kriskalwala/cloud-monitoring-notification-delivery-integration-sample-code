@@ -31,6 +31,10 @@ class DuplicatePolicyError(Error):
     """Raised when policy creation is attempted with a display name that already exists."""
 
 
+class PolicyNotFoundError(Error):
+    """Raised when a policy can't be found."""
+
+
 class TestCustomMetricClient():
     """Client that can create and modify custom metrics
     used as monitoring data for testing purposes.
@@ -132,9 +136,15 @@ class TestPolicyClient():
             
         Returns:
             the AlertPolicy instance with the given policy display name
+            
+        Raises:
+            PolicyNotFoundError: if the policy doesn't exist
         """
-        policy = list(self._policy_client.list_alert_policies(name=self._project_name, filter_=f'display_name = "{policy_name}"'))[0]
-        return policy
+        try:
+            policy = list(self._policy_client.list_alert_policies(name=self._project_name, filter_=f'display_name = "{policy_name}"'))[0]
+            return policy
+        except IndexError:
+            raise PolicyNotFoundError()
         
     
     def create_policy(self, policy_name, metric_name):
@@ -150,26 +160,31 @@ class TestPolicyClient():
         Raises:
             DuplicatePolicyError: If policy with given policy display name already exists.
         """
-        self._metric_client.create_custom_metric(metric_name)
+        try:
+            self.get_policy(policy_name)
+        except PolicyNotFoundError:        
+            self._metric_client.create_custom_metric(metric_name)
 
-        condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
-            filter=f'metric.type = "custom.googleapis.com/{metric_name}" AND resource.type = "gce_instance"',
-            comparison=monitoring_v3.enums.ComparisonType.COMPARISON_GT,
-            threshold_value=self._threshold_value,
-            duration=Duration(seconds=0)
-        )
-        condition = monitoring_v3.types.AlertPolicy.Condition(
-            display_name='test condition',
-            condition_threshold=condition_threshold
-        )
-        alert_policy = monitoring_v3.types.AlertPolicy(
-            display_name=policy_name,
-            user_labels={'type': 'test_policy', 'metric': metric_name},
-            conditions=[condition],
-            combiner='AND'
-        )
-        self._policy_client.create_alert_policy(self._project_name, alert_policy)
-        print(f'Created {policy_name}.')
+            condition_threshold = monitoring_v3.types.AlertPolicy.Condition.MetricThreshold(
+                filter=f'metric.type = "custom.googleapis.com/{metric_name}" AND resource.type = "gce_instance"',
+                comparison=monitoring_v3.enums.ComparisonType.COMPARISON_GT,
+                threshold_value=self._threshold_value,
+                duration=Duration(seconds=0)
+            )
+            condition = monitoring_v3.types.AlertPolicy.Condition(
+                display_name='test condition',
+                condition_threshold=condition_threshold
+            )
+            alert_policy = monitoring_v3.types.AlertPolicy(
+                display_name=policy_name,
+                user_labels={'type': 'test_policy', 'metric': metric_name},
+                conditions=[condition],
+                combiner='AND'
+            )
+            self._policy_client.create_alert_policy(self._project_name, alert_policy)
+            print(f'Created {policy_name}.')
+        else:
+            raise DuplicatePolicyError(f'policy with display name {policy_name} already exists.')
         
         
     def delete_policy(self, policy_name):
@@ -222,6 +237,7 @@ class TestPolicyClient():
 
 def main():
     client = TestPolicyClient('alertmanager-cloudmon-test')
+    client.get_policy('test_policy')
     client.create_policy('test_policy', 'test_metric')
     client.delete_policy('test_policy')
     
