@@ -14,7 +14,6 @@
 
 import os
 import time
-import threading
 
 from google.cloud import monitoring_v3
 from google.protobuf.duration_pb2 import Duration
@@ -239,11 +238,15 @@ class TestPolicyClient():
 def main():
     metric_client = TestCustomMetricClient('alertmanager-cloudmon-test')
     client = TestPolicyClient('alertmanager-cloudmon-test', metric_client)
-    thread = threading.Thread(target=metric_client.create_custom_metric)
-    thread.start()
-    thread.join()
-    client.create_policy('test_policy', 'test_metric')
+    
+    @retry.Retry(predicate=if_exception_type(NotFound), deadline=10)
+    def call_create_policy():
+        return client.create_policy('test_policy', 'test_metric')
+
+    metric_client.create_custom_metric('test_metric')
+    call_create_policy()
     client.delete_policy('test_policy')
+    metric_client.delete_custom_metric('test_metric')
     
 
 if __name__ == '__main__':
