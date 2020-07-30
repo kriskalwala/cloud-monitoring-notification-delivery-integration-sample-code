@@ -17,6 +17,7 @@ from tests import constants
 
 import copy
 
+from jira import JIRA, Issue
 from google.cloud import monitoring_v3
 from google.protobuf.duration_pb2 import Duration
 from google.api_core import exceptions
@@ -36,6 +37,11 @@ def call_get_alert_policy(policy_client, name):
 @retry.Retry(predicate=retry.if_exception_type(exceptions.NotFound), deadline=10)
 def call_get_notification_channel(notification_channel_client, name):
     return notification_channel_client.get_notification_channel(name)
+
+
+@retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=120)
+def call_assert_jira_issue_created(jira_client):
+    jira_client.create_issue.assert_called_once()
 
 
 @pytest.fixture(scope='function')
@@ -81,7 +87,7 @@ def alert_policy(metric_descriptor, notification_channel):
     print(metric_descriptor.name)
     print(notification_channel.name)
 
-    test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE.copy()
+    test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE
     test_alert_policy['notification_channels'].append(notification_channel.name)
 
     alert_policy = policy_client.create_alert_policy(
@@ -94,41 +100,35 @@ def alert_policy(metric_descriptor, notification_channel):
     # tear down
     policy_client.delete_alert_policy(alert_policy.name)
     
-
-@pytest.fixture(scope='function')
-def alert_policy_resources(metric_descriptor, notification_channel):
-    # setup
-    policy_client = monitoring_v3.AlertPolicyServiceClient()
-    gcp_project_path = policy_client.project_path(constants.PROJECT_ID)
     
-    print(metric_descriptor.name)
-    print(notification_channel.name)
-
-    test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE.copy()
-    test_alert_policy['notification_channels'].append(notification_channel.name)
-
-    alert_policy = policy_client.create_alert_policy(
-        gcp_project_path,
-        test_alert_policy)
-    alert_policy = call_get_alert_policy(policy_client, alert_policy.name)
-
-    yield {'metric_descriptor': metric_descriptor,
-           'notification_channel': notification_channel,
-           'alert_policy': alert_policy}
+def append_to_time_series(point_value):
+    client = monitoring_v3.MetricServiceClient()
+    gcp_project_path = client.project_path(constants.PROJECT_ID)
     
-    # tear down
-    policy_client.delete_alert_policy(alert_policy.name)
+    series = monitoring_v3.types.TimeSeries(constants.TEST_SERIES)
+    point = series.points.add()
+    point.value.double_value = point_value
+    now = time.time()
+    point.interval.end_time.seconds = int(now)
+    point.interval.end_time.nanos = int(
+        ( - point.interval.end_time.seconds) * 10**9)
+        
+    client.create_time_series(gcp_project_path, [time_series])
 
 
-def test_end_to_end(metric_descriptor, notification_channel, alert_policy):
-    # metric_descriptor = alert_policy_resources['metric_descriptor']
-    # notification_channel = alert_policy_resources['notification_channel']
-    # alert_policy = alert_policy_resources['alert_policy']
-    
+def test_end_to_end(metric_descriptor, notification_channel, alert_policy, mocker):
     assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR['type']
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL['display_name']
     assert alert_policy.display_name == constants.ALERT_POLICY_NAME
     assert alert_policy.user_labels == constants.TEST_ALERT_POLICY_TEMPLATE['user_labels']
     assert alert_policy.notification_channels[0] == notification_channel.name
+    
+    # trigger incident
+    append_to_time_series(constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
+    
+    jira_client = mocker.create_autospec(JIRA, instance=True)
+    call_assert_jira_issue_created(jira_client)
+    
+    
     
     

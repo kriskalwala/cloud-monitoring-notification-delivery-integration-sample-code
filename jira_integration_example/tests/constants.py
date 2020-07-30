@@ -17,6 +17,9 @@ from google.protobuf.duration_pb2 import Duration
 
 METRIC_NAME = 'integ-test-metric'
 METRIC_PATH = f'custom.googleapis.com/{METRIC_NAME}'
+RESOURCE_TYPE = 'gce_instance'
+INSTANCE_ID = '1234567890123456789'
+ZONE = 'us-central1-f'
 ALERT_POLICY_NAME = 'integ-test-policy'
 TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE = 3.0
 PROJECT_ID = os.environ['PROJECT_ID']
@@ -44,11 +47,24 @@ TEST_ALERT_POLICY_TEMPLATE = {
     'conditions': [{
         'display_name': 'test condition',
         'condition_threshold': {
-            'filter': f'metric.type = "{METRIC_PATH}" AND resource.type = "gce_instance"',
+            'filter': f'metric.type = {METRIC_PATH} AND resource.type = {RESOURCE_TYPE}',
             'comparison': 'COMPARISON_GT',
             'threshold_value': TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE,
             'duration': Duration(seconds=0),
         }
     }],
     'notification_channels': []
+}
+
+TEST_SERIES = {
+    'metric': {
+        'type': METRIC_PATH,
+    },
+    'resource': {
+        'type': RESOURCE_TYPE,
+        'labels': {
+            'instance_id': INSTANCE_ID,
+            'zone': ZONE
+        }
+    }
 }
