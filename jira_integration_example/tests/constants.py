@@ -47,7 +47,7 @@ TEST_ALERT_POLICY_TEMPLATE = {
     'conditions': [{
         'display_name': 'test condition',
         'condition_threshold': {
-            'filter': f'metric.type = {METRIC_PATH} AND resource.type = {RESOURCE_TYPE}',
+            'filter': f'metric.type = "{METRIC_PATH}" AND resource.type = "{RESOURCE_TYPE}"',
             'comparison': 'COMPARISON_GT',
             'threshold_value': TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE,
             'duration': Duration(seconds=0),

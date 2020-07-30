@@ -99,13 +99,17 @@ def alert_policy(metric_descriptor, notification_channel):
     
     # tear down
     policy_client.delete_alert_policy(alert_policy.name)
-    
+
     
 def append_to_time_series(point_value):
     client = monitoring_v3.MetricServiceClient()
     gcp_project_path = client.project_path(constants.PROJECT_ID)
     
-    series = monitoring_v3.types.TimeSeries(constants.TEST_SERIES)
+    series = monitoring_v3.types.TimeSeries()
+    series.metric.type = 'custom.googleapis.com/' + metric_name
+    series.resource.type = 'gce_instance'
+    series.resource.labels['instance_id'] = '1234567890123456789'
+    series.resource.labels['zone'] = 'us-central1-f'
     point = series.points.add()
     point.value.double_value = point_value
     now = time.time()
