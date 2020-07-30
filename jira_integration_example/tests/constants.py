@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from google.protobuf.duration_pb2 import Duration
 
 METRIC_NAME = 'integ-test-metric'
 METRIC_PATH = f'custom.googleapis.com/{METRIC_NAME}'
 ALERT_POLICY_NAME = 'integ-test-policy'
 TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE = 3.0
-PROJECT_ID = os.environ.['PROJECT_ID']
+PROJECT_ID = os.environ['PROJECT_ID']
         
 TEST_METRIC_DESCRIPTOR = {
     'type': f'custom.googleapis.com/{METRIC_NAME}',
@@ -35,8 +37,8 @@ TEST_NOTIFICATION_CHANNEL = {
     }
 }   
 
-TEST_ALERT_POLICY = {
-    'display_name': ALERT_POLICY_NAME',
+TEST_ALERT_POLICY_TEMPLATE = {
+    'display_name': ALERT_POLICY_NAME,
     'user_labels': {'type': 'test_policy', 'metric': METRIC_NAME},
     'combiner': 'AND',
     'conditions': [{
@@ -44,9 +46,9 @@ TEST_ALERT_POLICY = {
         'condition_threshold': {
             'filter': f'metric.type = "{METRIC_PATH}" AND resource.type = "gce_instance"',
             'comparison': 'COMPARISON_GT',
-            'threshold_value': TRIGGER_NOTIFICATION_THRESHOLD,
-            'duration'='0',
+            'threshold_value': TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE,
+            'duration': Duration(seconds=0),
         }
     }],
-    'notification_channels': [TEST_NOTIFICATION_CHANNEL]
+    'notification_channels': []
 }

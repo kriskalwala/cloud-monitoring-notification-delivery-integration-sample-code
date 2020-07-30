@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import pytest
-import constants
+from tests import constants
+
+import copy
 
 from google.cloud import monitoring_v3
 from google.protobuf.duration_pb2 import Duration
@@ -71,7 +73,7 @@ def notification_channel():
 
 
 @pytest.fixture(scope='function')
-def alert_policy_resources(metric_desciptor, notification_channel):
+def alert_policy_resources(metric_descriptor, notification_channel):
     # setup
     policy_client = monitoring_v3.AlertPolicyServiceClient()
     gcp_project_path = policy_client.project_path(constants.PROJECT_ID)
@@ -79,9 +81,12 @@ def alert_policy_resources(metric_desciptor, notification_channel):
     print(metric_descriptor.name)
     print(notification_channel.name)
 
+    test_alert_policy = constants.TEST_ALERT_POLICY.TEMPLATE.copy()
+    test_alert_policy['notification_channels'].append(notification_channel.name)
+
     alert_policy = policy_client.create_alert_policy(
         gcp_project_path,
-        constants.TEST_ALERT_POLICY)
+        test_alert_policy)
     alert_policy = call_get_alert_policy(policy_client, alert_policy.name)
 
     yield {'metric_descriptor': metric_descriptor,
