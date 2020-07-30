@@ -12,25 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Generate necessary keys/tokens and set up Jira server and Google Cloud project
-such that the Cloud Monitoring Jira integration app can authenticate a Jira
-client using OAuth.
-
-This program first either creates or loads in RSA public and private keys
-based on whether or not the -m flag was used. Then part of the 'OAuth dance'
-is performed and an access token and access token secret are generated to be
-used to access the Jira server in the Cloud Monitoring Jira Integration app.
-Note, this 'OAuth dance' step prompts the user to complete certain steps manually.
-Lastly, all the values needed to authenticate a Jira client using OAuth are
-stored as secrets in the Secret Manager of the Google Cloud project where
-the Jira integration app will be running.
+"""Generates OAuth credentials for a given Jira server, and optionally
+saves those credentials to Google Secret Manager. This is a one-time
+setup script that generates the credentials necessary for a client to
+connect to a Jira server. It must be ran manually.
 
 
   How to use:
 
-  $ python3 jira_oauth_setup_script.py -h
-  $ python3 jira_oauth_setup_script.py PROJECT_ID JIRA_URL
-  $ python3 jira_oauth_setup_script.py -m PROJECT_ID JIRA_URL
+  Show help message:
+    $ python3 jira_oauth_setup_script.py --help
+  
+  Write Jira OAuth credentials to output files:
+    $ python3 jira_oauth_setup_script.py JIRA_URL
+
+  Write Jira OAuth credentials to output files and Google Secret Manager:
+    $ python3 jira_oauth_setup_script.py --gcp_project_id="PROJECT_ID" JIRA_URL
+
+  Supply your own RSA keys in files named `private.pem` and `public.pem`:
+    $ python3 jira_oauth_setup_script.py --load_keys JIRA_URL
+
+  Specify the consumer key to use for Jira OAuth authorization:
+    $ python3 jira_oauth_setup_script.py --consumer_key="CONSUMER_KEY" JIRA_URL
 """
 
 
@@ -42,19 +45,19 @@ from google.cloud import secretmanager
 from google.api_core.exceptions import AlreadyExists
 
 
-def create_secret(client, project_id, secret_id):
+def create_secret(client, gcp_project_id, secret_id):
     """Create a new secret with the given name in Secret Manager. A secret
     is a logical wrapper around a collection of secret versions. Secret
     versions hold the actual secret material.
 
     Args:
         client: A Secret Manager client to use to create the secret
-        project_id: The id of the Google Cloud project in which to
+        gcp_project_id: The id of the Google Cloud project in which to
                     create the secret
         secret_id: The name of the secret to create
     """
 
-    parent = client.project_path(project_id)
+    parent = client.project_path(gcp_project_id)
     response = client.create_secret(parent, secret_id, {
         'replication': {
             'automatic': {},
@@ -63,21 +66,21 @@ def create_secret(client, project_id, secret_id):
     print('Created secret: {}'.format(response.name))
 
 
-def add_secret_version(client, project_id, secret_id, payload):
+def add_secret_version(client, gcp_project_id, secret_id, payload):
     """
     Add a new secret version to the given secret with the provided payload.
 
     Args:
         client: A Secret Manager client to use to add the secret version
-        project_id: The id of the Google Cloud project in which to
+        gcp_project_id: The id of the Google Cloud project in which to
                     add the secret version
         secret_id: The name of the secret to add a new version to
         payload: The payload of the new secret version
     """
 
-    parent = client.secret_path(project_id, secret_id)
+    parent = client.secret_path(gcp_project_id, secret_id)
 
-    if not isinstance(payload, bytes):
+    if isinstance(payload, str):
         payload = payload.encode('UTF-8')
 
     response = client.add_secret_version(parent, {'data': payload})
@@ -87,28 +90,34 @@ def add_secret_version(client, project_id, secret_id, payload):
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description=('Generate necessary keys/secrets and set up Jira server and Secret '
-                     'Manager such that the Cloud Monitoring Jira integration app can '
-                     'authenticate a Jira client using OAuth.'))
-
-    parser.add_argument('project_id',
-                        help=('id of the Google Cloud project whose Secret Manager '
-                              'to store Jira OAuth secrets in.'))
+        description=('Generate OAuth credentials for a given Jira server, and optionally '
+                     'saves those credentials to Google Secret Manager. This is a one-time '
+                     'setup script that generates the credentials necessary for a client to '
+                     'connect to a Jira server. It must be ran manually.'))
 
     parser.add_argument('jira_url',
                         help=('URL of the Jira Server to setup OAuth for, e.g '
                               'https://jira.atlassian.com'))
 
-    parser.add_argument('-m',
+    parser.add_argument('--gcp_project_id',
+                        help=('ID of the Google Cloud project whose Secret Manager '
+                              'to store Jira OAuth secrets in.'))
+
+    parser.add_argument('--consumer_key',
+                        help=('Consumer key to use for Jira OAuth authorization. '
+                              'If not specified, default is "CloudMonitoringOauthKey"'),
+                        default='CloudMonitoringOauthKey')
+
+    parser.add_argument('--load_keys',
                         action='store_true',
-                        help=('Use already generated private/public RSA keys called '
+                        help=('Load already generated private/public RSA keys called '
                               'private.pem and public.pem'))
 
     args = parser.parse_args()
 
 
     # Create or load in RSA public and private keys
-    if args.m:
+    if args.load_keys:
         with open('private.pem', 'rb') as f:
             private_key_pem = f.read()
 
@@ -131,15 +140,16 @@ def main():
 
 
     # Setup Jira Oauth
-    consumer_key = 'CloudMonitoringOauthKey'
+    application_links_url = f'{args.jira_url}/plugins/servlet/applinks/listApplicationLinks'
 
     print(f"""\nComplete the following steps:
     1. In Jira, navigate to Jira Settings > Applications > Application Links
+       OR go to {application_links_url}
     2. In the 'Enter the URL of the application you want to link' field, enter http://example.com/
     3. On the first screen of the 'Link applications' dialog, enter 'Cloud Monitoring App' for
        'Application Name', select the 'Create incoming link' checkbox, and click 'Continue'
     4. On next screen of the 'Link applications' dialog, enter the following consumer details:
-        * Consumer Key: {consumer_key}
+        * Consumer Key: {args.consumer_key}
         * Consumer Name: Cloud Monitoring App
         * Public Key:\n{public_key_pem.decode('utf-8')}
     5: Click 'Continue'
@@ -149,7 +159,7 @@ def main():
 
     input('Once complete, press "Enter" to proceed\n')
 
-    oauth = OAuth1Session(consumer_key,
+    oauth = OAuth1Session(args.consumer_key,
                           signature_method=SIGNATURE_RSA,
                           rsa_key=private_key_pem,
                           signature_type='auth_header',
@@ -180,34 +190,39 @@ def main():
 
 
 
-    # Store Oauth data necessary to authenticate Jira in Google Secret Manager
-    client = secretmanager.SecretManagerServiceClient()
+    # Store Oauth data necessary to authorize Jira client in Google Secret Manager
+    if args.gcp_project_id:
+        client = secretmanager.SecretManagerServiceClient()
 
-    try:
-        create_secret(client, args.project_id, 'jira_access_token')
-    except AlreadyExists:
-        print('Secret already exists: "jira_access_token"')
+        try:
+            create_secret(client, args.gcp_project_id, 'jira_access_token')
+        except AlreadyExists:
+            print('Secret named "jira_access_token" already exists; overwriting '
+                  'existing secret with the new access token')
 
-    try:
-        create_secret(client, args.project_id, 'jira_access_token_secret')
-    except AlreadyExists:
-        print('Secret already exists: "jira_access_token_secret"')
+        try:
+            create_secret(client, args.gcp_project_id, 'jira_access_token_secret')
+        except AlreadyExists:
+            print('Secret named "jira_access_token_secret" already exists; overwriting '
+                  'existing secret with the new access token secret')
 
-    try:
-        create_secret(client, args.project_id, 'jira_consumer_key')
-    except AlreadyExists:
-        print('Secret already exists: "jira_consumer_key"')
+        try:
+            create_secret(client, args.gcp_project_id, 'jira_consumer_key')
+        except AlreadyExists:
+            print('Secret named "jira_consumer_key" already exists; overwriting '
+                  'existing secret with the new consumer key')
 
-    try:
-        create_secret(client, args.project_id, 'jira_key_cert')
-    except AlreadyExists:
-        print('Secret already exists: "jira_key_cert"')
+        try:
+            create_secret(client, args.gcp_project_id, 'jira_key_cert')
+        except AlreadyExists:
+            print('Secret named "jira_key_cert" already exists; overwriting '
+                  'existing secret with the new key cert')
 
 
-    add_secret_version(client, args.project_id, 'jira_access_token', oauth_token)
-    add_secret_version(client, args.project_id, 'jira_access_token_secret', oauth_token_secret)
-    add_secret_version(client, args.project_id, 'jira_consumer_key', consumer_key)
-    add_secret_version(client, args.project_id, 'jira_key_cert', private_key_pem)
+        add_secret_version(client, args.gcp_project_id, 'jira_access_token', oauth_token)
+        add_secret_version(client, args.gcp_project_id, 'jira_access_token_secret', oauth_token_secret)
+        add_secret_version(client, args.gcp_project_id, 'jira_consumer_key', args.consumer_key)
+        add_secret_version(client, args.gcp_project_id, 'jira_key_cert', private_key_pem)
 
     print("Successfully setup Jira OAuth")
 
