@@ -73,6 +73,29 @@ def notification_channel():
 
 
 @pytest.fixture(scope='function')
+def alert_policy(metric_descriptor, notification_channel):
+    # setup
+    policy_client = monitoring_v3.AlertPolicyServiceClient()
+    gcp_project_path = policy_client.project_path(constants.PROJECT_ID)
+    
+    print(metric_descriptor.name)
+    print(notification_channel.name)
+
+    test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE.copy()
+    test_alert_policy['notification_channels'].append(notification_channel.name)
+
+    alert_policy = policy_client.create_alert_policy(
+        gcp_project_path,
+        test_alert_policy)
+    alert_policy = call_get_alert_policy(policy_client, alert_policy.name)
+
+    yield alert_policy
+    
+    # tear down
+    policy_client.delete_alert_policy(alert_policy.name)
+    
+
+@pytest.fixture(scope='function')
 def alert_policy_resources(metric_descriptor, notification_channel):
     # setup
     policy_client = monitoring_v3.AlertPolicyServiceClient()
@@ -81,7 +104,7 @@ def alert_policy_resources(metric_descriptor, notification_channel):
     print(metric_descriptor.name)
     print(notification_channel.name)
 
-    test_alert_policy = constants.TEST_ALERT_POLICY.TEMPLATE.copy()
+    test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE.copy()
     test_alert_policy['notification_channels'].append(notification_channel.name)
 
     alert_policy = policy_client.create_alert_policy(
@@ -97,15 +120,15 @@ def alert_policy_resources(metric_descriptor, notification_channel):
     policy_client.delete_alert_policy(alert_policy.name)
 
 
-def test_end_to_end(alert_policy_resources):
-    metric_descriptor = alert_policy_resources['metric_descriptor']
-    notification_channel = alert_policy_resources['notification_channel']
-    alert_policy = alert_policy_resources['alert_policy']
+def test_end_to_end(metric_descriptor, notification_channel, alert_policy):
+    # metric_descriptor = alert_policy_resources['metric_descriptor']
+    # notification_channel = alert_policy_resources['notification_channel']
+    # alert_policy = alert_policy_resources['alert_policy']
     
     assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR['type']
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL['display_name']
     assert alert_policy.display_name == constants.ALERT_POLICY_NAME
-    assert alert_policy.user_labels == constants.TEST_ALERT_POLICY['user_labels']
-    assert alert_policy.notification_channels[0].labels == constants.TEST_NOTIFICATION_CHANNEL['labels']
+    assert alert_policy.user_labels == constants.TEST_ALERT_POLICY_TEMPLATE['user_labels']
+    assert alert_policy.notification_channels[0] == notification_channel.name
     
     
