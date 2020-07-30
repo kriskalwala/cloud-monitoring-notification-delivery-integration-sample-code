@@ -106,10 +106,10 @@ def append_to_time_series(point_value):
     gcp_project_path = client.project_path(constants.PROJECT_ID)
     
     series = monitoring_v3.types.TimeSeries()
-    series.metric.type = 'custom.googleapis.com/' + metric_name
-    series.resource.type = 'gce_instance'
-    series.resource.labels['instance_id'] = '1234567890123456789'
-    series.resource.labels['zone'] = 'us-central1-f'
+    series.metric.type = constants.METRIC_PATH
+    series.resource.type = constants.RESOURCE_TYPE
+    series.resource.labels['instance_id'] = constants.INSTANCE_ID
+    series.resource.labels['zone'] = constants.ZONE
     point = series.points.add()
     point.value.double_value = point_value
     now = time.time()
