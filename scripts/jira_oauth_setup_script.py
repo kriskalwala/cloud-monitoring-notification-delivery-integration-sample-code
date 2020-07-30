@@ -22,7 +22,7 @@ connect to a Jira server. It must be ran manually.
 
   Show help message:
     $ python3 jira_oauth_setup_script.py --help
-  
+
   Write Jira OAuth credentials to output files:
     $ python3 jira_oauth_setup_script.py JIRA_URL
 
