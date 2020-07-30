@@ -148,7 +148,9 @@ def main():
     print(f"""\nComplete the following steps:
     1. In Jira, navigate to Jira Settings > Applications > Application Links
        OR go to {application_links_url}
-    2. In the 'Enter the URL of the application you want to link' field, enter http://example.com/
+    2. In the 'Enter the URL of the application you want to link' field, enter
+       http://example.com/ , and then click 'Create new link'. Ignore the 'No response was
+       received from the URL you entered' warning that is displayed and click 'Continue'
     3. On the first screen of the 'Link applications' dialog, enter 'Cloud Monitoring App' for
        'Application Name', select the 'Create incoming link' checkbox, and click 'Continue'
     4. On next screen of the 'Link applications' dialog, enter the following consumer details:
