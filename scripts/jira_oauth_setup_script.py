@@ -29,7 +29,10 @@ connect to a Jira server. It must be ran manually.
   Write Jira OAuth credentials to output files and Google Secret Manager:
     $ python3 jira_oauth_setup_script.py --gcp_project_id="PROJECT_ID" JIRA_URL
 
-  Supply your own RSA keys in files named `private.pem` and `public.pem`:
+  Supply your own RSA keys in files named `private.pem` and `public.pem` (can be
+  used to skip resetting up the Jira application link when running the script a
+  second time either to update the OAuth credentials or due to the script failing
+  halfway through the first run):
     $ python3 jira_oauth_setup_script.py --load_keys JIRA_URL
 
   Specify the consumer key to use for Jira OAuth authorization:
@@ -111,7 +114,7 @@ def main():
     parser.add_argument('--load_keys',
                         action='store_true',
                         help=('Load already generated private/public RSA keys called '
-                              'private.pem and public.pem'))
+                              '"private.pem" and "public.pem"'))
 
     args = parser.parse_args()
 
