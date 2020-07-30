@@ -53,7 +53,7 @@ def create_secret(client, gcp_project_id, secret_id):
     Args:
         client: A Secret Manager client to use to create the secret
         gcp_project_id: The id of the Google Cloud project in which to
-                    create the secret
+                        create the secret
         secret_id: The name of the secret to create
     """
 
@@ -73,7 +73,7 @@ def add_secret_version(client, gcp_project_id, secret_id, payload):
     Args:
         client: A Secret Manager client to use to add the secret version
         gcp_project_id: The id of the Google Cloud project in which to
-                    add the secret version
+                        add the secret version
         secret_id: The name of the secret to add a new version to
         payload: The payload of the new secret version
     """
@@ -101,7 +101,7 @@ def main():
 
     parser.add_argument('--gcp_project_id',
                         help=('ID of the Google Cloud project whose Secret Manager '
-                              'to store Jira OAuth secrets in.'))
+                              'to store Jira OAuth credentials in.'))
 
     parser.add_argument('--consumer_key',
                         help=('Consumer key to use for Jira OAuth authorization. '
@@ -197,26 +197,26 @@ def main():
         try:
             create_secret(client, args.gcp_project_id, 'jira_access_token')
         except AlreadyExists:
-            print('Secret named "jira_access_token" already exists; overwriting '
-                  'existing secret with the new access token')
+            print('Secret named "jira_access_token" already exists; adding new '
+                  'secret version with the new access token')
 
         try:
             create_secret(client, args.gcp_project_id, 'jira_access_token_secret')
         except AlreadyExists:
-            print('Secret named "jira_access_token_secret" already exists; overwriting '
-                  'existing secret with the new access token secret')
+            print('Secret named "jira_access_token_secret" already exists; adding new '
+                  'secret version with the new access token secret')
 
         try:
             create_secret(client, args.gcp_project_id, 'jira_consumer_key')
         except AlreadyExists:
-            print('Secret named "jira_consumer_key" already exists; overwriting '
-                  'existing secret with the new consumer key')
+            print('Secret named "jira_consumer_key" already exists; adding new '
+                  'secret version with the new consumer key')
 
         try:
             create_secret(client, args.gcp_project_id, 'jira_key_cert')
         except AlreadyExists:
-            print('Secret named "jira_key_cert" already exists; overwriting '
-                  'existing secret with the new key cert')
+            print('Secret named "jira_key_cert" already exists; adding new '
+                  'secret version with the new key cert')
 
 
         add_secret_version(client, args.gcp_project_id, 'jira_access_token', oauth_token)
