@@ -19,9 +19,9 @@ resource "google_project_service" "run" {
 }
 
 resource "random_string" "random" {
-  length = 16
-  special = true
-  override_special = "-_"
+  length   = 16
+  upper    = false
+  special  = false
 }
 
 resource "google_cloud_run_service" "cloud_run_pubsub_service" {
