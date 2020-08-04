@@ -20,6 +20,7 @@ resource "google_project_service" "run" {
 
 resource "random_string" "random" {
   length = 16
+  upper = false
   special = true
   override_special = "-_"
 }
