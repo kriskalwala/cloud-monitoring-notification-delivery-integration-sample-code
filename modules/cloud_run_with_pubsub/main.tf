@@ -26,7 +26,7 @@ resource "google_cloud_run_service" "cloud_run_pubsub_service" {
   template {
     spec {
       containers {
-        image = "gcr.io/${var.project}/cloud-run-pubsub-service"
+        image = "gcr.io/${var.project}/cloud-run-pubsub-service:latest"
       }
     }
   }

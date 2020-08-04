@@ -62,8 +62,11 @@ def handle_pubsub_message():
         return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
     try:
-        jira_client = JIRA(app.config['JIRA_URL'], basic_auth=(app.config['JIRA_USERNAME'],
-                                                               app.config['JIRA_PASSWORD']))
+        oauth_dict = {'access_token': app.config['JIRA_ACCESS_TOKEN'],
+                      'access_token_secret': app.config['JIRA_ACCESS_TOKEN_SECRET'],
+                      'consumer_key': app.config['JIRA_CONSUMER_KEY'],
+                      'key_cert': app.config['JIRA_KEY_CERT']}
+        jira_client = JIRA(app.config['JIRA_URL'], oauth=oauth_dict)
         jira_integration.update_jira_based_on_monitoring_notification(
             jira_client,
             app.config['JIRA_PROJECT'],
