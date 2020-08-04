@@ -19,7 +19,7 @@ resource "google_project_service" "run" {
 }
 
 resource "random_string" "random" {
-  length   = 16
+  length   = 5
   upper    = false
   special  = false
 }
@@ -34,11 +34,8 @@ resource "google_cloud_run_service" "cloud_run_pubsub_service" {
         image = "gcr.io/${var.project}/cloud-run-pubsub-service:latest"
       }
     }
-  }
-  
-  metadata {
-    labels = {
-      "revision_id" = random_string.random.result
+    metadata {
+      name = "cloud-run-pubsub-service-${random_string.random.result}"
     }
   }
 
