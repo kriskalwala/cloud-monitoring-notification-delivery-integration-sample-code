@@ -18,12 +18,6 @@ resource "google_project_service" "run" {
   project  = var.project
 }
 
-resource "random_string" "random" {
-  length   = 5
-  upper    = false
-  special  = false
-}
-
 resource "google_cloud_run_service" "cloud_run_pubsub_service" {
   name     = "cloud-run-pubsub-service"
   location = "us-west1"
@@ -35,7 +29,7 @@ resource "google_cloud_run_service" "cloud_run_pubsub_service" {
       }
     }
     metadata {
-      name = "cloud-run-pubsub-service-${random_string.random.result}"
+      name = "cloud-run-pubsub-service-${uuid()}"
     }
   }
 
