@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from dotenv import load_dotenv
 from google.protobuf.duration_pb2 import Duration
 
 METRIC_NAME = 'integ-test-metric'
