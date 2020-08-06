@@ -60,21 +60,34 @@ def handle_pubsub_message():
         logger.error(e)
         return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
+    return send_monitoring_notification_to_third_party(monitoring_notification_dict)
+# [END run_pubsub_handler]
+
+
+def send_monitoring_notification_to_third_party(notification):
+    """Send a given monitoring notification to a third party service.
+
+    Args:
+        notification: The dictionary containing the notification data.
+
+    Returns:
+        A tuple containing an HTTP response message and HTTP status code
+        indicating whether or not sending the notification to the third
+        party service was successful.
+    """
 
     philips_hue_client = philips_hue.PhilipsHueClient(app.config['BRIDGE_IP_ADDRESS'],
                                                       app.config['USERNAME'])
 
     try:
         hue_value = philips_hue.get_target_hue_from_monitoring_notification(
-            monitoring_notification_dict, app.config["POLICY_HUE_MAPPING"])
+            notification, app.config["POLICY_HUE_MAPPING"])
         philips_hue_client.set_color(app.config['LIGHT_ID'], hue_value)
     except philips_hue.Error as e:
         logger.error(e)
         return (str(e), 400)
 
-
     return (repr(hue_value), 200)
-# [END run_pubsub_handler]
 
 
 if __name__ == '__main__':

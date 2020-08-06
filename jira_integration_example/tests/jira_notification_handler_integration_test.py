@@ -56,8 +56,13 @@ def config():
 
 @pytest.fixture
 def jira_client(config):
-    jira_client = JIRA(config['JIRA_URL'], basic_auth=(config['JIRA_USERNAME'],
-                                                               config['JIRA_PASSWORD']))
+    oauth_dict = {'access_token': app.config['JIRA_ACCESS_TOKEN'],
+                      'access_token_secret': app.config['JIRA_ACCESS_TOKEN_SECRET'],
+                      'consumer_key': app.config['JIRA_CONSUMER_KEY'],
+                      'key_cert': app.config['JIRA_KEY_CERT']}
+    jira_client = JIRA(app.config['JIRA_URL'], oauth=oauth_dict)
+    return jira_client
+
     
 @pytest.fixture(scope='function')
 def metric_descriptor():

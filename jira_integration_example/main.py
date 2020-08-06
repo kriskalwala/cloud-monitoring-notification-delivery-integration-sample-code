@@ -61,21 +61,39 @@ def handle_pubsub_message():
         logger.error(e)
         return (f'Notification could not be decoded due to the following exception: {e}', 400)
 
+    return send_monitoring_notification_to_third_party(monitoring_notification_dict)
+# [END run_pubsub_handler]
+
+
+def send_monitoring_notification_to_third_party(notification):
+    """Send a given monitoring notification to a third party service.
+
+    Args:
+        notification: The dictionary containing the notification data.
+
+    Returns:
+        A tuple containing an HTTP response message and HTTP status code
+        indicating whether or not sending the notification to the third
+        party service was successful.
+    """
+
     try:
-        jira_client = JIRA(app.config['JIRA_URL'], basic_auth=(app.config['JIRA_USERNAME'],
-                                                               app.config['JIRA_PASSWORD']))
-        jira_notification_handler.update_jira_based_on_monitoring_notification(
+        oauth_dict = {'access_token': app.config['JIRA_ACCESS_TOKEN'],
+                      'access_token_secret': app.config['JIRA_ACCESS_TOKEN_SECRET'],
+                      'consumer_key': app.config['JIRA_CONSUMER_KEY'],
+                      'key_cert': app.config['JIRA_KEY_CERT']}
+        jira_client = JIRA(app.config['JIRA_URL'], oauth=oauth_dict)
+        jira_integration.update_jira_based_on_monitoring_notification(
             jira_client,
             app.config['JIRA_PROJECT'],
             app.config['CLOSED_JIRA_ISSUE_STATUS'],
-            monitoring_notification_dict)
+            notification)
 
     except (jira_notification_handler.Error, JIRAError) as e:
         logger.error(e)
         return (str(e), 400)
 
     return ('', 200)
-# [END run_pubsub_handler]
 
 
 if __name__ == '__main__':
