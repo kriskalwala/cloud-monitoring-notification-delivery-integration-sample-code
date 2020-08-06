@@ -24,7 +24,7 @@ ZONE = 'us-central1-f'
 ALERT_POLICY_NAME = 'integ-test-policy'
 TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE = 3.0
 # PROJECT_ID = os.environ['PROJECT_ID']
-PROJECT_ID = 'mon-notif-hue-integ-staging'
+PROJECT_ID = 'acoustic-atom-281116'
         
 TEST_METRIC_DESCRIPTOR = {
     'type': f'custom.googleapis.com/{METRIC_NAME}',

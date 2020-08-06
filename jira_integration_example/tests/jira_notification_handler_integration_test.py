@@ -15,6 +15,8 @@
 import pytest
 from tests import constants
 
+import main
+
 import copy
 import time
 
@@ -42,9 +44,21 @@ def call_get_notification_channel(notification_channel_client, name):
 
 @retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=120)
 def call_assert_jira_issue_created(jira_client):
-    jira_client.create_issue.assert_called_once()
+    test_issue = jira_client.search_issues(f'description~"custom/test_metric - {constants.PROJECt_ID}" AND status=open')
+    assert len(test_issue) == 1
 
 
+@pytest.fixture
+def config():
+    main.app.config.from_object('config.ProdJiraConfig')
+    return main.app.config
+
+
+@pytest.fixture
+def jira_client(config):
+    jira_client = JIRA(config['JIRA_URL'], basic_auth=(config['JIRA_USERNAME'],
+                                                               config['JIRA_PASSWORD']))
+    
 @pytest.fixture(scope='function')
 def metric_descriptor():
     # setup
@@ -121,7 +135,7 @@ def append_to_time_series(point_value):
     client.create_time_series(gcp_project_path, [series])
 
 
-def test_end_to_end(metric_descriptor, notification_channel, alert_policy):
+def test_end_to_end(metric_descriptor, notification_channel, alert_policy, jira_client):
     assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR['type']
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL['display_name']
     assert alert_policy.display_name == constants.ALERT_POLICY_NAME
@@ -132,7 +146,7 @@ def test_end_to_end(metric_descriptor, notification_channel, alert_policy):
     append_to_time_series(constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
     
     # check jira
-    
+    call_assert_jira_issue_created(jira_client)
     
     
     
