@@ -44,13 +44,12 @@ def call_get_notification_channel(notification_channel_client, name):
 
 @retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=120)
 def call_assert_jira_issue_created(jira_client):
-    test_issue = jira_client.search_issues(f'description~"custom/test_metric - {constants.PROJECt_ID}" AND status=open')
+    test_issue = jira_client.search_issues(f'description~"custom/test_metric - {constants.PROJECT_ID}" AND status=open')
     assert len(test_issue) == 1
 
 
 @pytest.fixture
 def config():
-    main.app.config.from_object('config.ProdJiraConfig')
     return main.app.config
 
 
