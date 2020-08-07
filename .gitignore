@@ -3,3 +3,7 @@ __pycache__
 .env
 environments/dev/.terraform
 environments/prod/.terraform
+scripts/jira_access_token_secret.txt
+scripts/jira_access_token.txt
+scripts/private.pem
+scripts/public.pem
