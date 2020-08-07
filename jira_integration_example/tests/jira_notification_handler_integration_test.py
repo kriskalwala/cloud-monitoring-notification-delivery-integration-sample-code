@@ -43,8 +43,14 @@ def call_get_notification_channel(notification_channel_client, name):
 
 
 @retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=120)
-def call_assert_jira_issue_created(jira_client):
-    test_issue = jira_client.search_issues(f'description~"custom/test_metric - {constants.PROJECT_ID}" AND status=open')
+def call_assert_jira_issue_created(jira_client, open_status):
+    test_issue = jira_client.search_issues(f'description~"custom/integ-test-metric for {constants.PROJECT_ID}" and status={open_status}')
+    assert len(test_issue) == 1
+    
+    
+@retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=120)
+def call_assert_jira_issue_resolved(jira_client, resolved_status)
+    test_issue = jira_client.search_issues(f'description~"custom/integ-test-metric for {constants.PROJECT_ID}" and status={resolved_status}')
     assert len(test_issue) == 1
 
 
@@ -53,14 +59,21 @@ def config():
     return main.app.config
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def jira_client(config):
+    # setup
     oauth_dict = {'access_token': config['JIRA_ACCESS_TOKEN'],
                       'access_token_secret': config['JIRA_ACCESS_TOKEN_SECRET'],
                       'consumer_key': config['JIRA_CONSUMER_KEY'],
                       'key_cert': config['JIRA_KEY_CERT']}
     jira_client = JIRA(config['JIRA_URL'], oauth=oauth_dict)
-    return jira_client
+    
+    yield jira_client
+    
+    # tear down
+    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric for {constants.PROJECT_ID}"')
+    for issue in test_issues:
+        issue.delete()
 
     
 @pytest.fixture(scope='function')
@@ -139,19 +152,20 @@ def append_to_time_series(point_value):
     client.create_time_series(gcp_project_path, [series])
 
 
-def test_end_to_end(metric_descriptor, notification_channel, alert_policy, jira_client):
+def test_end_to_end(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR['type']
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL['display_name']
     assert alert_policy.display_name == constants.ALERT_POLICY_NAME
     assert alert_policy.user_labels == constants.TEST_ALERT_POLICY_TEMPLATE['user_labels']
     assert alert_policy.notification_channels[0] == notification_channel.name
     
-    # trigger incident
-    append_to_time_series(constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
+    # trigger incident and check jira issue created
+    append_to_time_series(constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)  
+    call_assert_jira_issue_created(jira_client, "10000") # issue status id for "To Do"
     
-    # check jira
-    call_assert_jira_issue_created(jira_client)
-    
+    # resolve incident and check jira issue resolved
+    append_to_time_series(constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE - 1)
+    call_assert_jira_issue_resolved(jira_client, config['CLOSED_JIRA_ISSUE_STATUS'])
     
     
     
