@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import time
 
 import pytest
@@ -20,7 +19,7 @@ import pytest
 from google.cloud import monitoring_v3
 from google.api_core import exceptions
 from google.api_core import retry
-from jira import JIRA, Issue
+from jira import JIRA
 
 from tests import constants
 
