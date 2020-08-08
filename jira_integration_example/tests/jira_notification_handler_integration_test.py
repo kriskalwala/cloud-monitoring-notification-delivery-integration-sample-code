@@ -49,7 +49,7 @@ def call_assert_jira_issue_created(jira_client, open_status):
     
     
 @retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=180)
-def call_assert_jira_issue_resolved(jira_client, resolved_status)
+def call_assert_jira_issue_resolved(jira_client, resolved_status):
     test_issue = jira_client.search_issues(f'description~"custom/integ-test-metric for {constants.PROJECT_ID}" and status={resolved_status}')
     assert len(test_issue) == 1
 
