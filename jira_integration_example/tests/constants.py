@@ -23,9 +23,8 @@ INSTANCE_ID = '1234567890123456789'
 ZONE = 'us-central1-f'
 ALERT_POLICY_NAME = 'integ-test-policy'
 TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE = 3.0
-# PROJECT_ID = os.environ['PROJECT_ID']
-PROJECT_ID = 'acoustic-atom-281116'
-        
+PROJECT_ID = os.environ['PROJECT_ID']
+
 TEST_METRIC_DESCRIPTOR = {
     'type': f'custom.googleapis.com/{METRIC_NAME}',
     'metric_kind': 'GAUGE',
@@ -40,7 +39,7 @@ TEST_NOTIFICATION_CHANNEL = {
     'labels': {
         'topic': f'projects/{PROJECT_ID}/topics/tf-topic'
     }
-}   
+}
 
 TEST_ALERT_POLICY_TEMPLATE = {
     'display_name': ALERT_POLICY_NAME,
