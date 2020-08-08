@@ -83,7 +83,7 @@ def send_monitoring_notification_to_third_party(notification):
                       'consumer_key': app.config['JIRA_CONSUMER_KEY'],
                       'key_cert': app.config['JIRA_KEY_CERT']}
         jira_client = JIRA(app.config['JIRA_URL'], oauth=oauth_dict)
-        jira_integration.update_jira_based_on_monitoring_notification(
+        jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client,
             app.config['JIRA_PROJECT'],
             app.config['CLOSED_JIRA_ISSUE_STATUS'],
