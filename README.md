@@ -167,7 +167,7 @@ In order to successfully run these tests, make sure you have successfully setup 
 To run unit tests for Philips Hue and Jira integrations:
 
 ```
-./scripts/run_tests.sh
+bash ./scripts/run_tests.sh
 ```
 
 ### Linting
@@ -175,7 +175,7 @@ To run unit tests for Philips Hue and Jira integrations:
 To lint project source code with pylint:
 
 ```
-./scripts/run_linter.sh
+bash ./scripts/run_linter.sh
 ```
 
 ## Terraform
