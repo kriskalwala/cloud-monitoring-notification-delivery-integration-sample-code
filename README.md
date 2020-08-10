@@ -194,7 +194,7 @@ These configurations will be applied automatically on source code changes after 
 
 ### Run Terraform Manually
 
-Deployment with Terraform will be automated through source code changes in GitHub. To test the deployment manually:
+Deployment with Terraform will be automated through source code changes in GitHub. To manually see and apply the changes Terraform makes to your Cloud project resources, do the following:
 
 Navigate to the desired environment folder (`environments/dev` or `environments/prod`) and run the following:
 
@@ -202,20 +202,19 @@ Initialize a working directory containing Terraform configuration files:
 ```
 terraform init -backend-config "bucket=$PROJECT_ID-tfstate"
 ```
-Refresh the current Terraform state:
+Refresh the current Terraform state, replacing `PROJECT_ID` with your GCP project ID:
 ```
-terraform refresh
+terraform refresh -var="project=PROJECT_ID"
 ```
-When prompted for `var.project`, enter the GCP project ID.
 
 To see what changes will be made without applying them yet:
 ```
-terraform plan
+terraform plan -var="project=PROJECT_ID"
 ``` 
 
 Apply configuration changes:
 ```
-terraform apply
+terraform apply -var="project=PROJECT_ID"
 ```
 When prompted, type `yes` to confirm changes. Once finished, information about the created resources should appear in the output.
 
