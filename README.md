@@ -12,19 +12,18 @@ The sample code in this repository is referenced in the following solutions guid
     ├── .github/workflows
     ├── docs
     ├── environments                      # Terraform configurations for each environment
-        ├── prod
-        └── dev
+    │   ├── prod
+    │   └── dev
     ├── jira_integration_example          # Jira Integration
-        ├── utilities
-        ├── tests                         # Unit and integration tests
-        ...
-    ├── scripts                           # Scripts for testing and authentication
+    │   ├── utilities
+    │   ├── tests                         # Unit and integration tests
+    │   ...
     ├── modules                           # Terraform modules
     ├── philips_hue_integration_example   # Philips Hue Integration
-        ├── utilities
-        ├── tests                         # Unit tests
-        ...
-    ├── scripts                           # scripts for testing and authentication
+    │   ├── utilities
+    │   ├── tests                         # Unit tests
+    │   ...
+    ├── scripts                           # Scripts for testing and authentication
     .
     .
     .
@@ -45,7 +44,7 @@ The sample code in this repository is referenced in the following solutions guid
 gcloud config set project [PROJECT_ID]
 ```
 
-4.  (Optional) In order to successfully run unit tests and linter in the section below, setup a virtualenv and install the required dependencies
+4.  (Optional) In order to successfully run unit tests and linter in the section below, setup a virtualenv and install the required dependencies.
 
 ```
 virtualenv env
@@ -58,12 +57,12 @@ pip3 install -r scripts/requirements.txt
 
 ## Manual Deployment
 
-To deploy either the Philips Hue integration or Jira integration for the first time manually, complete the following steps. Make sure to first complete the integration specific deployment steps, then complete the deployment steps for all integrations.
+To deploy either the Philips Hue integration or Jira integration for the first time manually, complete the following steps. Make sure to first complete the integration specific deployment steps (part 1), then complete the deployment steps for all integrations (part 2). However if you are redeploying, follow complete the steps in the redeploying section.
 
-### Step 1: Integration Specific Deployment Steps
+### Part 1: Integration Specific Deployment Steps
 
 #### Philips Hue Integration
-1. Store your Philips Hue bridge IP address as `philips_ip` and username as `philips_username` in Secret Manager
+1. Store your Philips Hue bridge IP address as `philips_ip` and username as `philips_username` in [Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart#create_and_access_a_secret_version)
 2. Checkout the desired GitHub environment branch (`dev` or `prod`)
 4. Edit the `cloudbuild.yaml` configuration file to build a Philips Hue Docker image. Make sure the following line is set in the `build docker image` step:
 
@@ -72,7 +71,7 @@ args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJE
 ```
 
 #### Jira Integration
-1. Store your Jira Server URL as `jira_url` and Jira project as `jira_project` in Secret Manager
+1. Store your Jira Server URL as `jira_url` and Jira project as `jira_project` in [Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart#create_and_access_a_secret_version)
 2. Setup Jira OAuth to be used to authenticate the Jira client in the Cloud Run service. Replace `[JIRA_URL]` with your Jira Server URL
 
 ```
@@ -88,7 +87,7 @@ python3 jira_oauth_setup_script.py --gcp_project_id=$PROJECT_ID [JIRA_URL]
 args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './jira_hue_integration_example']
 ```
 
-### Step 2: Deployment Steps for all Integrations
+### Part 2: Deployment Steps for all Integrations
 1. Create Cloud Storage bucket
 
 ```
@@ -131,11 +130,11 @@ gcloud builds submit . --config cloudbuild.yaml --substitutions BRANCH_NAME=[BRA
 
 Note that this step uses Terraform to automatically create necessary resources in the Google Cloud Platform project. For more info on what resources are created and managed, refer to the Terraform section below.
 
-6. Create a Pub/Sub notification channel that uses the topic tf-topic (which was created by Terraform in the previous step).
+6. Create a Pub/Sub notification channel that uses the topic `tf-topic` (which was created by Terraform in the previous step).
 7. Add the Pub/Sub channel to an alerting policy by selecting Pub/Sub as the channel type and the channel created in the prior step as the notification channel.
 8. Congratulations! Your service is now successfully deployed to Cloud Run and alerts will be forwarded to either the Philips Hue light bulb or Jira server.
 
-### Redeploying
+### Redeploy
 
 If you've already deployed once manually and want to build and redeploy a new version, do the following:
 
@@ -155,7 +154,7 @@ Refer to this solutions guide for instructions on how to setup continuous deploy
 
 ## Running the tests
 
-In order to successfully run these tests, make sure you successfully setup virtualenv and installed the required dependencies as specified in the "Setup" section above.
+In order to successfully run these tests, make sure you have successfully setup virtualenv and installed the required dependencies as specified in the "Setup" section above.
 
 ### Unit Tests
 
