@@ -10,21 +10,25 @@ The sample code in this repository is referenced in the following solutions guid
 
     .
     ├── .github/workflows
-    ├── docs                              # All Api doc and gif files
-    ├── environments                      # Electron JS app folder
+    ├── docs
+    ├── environments                      # Terraform configurations for each environment
+        ├── prod
+        └── dev
     ├── jira_integration_example          # Jira Integration
-    ├── modules                           # Node JS MongoDB and Express JS server folder
+        ├── utilities
+        ├── tests                         # Unit and integration tests
+        ...
+    ├── scripts                           # Scripts for testing and authentication
+    ├── modules                           # Terraform modules
     ├── philips_hue_integration_example   # Philips Hue Integration
-        ├── .github/workflows
-        └── cloudbuild.yaml
-    ├── scripts                  # Angular website folder
-    ├── .dockerignore
-    ├── .gcloudignore
-    ├── .gitignore
-    ├── CODEOWNERS
-    ├── LICENSE
-    ├── README.md
-    └── cloudbuild.yaml
+        ├── utilities
+        ├── tests                         # Unit tests
+        ...
+    ├── scripts                           # scripts for testing and authentication
+    .
+    .
+    .
+    └── cloudbuild.yaml                   # Build configuration file
 
 ## Setup
 
@@ -54,12 +58,12 @@ pip3 install -r scripts/requirements.txt
 
 ## Manual Deployment
 
-To deploy either the Philips Hue integration or Jira integration once manually, complete the following steps. Make sure to first complete the integration specific deployment steps, then complete the deployment steps for all integrations.
+To deploy either the Philips Hue integration or Jira integration for the first time manually, complete the following steps. Make sure to first complete the integration specific deployment steps, then complete the deployment steps for all integrations.
 
-### Integration specific Deployment Steps
+### Step 1: Integration Specific Deployment Steps
 
-#### Philips Hue integration
-1. Store your Jira Server URL as “jira_url” and Jira project as “jira_project” in Secret Manager
+#### Philips Hue Integration
+1. Store your Philips Hue bridge IP address as “philips_ip” and username as “philips_username” in Secret Manager
 2. Checkout the desired GitHub environment branch (dev or prod)
 4. Edit the cloudbuild.yaml configuration file to build a Philips Hue Docker image. Make sure the following line is set in the ‘build docker image’ step:
 
@@ -67,7 +71,7 @@ To deploy either the Philips Hue integration or Jira integration once manually, 
 args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './philips_hue_integration_example']
 ```
 
-#### Jira integration
+#### Jira Integration
 1. Store your Jira Server URL as “jira_url” and Jira project as “jira_project” in Secret Manager
 2. Setup Jira OAuth to be used to authenticate the Jira client in the Cloud Run service. Replace [JIRA_URL] with your Jira Server URL
 
@@ -84,7 +88,7 @@ python3 jira_oauth_setup_script.py --gcp_project_id=$PROJECT_ID [JIRA_URL]
 args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './jira_hue_integration_example']
 ```
 
-### Deployment Steps for all integrations
+### Step 2: Deployment Steps for all Integrations
 1. Create Cloud Storage bucket
 
 ```
@@ -131,6 +135,20 @@ Note that this step uses Terraform to automatically create necessary resources i
 7. Add the Pub/Sub channel to an alerting policy by selecting Pub/Sub as the channel type and the channel created in the prior step as the notification channel.
 8. Congratulations! Your service is now successfully deployed to Cloud Run and alerts will be forwarded to either the Philips Hue light bulb or Jira server.
 
+### Redeploying
+
+If you've already deployed once manually and want to build and redeploy a new version, do the following:
+
+1.  Checkout the desired GitHub environment branch (dev or prod)
+
+2.  Trigger a build and deploy to Cloud Run. Replace [BRANCH] with the current environment branch
+
+```
+cd ~/cloud-monitoring-notification-delivery-integration-sample-code
+
+gcloud builds submit . --config cloudbuild.yaml --substitutions BRANCH_NAME=[BRANCH]
+```
+
 ## Continuous Deployment
 
 Refer to this solutions guide for instructions on how to setup continuous deployment: TBD
@@ -176,20 +194,9 @@ These configurations will be applied automatically on source code changes after 
 
 ### Run Terraform Manually
 
-Deployment with Terraform will be automated through source code changes in GitHub. To test the deployment manually, first create a Cloud Storage bucket in Cloud Shell that Terraform will use to store state:
-```
-PROJECT_ID=$(gcloud config get-value project)
-gsutil mb gs://${PROJECT_ID}-tfstate
-```
-Note that you only need to create the bucket once. Trying to do create a duplicate bucket will display an error. 
+Deployment with Terraform will be automated through source code changes in GitHub. To test the deployment manually:
 
-You may optionally enable Object Versioning to keep the history of your deployments:
-```
-gsutil versioning set on gs://${PROJECT_ID}-tfstate
-```
-Enabling Object Versioning increases storage costs, which you can mitigate by configuring Object Lifestyle Management to delete old state versions.
-
-Now, navigate to the desired environment folder (`environments/dev` or `environments/prod`) and run the following:
+Navigate to the desired environment folder (`environments/dev` or `environments/prod`) and run the following:
 
 Initialize a working directory containing Terraform configuration files:
 ```
