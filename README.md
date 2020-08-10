@@ -39,7 +39,7 @@ The sample code in this repository is referenced in the following solutions guid
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgoogleinterns%2Fcloud-monitoring-notification-delivery-integration-sample-code)
 
-3.  Set the Cloud Platform project in Cloud Shell. Replace [PROJECT_ID] with your Cloud Platform project id.
+3.  Set the Cloud Platform project in Cloud Shell. Replace `[PROJECT_ID]` with your Cloud Platform project id.
 
 ```
 gcloud config set project [PROJECT_ID]
@@ -63,17 +63,17 @@ To deploy either the Philips Hue integration or Jira integration for the first t
 ### Step 1: Integration Specific Deployment Steps
 
 #### Philips Hue Integration
-1. Store your Philips Hue bridge IP address as “philips_ip” and username as “philips_username” in Secret Manager
-2. Checkout the desired GitHub environment branch (dev or prod)
-4. Edit the cloudbuild.yaml configuration file to build a Philips Hue Docker image. Make sure the following line is set in the ‘build docker image’ step:
+1. Store your Philips Hue bridge IP address as `philips_ip` and username as `philips_username` in Secret Manager
+2. Checkout the desired GitHub environment branch (`dev` or `prod`)
+4. Edit the `cloudbuild.yaml` configuration file to build a Philips Hue Docker image. Make sure the following line is set in the `build docker image` step:
 
 ```
 args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './philips_hue_integration_example']
 ```
 
 #### Jira Integration
-1. Store your Jira Server URL as “jira_url” and Jira project as “jira_project” in Secret Manager
-2. Setup Jira OAuth to be used to authenticate the Jira client in the Cloud Run service. Replace [JIRA_URL] with your Jira Server URL
+1. Store your Jira Server URL as `jira_url` and Jira project as `jira_project` in Secret Manager
+2. Setup Jira OAuth to be used to authenticate the Jira client in the Cloud Run service. Replace `[JIRA_URL]` with your Jira Server URL
 
 ```
 python3 jira_oauth_setup_script.py --gcp_project_id=$PROJECT_ID [JIRA_URL]
@@ -81,8 +81,8 @@ python3 jira_oauth_setup_script.py --gcp_project_id=$PROJECT_ID [JIRA_URL]
 
 (Note, this script prompts you to complete some steps manually)
 
-3. Checkout the desired GitHub environment branch
-4. Edit the cloudbuild.yaml configuration file to build a Jira Docker image. Make sure the following line is set in the ‘build docker image’ step:
+3. Checkout the desired GitHub environment branch (`dev` or `prod`)
+4. Edit the `cloudbuild.yaml` configuration file to build a Jira Docker image. Make sure the following line is set in the `build docker image` step:
 
 ```
 args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './jira_hue_integration_example']
@@ -115,13 +115,13 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$CLOU
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$CLOUDBUILD_SA --role roles/editor
 ```
 
-4. To allow the Cloud Run service to access secrets in Secret Manager, grant the Compute Engine default service account the Secret Manager Secret Accessor role. Replace [PROJECT_NUMBER] with the Cloud project number
+4. To allow the Cloud Run service to access secrets in Secret Manager, grant the Compute Engine default service account the Secret Manager Secret Accessor role. Replace `[PROJECT_NUMBER]` with the Cloud project number
 
 ```
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:[PROJECT_NUMBER]-compute@developer.gserviceaccount.com --role roles/secretmanager.secretAccessor
 ```
 
-5. Trigger a build and deploy to Cloud Run. Replace [BRANCH] with the current environment branch
+5. Trigger a build and deploy to Cloud Run. Replace `[BRANCH]` with the current environment branch
 
 ```
 cd ~/cloud-monitoring-notification-delivery-integration-sample-code
@@ -141,7 +141,7 @@ If you've already deployed once manually and want to build and redeploy a new ve
 
 1.  Checkout the desired GitHub environment branch (dev or prod)
 
-2.  Trigger a build and deploy to Cloud Run. Replace [BRANCH] with the current environment branch
+2.  Trigger a build and deploy to Cloud Run. Replace `[BRANCH]` with the current environment branch
 
 ```
 cd ~/cloud-monitoring-notification-delivery-integration-sample-code
