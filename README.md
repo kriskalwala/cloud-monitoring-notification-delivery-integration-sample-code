@@ -202,19 +202,19 @@ Initialize a working directory containing Terraform configuration files:
 ```
 terraform init -backend-config "bucket=$PROJECT_ID-tfstate"
 ```
-Refresh the current Terraform state, replacing `PROJECT_ID` with your GCP project ID:
+Refresh the current Terraform state:
 ```
-terraform refresh -var="project=PROJECT_ID"
+terraform refresh -var="project=$PROJECT_ID"
 ```
 
 To see what changes will be made without applying them yet:
 ```
-terraform plan -var="project=PROJECT_ID"
+terraform plan -var="project=$PROJECT_ID"
 ``` 
 
 Apply configuration changes:
 ```
-terraform apply -var="project=PROJECT_ID"
+terraform apply -var="project=$PROJECT_ID"
 ```
 When prompted, type `yes` to confirm changes. Once finished, information about the created resources should appear in the output.
 
