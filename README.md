@@ -38,13 +38,13 @@ The sample code in this repository is referenced in the following solutions guid
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fgoogleinterns%2Fcloud-monitoring-notification-delivery-integration-sample-code)
 
-3.  Set the Cloud Platform project in Cloud Shell. Replace `[PROJECT_ID]` with your Cloud Platform project id.
+3.  Set the Cloud Platform project in Cloud Shell. Replace `[PROJECT_ID]` with your Cloud Platform project id:
 
 ```
 gcloud config set project [PROJECT_ID]
 ```
 
-4.  (Optional) In order to successfully run unit tests and linter in the section below, setup a virtualenv and install the required dependencies.
+4.  (Optional) In order to successfully run unit tests and linter in the section below, setup a virtualenv and install the required dependencies:
 
 ```
 virtualenv env
@@ -62,8 +62,8 @@ To deploy either the Philips Hue integration or Jira integration for the first t
 ### Part 1: Integration Specific Deployment Steps
 
 #### Philips Hue Integration
-1. Store your Philips Hue bridge IP address as `philips_ip` and username as `philips_username` in [Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart#create_and_access_a_secret_version)
-2. Checkout the desired GitHub environment branch (`dev` or `prod`)
+1. Store your Philips Hue bridge IP address as `philips_ip` and username as `philips_username` in [Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart#create_and_access_a_secret_version).
+2. Checkout the desired GitHub environment branch (`dev` or `prod`).
 4. Edit the `cloudbuild.yaml` configuration file to build a Philips Hue Docker image. Make sure the following line is set in the `build docker image` step:
 
 ```
@@ -71,8 +71,8 @@ args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJE
 ```
 
 #### Jira Integration
-1. Store your Jira Server URL as `jira_url` and Jira project as `jira_project` in [Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart#create_and_access_a_secret_version)
-2. Setup Jira OAuth to be used to authenticate the Jira client in the Cloud Run service. Replace `[JIRA_URL]` with your Jira Server URL
+1. Store your Jira Server URL as `jira_url` and Jira project as `jira_project` in [Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart#create_and_access_a_secret_version).
+2. Setup Jira OAuth to be used to authenticate the Jira client in the Cloud Run service. Replace `[JIRA_URL]` with your Jira Server URL:
 
 ```
 python3 jira_oauth_setup_script.py --gcp_project_id=$PROJECT_ID [JIRA_URL]
@@ -80,7 +80,7 @@ python3 jira_oauth_setup_script.py --gcp_project_id=$PROJECT_ID [JIRA_URL]
 
 (Note, this script prompts you to complete some steps manually)
 
-3. Checkout the desired GitHub environment branch (`dev` or `prod`)
+3. Checkout the desired GitHub environment branch (`dev` or `prod`).
 4. Edit the `cloudbuild.yaml` configuration file to build a Jira Docker image. Make sure the following line is set in the `build docker image` step:
 
 ```
@@ -88,7 +88,7 @@ args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJE
 ```
 
 ### Part 2: Deployment Steps for all Integrations
-1. Create Cloud Storage bucket
+1. Create Cloud Storage bucket:
 
 ```
 PROJECT_ID=$(gcloud config get-value project)
@@ -96,13 +96,19 @@ PROJECT_ID=$(gcloud config get-value project)
 gsutil mb gs://${PROJECT_ID}-tfstate
 ```
 
-2. Retrieve the email for your project's Cloud Build service account
+2. You may optionally enable Object Versioning to keep the history of your deployments:
+
+```
+gsutil versioning set on gs://${PROJECT_ID}-tfstate
+```
+
+3. Retrieve the email for your project's Cloud Build service account:
 
 ```
 CLOUDBUILD_SA="$(gcloud projects describe $PROJECT_ID --format 'value(projectNumber)')@cloudbuild.gserviceaccount.com"
 ```
 
-3. Grant the required access to your Cloud Build service account
+4. Grant the required access to your Cloud Build service account:
 
 ```
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$CLOUDBUILD_SA --role roles/iam.securityAdmin
@@ -114,13 +120,13 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$CLOU
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$CLOUDBUILD_SA --role roles/editor
 ```
 
-4. To allow the Cloud Run service to access secrets in Secret Manager, grant the Compute Engine default service account the Secret Manager Secret Accessor role. Replace `[PROJECT_NUMBER]` with the Cloud project number
+5. To allow the Cloud Run service to access secrets in Secret Manager, grant the Compute Engine default service account the Secret Manager Secret Accessor role. Replace `[PROJECT_NUMBER]` with the Cloud project number:
 
 ```
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:[PROJECT_NUMBER]-compute@developer.gserviceaccount.com --role roles/secretmanager.secretAccessor
 ```
 
-5. Trigger a build and deploy to Cloud Run. Replace `[BRANCH]` with the current environment branch
+6. Trigger a build and deploy to Cloud Run. Replace `[BRANCH]` with the current environment branch:
 
 ```
 cd ~/cloud-monitoring-notification-delivery-integration-sample-code
@@ -130,17 +136,17 @@ gcloud builds submit . --config cloudbuild.yaml --substitutions BRANCH_NAME=[BRA
 
 Note that this step uses Terraform to automatically create necessary resources in the Google Cloud Platform project. For more info on what resources are created and managed, refer to the Terraform section below.
 
-6. Create a Pub/Sub notification channel that uses the topic `tf-topic` (which was created by Terraform in the previous step).
-7. Add the Pub/Sub channel to an alerting policy by selecting Pub/Sub as the channel type and the channel created in the prior step as the notification channel.
-8. Congratulations! Your service is now successfully deployed to Cloud Run and alerts will be forwarded to either the Philips Hue light bulb or Jira server.
+7. Create a Pub/Sub notification channel that uses the topic `tf-topic` (which was created by Terraform in the previous step).
+8. Add the Pub/Sub channel to an alerting policy by selecting Pub/Sub as the channel type and the channel created in the prior step as the notification channel.
+9. Congratulations! Your service is now successfully deployed to Cloud Run and alerts will be forwarded to either the Philips Hue light bulb or Jira server.
 
 ### Redeploy
 
 If you've already deployed once manually and want to build and redeploy a new version, do the following:
 
-1.  Checkout the desired GitHub environment branch (dev or prod)
+1.  Checkout the desired GitHub environment branch (dev or prod).
 
-2.  Trigger a build and deploy to Cloud Run. Replace `[BRANCH]` with the current environment branch
+2.  Trigger a build and deploy to Cloud Run. Replace `[BRANCH]` with the current environment branch:
 
 ```
 cd ~/cloud-monitoring-notification-delivery-integration-sample-code
@@ -179,15 +185,15 @@ Terraform is a HashiCorp open source tool that enables you to predictably create
 ### Resources provisioned with Terraform
 
 Terraform will create the following resources in your cloud project:
-* A Cloud Run service called cloud-run-pubsub-service to deploy the Flask application
-* A Pub/Sub topic called tf-topic
-* A Pub/Sub push subscription called alert-push-subscription with a push endpoint to cloud-run-pubsub-service
-* A service account with ID cloud-run-pubsub-invoker to represent the Pub/Sub subscription identity
+* A Cloud Run service called `cloud-run-pubsub-service` to deploy the Flask application
+* A Pub/Sub topic called `tf-topic`
+* A Pub/Sub push subscription called `alert-push-subscription` with a push endpoint to `cloud-run-pubsub-service`
+* A service account with ID `cloud-run-pubsub-invoker` to represent the Pub/Sub subscription identity
 
 In addition, Terraform configures the following authentication policies:
 * Enabling Pub/Sub to create authentication tokens in your gcloud project
-* Giving the cloud-run-pubsub-invoker service account permission to invoke cloud-run-pubsub-service
-* Adding authentication for alert-push-subscription using the cloud-run-pubsub-invoker service account
+* Giving the `cloud-run-pubsub-invoker` service account permission to invoke `cloud-run-pubsub-service`
+* Adding authentication for `alert-push-subscription` using the `cloud-run-pubsub-invoker` service account
 
 These configurations will be applied automatically on source code changes after connecting Cloud Build with GitHub and when deploying manually.
 
