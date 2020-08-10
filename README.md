@@ -57,7 +57,7 @@ pip3 install -r scripts/requirements.txt
 
 ## Manual Deployment
 
-To deploy either the Philips Hue integration or Jira integration for the first time manually, complete the following steps. Make sure to first complete the integration specific deployment steps (part 1), then complete the deployment steps for all integrations (part 2). However if you are redeploying, follow complete the steps in the redeploying section.
+To deploy either the Philips Hue integration or Jira integration for the first time manually, complete the following steps. Make sure to first complete the integration specific deployment steps (part 1), then complete the deployment steps for all integrations (part 2). However if you are redeploying, complete the steps in the redeploying section.
 
 ### Part 1: Integration Specific Deployment Steps
 
