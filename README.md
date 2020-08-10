@@ -41,6 +41,17 @@ The sample code in this repository is referenced in the following solutions guid
 gcloud config set project [PROJECT_ID]
 ```
 
+4.  (Optional) In order to successfully run unit tests and linter in the section below, setup a virtualenv and install the required dependencies
+
+```
+virtualenv env
+source env/bin/activate
+
+pip3 install -r philips_hue_integration_example/requirements.txt
+pip3 install -r jira_integration_example/requirements.txt
+pip3 install -r scripts/requirements.txt
+```
+
 ## Manual Deployment
 
 To deploy either the Philips Hue integration or Jira integration once manually, complete the following steps. Make sure to first complete the integration specific deployment steps, then complete the deployment steps for all integrations.
@@ -126,18 +137,14 @@ Refer to this solutions guide for instructions on how to setup continuous deploy
 
 ## Running the tests
 
+In order to successfully run these tests, make sure you successfully setup virtualenv and installed the required dependencies as specified in the "Setup" section above.
+
 ### Unit Tests
 
-To run unit tests for Philips Hue integration:
+To run unit tests for Philips Hue and Jira integrations:
 
 ```
-pytest ./philips_hue_integration_example
-```
-
-To run unit tests for Jira integration:
-
-```
-pytest ./jira_integration_example
+./scripts/run_tests.sh
 ```
 
 ### Linting
@@ -145,7 +152,7 @@ pytest ./jira_integration_example
 To lint project source code with pylint:
 
 ```
-export FLASK_APP_ENV=test; pylint scripts/ philips_hue_integration_example/ jira_integration_example/ --disable=C0116,E1101,R0903,C0115,C0103,C0301,C0114,W0621,W0511,E0611,R0801,R0914,R0915
+./scripts/run_linter.sh
 ```
 
 ## Terraform
