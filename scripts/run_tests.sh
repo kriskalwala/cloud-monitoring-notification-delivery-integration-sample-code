@@ -1,5 +1,8 @@
 #!/bin/bash
 
 export FLASK_APP_ENV=test
-pytest philips_hue_integration_example
-pytest jira_integration_example
+directories="philips_hue_integration_example jira_integration_example"
+
+for directory in $directories; do
+    pytest $directory
+done
