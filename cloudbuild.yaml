@@ -41,30 +41,32 @@
 # This is to ensure that changes being proposed hold for every single environment.
 # 
 # To test a build on dev manually:
-# 1. Make sure you are using the correct glcoud project for your dev environment:
-#    gcloud config set project PROJECT_ID
-# 2. Make sure you are on the dev branch:
-#    git checkout dev
-# 3. Build and deploy the project
+# 1. Make sure you are using the correct glcoud project for your dev environment
+#    (replace DEV_PROJECT_ID with your dev gcloud project id):
+#    gcloud config set project DEV_PROJECT_ID
+# 2. Build and deploy the project
 #    cd ~/cloud-monitoring-notification-delivery-integration-sample-code
-#    gcloud builds submit --config cloudbuild.yaml .
+#    gcloud builds submit . --config cloudbuild.yaml --substitutions BRANCH_NAME=dev
 #
 # To test a build on prod manually:
 # 1. Make sure you are using the correct glcoud project for your prod environment:
-#    gcloud config set project PROJECT_ID
-# 2. Make sure you are on the prod branch:
-#    git checkout prod
-# 3. Build and deploy the project
+#    (replace PROD_PROJECT_ID with your prod gcloud project id):
+#    gcloud config set project PROD_PROJECT_ID
+# 2. Build and deploy the project
 #    cd ~/cloud-monitoring-notification-delivery-integration-sample-code
-#    gcloud builds submit --config cloudbuild.yaml .
+#    gcloud builds submit . --config cloudbuild.yaml --substitutions BRANCH_NAME=prod
 
 steps:
 - id: 'build docker image'
 
   # Uses the docker build step to build an image
   name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './philips_hue_integration_example']
+  args: ['build', '--build-arg', 'PROJECT_ID=$PROJECT_ID', '--tag', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', './jira_integration_example']
   timeout: 300s # 5 minutes
+
+- id: 'push docker image to Container Registry'
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}']
 
 - id: 'check for required environment variables'
   name: 'bash'
