@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+# Note: Multiple copies of this test cannot be executed in parallel, since they allocate
+# resources using constants and would interfere with each other.
+
+# TODO(https://github.com/googleinterns/cloud-monitoring-notification-delivery-integration-sample-code/issues/83): Refactor scripts/incident_script.py to also use these constants.
+
 from google.protobuf.duration_pb2 import Duration
 
 METRIC_NAME = 'integ-test-metric'
@@ -22,7 +26,7 @@ INSTANCE_ID = '1234567890123456789'
 ZONE = 'us-central1-f'
 ALERT_POLICY_NAME = 'integ-test-policy'
 TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE = 3.0
-PROJECT_ID = os.environ['PROJECT_ID']
+
 
 TEST_METRIC_DESCRIPTOR = {
     'type': f'custom.googleapis.com/{METRIC_NAME}',
@@ -31,11 +35,12 @@ TEST_METRIC_DESCRIPTOR = {
     'description': 'A custom metric meant for testing purposes'
 }
 
-TEST_NOTIFICATION_CHANNEL = {
+TEST_NOTIFICATION_CHANNEL_TEMPLATE = {
     'type': 'pubsub',
     'display_name': 'test channel',
     'description': 'A Pub/Sub channel meant for testing purposes',
     'labels': {
+        # caller is required to fill in the project_id
         'topic': f'projects/{PROJECT_ID}/topics/tf-topic'
     }
 }
