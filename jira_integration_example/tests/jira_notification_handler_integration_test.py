@@ -29,12 +29,12 @@ from tests import constants
 
 @retry.Retry(predicate=retry.if_exception_type(exceptions.NotFound), deadline=10)
 def short_retry(callable, *args):
-    return callable(args)
+    return callable(*args)
 
 
 @retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=180)
 def long_retry(callable, *args):
-    return callable(args)
+    return callable(*args)
 
 
 @pytest.fixture
@@ -83,10 +83,12 @@ def notification_channel(config):
     # setup
     notification_channel_client = monitoring_v3.NotificationChannelServiceClient()
     gcp_project_path = notification_channel_client.project_path(config['PROJECT_ID'])
+    test_notification_channel = constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE
+    test_notification_channel['labels']['topic'] = constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE['labels']['topic'].format(PROJECT_ID=config['PROJECT_ID'])
 
     notification_channel = notification_channel_client.create_notification_channel(
         gcp_project_path,
-        constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE.format(PROJECT_ID=config['PROJECT_ID']))
+        test_notification_channel)
     notification_channel = short_retry(notification_channel_client.get_notification_channel,
                                        notification_channel.name)
 
@@ -116,7 +118,7 @@ def alert_policy(config, metric_descriptor, notification_channel):
     policy_client.delete_alert_policy(alert_policy.name)
 
 
-def append_to_time_series(configpoint_value):
+def append_to_time_series(config, point_value):
     client = monitoring_v3.MetricServiceClient()
     gcp_project_path = client.project_path(config['PROJECT_ID'])
 
@@ -160,10 +162,10 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
         assert len(resolved_monitoring_issues) == 1
         
     # trigger incident and check jira issue created
-    append_to_time_series(constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
+    append_to_time_series(config, constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
     long_retry(assert_jira_issue_is_created) # issue status id for "To Do"
 
     # resolve incident and check jira issue resolved
-    append_to_time_series(constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
+    append_to_time_series(config, constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
     long_retry(assert_jira_issue_is_resolved)
     

@@ -192,15 +192,6 @@ class TestJiraConfig(JiraConfig):
     JIRA_PROJECT = 'test-project'
 
 
-
-_ENVIRONMENT_TO_CONFIG_MAPPING = {
-    'prod': ProdJiraConfig,
-    'dev': DevJiraConfig,
-    'test': TestJiraConfig,
-    'default': ProdJiraConfig
-}
-
-
 class IntegTestJiraConfig(DevJiraConfig):
     """Integration test Jira config."""
 
@@ -208,6 +199,7 @@ class IntegTestJiraConfig(DevJiraConfig):
 
 
     def __init__(self):
+        super().__init__()
         self._gcloud_project_id = os.environ.get('PROJECT_ID')
         
     @property
@@ -218,6 +210,13 @@ class IntegTestJiraConfig(DevJiraConfig):
 
         return self._gcloud_project_id
 
+    
+_ENVIRONMENT_TO_CONFIG_MAPPING = {
+    'prod': ProdJiraConfig,
+    'dev': DevJiraConfig,
+    'test': TestJiraConfig,
+    'default': ProdJiraConfig
+}
 
 
 def load():

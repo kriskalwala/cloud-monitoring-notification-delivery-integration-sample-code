@@ -42,7 +42,7 @@ TEST_NOTIFICATION_CHANNEL_TEMPLATE = {
     'description': 'A Pub/Sub channel meant for testing purposes',
     'labels': {
         # caller is required to fill in the project_id
-        'topic': f'projects/{PROJECT_ID}/topics/tf-topic'
+        'topic': 'projects/{PROJECT_ID}/topics/tf-topic'
     }
 }
 
