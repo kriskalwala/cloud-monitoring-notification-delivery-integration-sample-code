@@ -30,7 +30,6 @@ class JiraConfig:
     CLOSED_JIRA_ISSUE_STATUS = 'Done'
 
 
-
 class ProdJiraConfig(JiraConfig):
     """Production Jira config."""
 
@@ -102,7 +101,6 @@ class ProdJiraConfig(JiraConfig):
             self._jira_project = secret.get_secret_value()
 
         return self._jira_project
-
 
 
 class DevJiraConfig(JiraConfig):
@@ -177,7 +175,6 @@ class DevJiraConfig(JiraConfig):
         return self._jira_project
 
 
-
 class TestJiraConfig(JiraConfig):
     """Test Jira config."""
 
@@ -202,6 +199,24 @@ _ENVIRONMENT_TO_CONFIG_MAPPING = {
     'test': TestJiraConfig,
     'default': ProdJiraConfig
 }
+
+
+class IntegTestJiraConfig(DevJiraConfig):
+    """Integration test Jira config."""
+
+    FLASK_ENV = 'test'
+
+
+    def __init__(self):
+        self._gcloud_project_id = os.environ.get('PROJECT_ID')
+        
+    @property
+    def PROJECT_ID(self):
+        if self._gcloud_project_id is None:
+            secret = secrets.EnvironmentVariableSecret('PROJECT_ID')
+            self._gcloud_project_id = secret.get_secret_value()
+
+        return self._gcloud_project_id
 
 
 

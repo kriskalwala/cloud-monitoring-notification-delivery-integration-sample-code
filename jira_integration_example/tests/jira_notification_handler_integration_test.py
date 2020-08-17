@@ -17,7 +17,7 @@ import time
 import pytest
 
 import main
-from config import DevJiraConfig
+from config import IntegTestJiraConfig
 
 from google.cloud import monitoring_v3
 from google.api_core import exceptions
@@ -27,19 +27,19 @@ from jira import JIRA
 from tests import constants
 
 
-@retry.Retry(predicate.if_exception_type(exceptions.NotFound), deadline=10)
+@retry.Retry(predicate=retry.if_exception_type(exceptions.NotFound), deadline=10)
 def short_retry(callable, *args):
     return callable(args)
 
 
-@retry.Retry(predicate.if_exception_type(AssertionError), deadline=180)
+@retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=180)
 def long_retry(callable, *args):
     return callable(args)
 
 
 @pytest.fixture
 def config():
-    main.app.config.from_object(DevJiraConfig())
+    main.app.config.from_object(IntegTestJiraConfig())
     return main.app.config
 
 
@@ -55,13 +55,14 @@ def jira_client(config):
     yield jira_client
 
     # tear down
-    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric for {config['PROJECT_ID']}"')
+    project_id = config['PROJECT_ID']
+    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric for {project_id}"')
     for issue in test_issues:
         issue.delete()
 
 
 @pytest.fixture(scope='function')
-def metric_descriptor():
+def metric_descriptor(config):
     # setup
     metric_client = monitoring_v3.MetricServiceClient()
     gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
@@ -78,15 +79,16 @@ def metric_descriptor():
 
 
 @pytest.fixture(scope='function')
-def notification_channel():
+def notification_channel(config):
     # setup
     notification_channel_client = monitoring_v3.NotificationChannelServiceClient()
     gcp_project_path = notification_channel_client.project_path(config['PROJECT_ID'])
 
     notification_channel = notification_channel_client.create_notification_channel(
         gcp_project_path,
-        constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE.format(PROJECT_ID=config['PROJECT_ID'])
-    notification_channel = short_retry(notification_channel_client.get_notification_channel, notification_channel.name)
+        constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE.format(PROJECT_ID=config['PROJECT_ID']))
+    notification_channel = short_retry(notification_channel_client.get_notification_channel,
+                                       notification_channel.name)
 
     yield notification_channel
 
@@ -95,7 +97,7 @@ def notification_channel():
 
 
 @pytest.fixture(scope='function')
-def alert_policy(metric_descriptor, notification_channel):
+def alert_policy(config, metric_descriptor, notification_channel):
     # setup
     policy_client = monitoring_v3.AlertPolicyServiceClient()
     gcp_project_path = policy_client.project_path(config['PROJECT_ID'])
@@ -114,7 +116,7 @@ def alert_policy(metric_descriptor, notification_channel):
     policy_client.delete_alert_policy(alert_policy.name)
 
 
-def append_to_time_series(point_value):
+def append_to_time_series(configpoint_value):
     client = monitoring_v3.MetricServiceClient()
     gcp_project_path = client.project_path(config['PROJECT_ID'])
 
@@ -144,14 +146,16 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
     def assert_jira_issue_is_created():
         # Search for all issues where the status is 'unresolved' and
         # the integ-test-metric custom field is set to this the Cloud Monitoring project ID
-        query_string = f'description~"custom/integ-test-metric for {config['PROJECT_ID']}" and status=10000'
+        project_id = config['PROJECT_ID']
+        query_string = f'description~"custom/integ-test-metric for {project_id}" and status=10000'
         created_monitoring_issues = jira_client.search_issues(query_string)
         assert len(created_monitoring_issues) == 1
 
     def assert_jira_issue_is_resolved():
         # Search for all issues where the status is 'resolved' and
         # the integ-test-metric custom field is set to this the Cloud Monitoring project ID
-        query_string = f'description~"custom/integ-test-metric for {config['PROJECT_ID']}" and status={config['CLOSED_JIRA_ISSUE_STATUS']}'
+        project_id = config['PROJECT_ID']
+        query_string = f'description~"custom/integ-test-metric for {project_id}" and status={config["CLOSED_JIRA_ISSUE_STATUS"]}'
         resolved_monitoring_issues = jira_client.search_issues(query_string)
         assert len(resolved_monitoring_issues) == 1
         
