@@ -44,6 +44,11 @@ class ProdJiraConfig(JiraConfig):
 
 
     @property
+    def PROJECT_ID(self):
+        return self.__gcloud_project_id
+
+
+    @property
     def JIRA_URL(self):
         if self._jira_url is None:
             secret = secrets.GoogleSecretManagerSecret(
@@ -190,33 +195,6 @@ class TestJiraConfig(JiraConfig):
     JIRA_CONSUMER_KEY = 'test-consumer-key'
     JIRA_KEY_CERT = 'test-key-cert'
     JIRA_PROJECT = 'test-project'
-
-
-class IntegTestJiraConfig(DevJiraConfig):
-    """Integration test Jira config."""
-
-    FLASK_ENV = 'test'
-
-
-    def __init__(self):
-        super().__init__()
-        self._gcloud_project_id = os.environ.get('PROJECT_ID')
-        
-    @property
-    def PROJECT_ID(self):
-        if self._gcloud_project_id is None:
-            secret = secrets.EnvironmentVariableSecret('PROJECT_ID')
-            self._gcloud_project_id = secret.get_secret_value()
-
-        return self._gcloud_project_id
-
-    
-_ENVIRONMENT_TO_CONFIG_MAPPING = {
-    'prod': ProdJiraConfig,
-    'dev': DevJiraConfig,
-    'test': TestJiraConfig,
-    'default': ProdJiraConfig
-}
 
 
 def load():
