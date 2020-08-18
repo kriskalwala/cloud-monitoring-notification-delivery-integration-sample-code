@@ -16,30 +16,27 @@ import time
 
 import pytest
 
-import main
-from config import IntegTestJiraConfig
-
 from google.cloud import monitoring_v3
 from google.api_core import exceptions
 from google.api_core import retry
 from jira import JIRA
 
+import main
 from tests import constants
 
 
 @retry.Retry(predicate=retry.if_exception_type(exceptions.NotFound), deadline=10)
-def short_retry(callable, *args):
-    return callable(*args)
+def short_retry(callable_function, *args):
+    return callable_function(*args)
 
 
 @retry.Retry(predicate=retry.if_exception_type(AssertionError), deadline=180)
-def long_retry(callable, *args):
-    return callable(*args)
+def long_retry(callable_function, *args):
+    return callable_function(*args)
 
 
 @pytest.fixture
 def config():
-    main.app.config.from_object(IntegTestJiraConfig())
     return main.app.config
 
 
@@ -160,7 +157,7 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
         query_string = f'description~"custom/integ-test-metric for {project_id}" and status={config["CLOSED_JIRA_ISSUE_STATUS"]}'
         resolved_monitoring_issues = jira_client.search_issues(query_string)
         assert len(resolved_monitoring_issues) == 1
-        
+
     # trigger incident and check jira issue created
     append_to_time_series(config, constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
     long_retry(assert_jira_issue_is_created) # issue status id for "To Do"
