@@ -197,6 +197,14 @@ class TestJiraConfig(JiraConfig):
     JIRA_PROJECT = 'test-project'
 
 
+_ENVIRONMENT_TO_CONFIG_MAPPING = {
+    'prod': ProdJiraConfig,
+    'dev': DevJiraConfig,
+    'test': TestJiraConfig,
+    'default': ProdJiraConfig
+}
+
+
 def load():
     environment_name = os.environ.get('FLASK_APP_ENV', 'default')
     return _ENVIRONMENT_TO_CONFIG_MAPPING[environment_name]()

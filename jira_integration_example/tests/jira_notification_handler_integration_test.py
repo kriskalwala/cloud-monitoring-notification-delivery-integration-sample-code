@@ -96,7 +96,7 @@ def notification_channel(config):
 
 
 @pytest.fixture(scope='function')
-def alert_policy(config, metric_descriptor, notification_channel):
+def alert_policy(config, notification_channel):
     # setup
     policy_client = monitoring_v3.AlertPolicyServiceClient()
     gcp_project_path = policy_client.project_path(config['PROJECT_ID'])
