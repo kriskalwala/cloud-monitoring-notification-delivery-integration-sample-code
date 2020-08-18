@@ -45,7 +45,7 @@ class ProdJiraConfig(JiraConfig):
 
     @property
     def PROJECT_ID(self):
-        return self.__gcloud_project_id
+        return self._gcloud_project_id
 
 
     @property
