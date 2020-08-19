@@ -166,10 +166,10 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
         assert len(resolved_monitoring_issues) == 1
 
     # trigger incident and check jira issue created
-    append_to_time_series(config, constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
+    append_to_time_series(config, 'integ-test-metric', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
     long_retry(assert_jira_issue_is_created) # issue status id for "To Do"
 
     # resolve incident and check jira issue resolved
-    append_to_time_series(config, constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
+    append_to_time_series(config, 'integ-test-metric', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
     long_retry(assert_jira_issue_is_resolved)
     
