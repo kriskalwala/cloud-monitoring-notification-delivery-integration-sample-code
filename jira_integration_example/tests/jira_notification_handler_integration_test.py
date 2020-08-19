@@ -65,7 +65,7 @@ def metric_descriptor(config, metric_name):
     gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
         
     test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE
-    test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR['type'].format(METRIC_NAME=metric_name)
+    test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME=metric_name)
 
     metric_descriptor = metric_client.create_metric_descriptor(
         gcp_project_path,
