@@ -47,7 +47,7 @@ def jira_client(config):
                   'access_token_secret': config['JIRA_ACCESS_TOKEN_SECRET'],
                   'consumer_key': config['JIRA_CONSUMER_KEY'],
                   'key_cert': config['JIRA_KEY_CERT']}
-    jira_client = JIRA(config['JIRA_URL'], oauth=oauth_dict)
+    jira_client = JIRA(config['JIRA_URL'], oauth=oauth_dict)                                         
 
     yield jira_client
 
@@ -59,14 +59,17 @@ def jira_client(config):
 
 
 @pytest.fixture(scope='function')
-def metric_descriptor(config):
+def metric_descriptor(config, metric_name):
     # setup
     metric_client = monitoring_v3.MetricServiceClient()
     gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
+        
+    test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR
+    test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR['type'].format(METRIC_NAME=metric_name)
 
     metric_descriptor = metric_client.create_metric_descriptor(
         gcp_project_path,
-        constants.TEST_METRIC_DESCRIPTOR)
+        test_metric_descriptor)
     metric_descriptor = short_retry(metric_client.get_metric_descriptor, metric_descriptor.name)
 
     yield metric_descriptor
@@ -96,13 +99,17 @@ def notification_channel(config):
 
 
 @pytest.fixture(scope='function')
-def alert_policy(config, notification_channel):
+def alert_policy(config, notification_channel, alert_policy_name, metric_name):
     # setup
     policy_client = monitoring_v3.AlertPolicyServiceClient()
     gcp_project_path = policy_client.project_path(config['PROJECT_ID'])
 
     test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE
     test_alert_policy['notification_channels'].append(notification_channel.name)
+    test_alert_policy['display_name'] = alert_policy_name
+    test_alert_policy['user_labels']['metric'] = metric_name
+    metric_path = constants.METRIC_PATH.format(METRIC_NAME=metric_name)
+    test_alert_policy['conditions'][0]['condition_threshold']['filter'] = test_alert_policy['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
 
     alert_policy = policy_client.create_alert_policy(
         gcp_project_path,
@@ -134,6 +141,7 @@ def append_to_time_series(config, point_value):
     client.create_time_series(gcp_project_path, [series])
 
 
+@pytest.mark.parametrize('metric_name,alert_policy_name', ['integ-test-metric', 'integ-test-policy'])
 def test_open_close_ticket(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     # Sanity check that the test fixtures were initialized with values that the rest of the test expects
     assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR['type']
