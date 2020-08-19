@@ -64,7 +64,7 @@ def metric_descriptor(config, metric_name):
     metric_client = monitoring_v3.MetricServiceClient()
     gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
         
-    test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR
+    test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE
     test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR['type'].format(METRIC_NAME=metric_name)
 
     metric_descriptor = metric_client.create_metric_descriptor(
@@ -141,13 +141,12 @@ def append_to_time_series(config, point_value):
     client.create_time_series(gcp_project_path, [series])
 
 
-@pytest.mark.parametrize('metric_name,alert_policy_name', ['integ-test-metric', 'integ-test-policy'])
+@pytest.mark.parametrize('metric_name,alert_policy_name', [('integ-test-metric','integ-test-policy')])
 def test_open_close_ticket(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     # Sanity check that the test fixtures were initialized with values that the rest of the test expects
-    assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR['type']
+    assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME='integ-test-metric')
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE['display_name']
-    assert alert_policy.display_name == constants.ALERT_POLICY_NAME
-    assert alert_policy.user_labels == constants.TEST_ALERT_POLICY_TEMPLATE['user_labels']
+    assert alert_policy.display_name == 'integ-test-policy'
     assert alert_policy.notification_channels[0] == notification_channel.name
 
     def assert_jira_issue_is_created():
