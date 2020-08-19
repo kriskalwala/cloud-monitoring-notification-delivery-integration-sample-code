@@ -4,7 +4,7 @@
 
 This repository provides examples of how a Google Cloud user can forward **[notifications](https://cloud.google.com/monitoring/alerts#how_does_alerting_work)** to third-party integrations not officially supported as **[notification options](https://cloud.google.com/monitoring/support/notification-options)**. The two provided examples forward notifications to a Philips Hue smart bulb and a Jira server. Each example accomplishes this through the use of a Flask server running on Cloud Run which recieves monitoring notifications through Cloud Pub/Sub push messages and then parses and delivers them to a third party service.
 
-The sample code in this repository is referenced in the following solutions guide: TBD
+The sample code in this repository is referenced in this **[Cloud Community tutorial](https://cloud.google.com/community/tutorials/delivering-cloud-monitoring-notifications-to-third-party-services)**. 
 
 ## Folder Structure
 
