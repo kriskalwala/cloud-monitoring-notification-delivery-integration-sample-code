@@ -116,14 +116,14 @@ def test_incident_alert_message(flask_client, config, mocker):
                '"url": "http://test-cloud.com", "incident_id": "0.abcdef123456"}}')
     data = base64.b64encode(message.encode()).decode()
 
-    mocker.patch('main.jira_integration.update_jira_based_on_monitoring_notification',
+    mocker.patch('main.jira_notification_handler.update_jira_based_on_monitoring_notification',
                  autospec=True)
     mocker.patch('main.JIRA', autospec=True)
     jira_client = main.JIRA.return_value # JIRA client to be used when handling pub/sub message
 
     response = flask_client.post('/', json={'message': {'data': data}})
 
-    main.jira_integration.update_jira_based_on_monitoring_notification.assert_called_once_with(
+    main.jira_notification_handler.update_jira_based_on_monitoring_notification.assert_called_once_with(
         jira_client, config['JIRA_PROJECT'], config['CLOSED_JIRA_ISSUE_STATUS'],
         json.loads(message))
 

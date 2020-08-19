@@ -28,7 +28,7 @@ from flask import Flask, request
 from jira import JIRA, JIRAError
 
 import config
-from utilities import pubsub, jira_integration
+from utilities import pubsub, jira_notification_handler
 
 
 app_config = config.load()
@@ -83,13 +83,13 @@ def send_monitoring_notification_to_third_party(notification):
                       'consumer_key': app.config['JIRA_CONSUMER_KEY'],
                       'key_cert': app.config['JIRA_KEY_CERT']}
         jira_client = JIRA(app.config['JIRA_URL'], oauth=oauth_dict)
-        jira_integration.update_jira_based_on_monitoring_notification(
+        jira_notification_handler.update_jira_based_on_monitoring_notification(
             jira_client,
             app.config['JIRA_PROJECT'],
             app.config['CLOSED_JIRA_ISSUE_STATUS'],
             notification)
 
-    except (jira_integration.Error, JIRAError) as e:
+    except (jira_notification_handler.Error, JIRAError) as e:
         logger.error(e)
         return (str(e), 400)
 

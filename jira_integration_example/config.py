@@ -30,7 +30,6 @@ class JiraConfig:
     CLOSED_JIRA_ISSUE_STATUS = 'Done'
 
 
-
 class ProdJiraConfig(JiraConfig):
     """Production Jira config."""
 
@@ -42,6 +41,11 @@ class ProdJiraConfig(JiraConfig):
         self._jira_key_cert = None
         self._jira_project = None
         self._gcloud_project_id = os.environ.get('PROJECT_ID')
+
+
+    @property
+    def PROJECT_ID(self):
+        return self._gcloud_project_id
 
 
     @property
@@ -102,7 +106,6 @@ class ProdJiraConfig(JiraConfig):
             self._jira_project = secret.get_secret_value()
 
         return self._jira_project
-
 
 
 class DevJiraConfig(JiraConfig):
@@ -177,7 +180,6 @@ class DevJiraConfig(JiraConfig):
         return self._jira_project
 
 
-
 class TestJiraConfig(JiraConfig):
     """Test Jira config."""
 
@@ -195,14 +197,12 @@ class TestJiraConfig(JiraConfig):
     JIRA_PROJECT = 'test-project'
 
 
-
 _ENVIRONMENT_TO_CONFIG_MAPPING = {
     'prod': ProdJiraConfig,
     'dev': DevJiraConfig,
     'test': TestJiraConfig,
     'default': ProdJiraConfig
 }
-
 
 
 def load():
