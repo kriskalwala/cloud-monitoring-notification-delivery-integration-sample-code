@@ -152,7 +152,7 @@ def append_to_time_series(config, metric_name, point_value):
 def test_open_close_ticket(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     # Sanity check that the test fixtures were initialized with values that the rest of the test expects
     metric_descriptor = metric_descriptor.create_metric_descriptor('integ-test-metric')
-    alert_policy = alert_policy.create_alert_policy('integ-test-policy')
+    alert_policy = alert_policy.create_alert_policy('integ-test-policy', 'integ-test-metric')
 
     assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME='integ-test-metric')
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE['display_name']
