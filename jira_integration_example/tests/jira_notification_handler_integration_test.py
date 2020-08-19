@@ -122,12 +122,12 @@ def alert_policy(config, notification_channel, alert_policy_name, metric_name):
     policy_client.delete_alert_policy(alert_policy.name)
 
 
-def append_to_time_series(config, point_value):
+def append_to_time_series(config, metric_name, point_value):
     client = monitoring_v3.MetricServiceClient()
     gcp_project_path = client.project_path(config['PROJECT_ID'])
 
     series = monitoring_v3.types.TimeSeries()
-    series.metric.type = constants.METRIC_PATH
+    series.metric.type = constants.METRIC_PATH.format(METRIC_NAME=metric_name)
     series.resource.type = constants.RESOURCE_TYPE
     series.resource.labels['instance_id'] = constants.INSTANCE_ID
     series.resource.labels['zone'] = constants.ZONE
