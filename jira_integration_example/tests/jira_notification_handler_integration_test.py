@@ -55,7 +55,7 @@ def jira_client(config):
 
     # tear down
     project_id = config['PROJECT_ID']
-    test_issues = jira_client.search_issues(f'description="custom/integ-test-metric* for {project_id}*"')
+    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric"')
     for issue in test_issues:
         issue.delete()
 
