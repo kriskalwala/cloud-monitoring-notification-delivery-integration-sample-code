@@ -77,7 +77,7 @@ def metric_descriptor(config, request):
             # tear down (addfinalizer is called after the test finishes execution)
             request.addfinalizer(metric_client.delete_metric_descriptor(metric_descriptor.name))
 
-            yield metric_descriptor
+            return metric_descriptor
         
     return MetricDescriptor()
 
@@ -125,7 +125,7 @@ def alert_policy(config, notification_channel, request):
             # tear down (addfinalizer is called after the test finishes execution)
             request.addfinalizer(policy_client.delete_alert_policy(alert_policy.name))
 
-            yield alert_policy
+            return alert_policy
 
     return AlertPolicy()
 
