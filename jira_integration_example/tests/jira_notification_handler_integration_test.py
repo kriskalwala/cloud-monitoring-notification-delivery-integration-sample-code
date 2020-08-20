@@ -183,4 +183,55 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
     # resolve incident and check jira issue resolved
     append_to_time_series(config, 'integ-test-metric', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
     long_retry(assert_jira_issue_is_resolved)
+
+
+def test_multiple_tickets(config, metric_descriptor, notification_channel, alert_policy, jira_client):
+    # Sanity check that the test fixtures were initialized with values that the rest of the test expects
+    metric_descriptor_1 = metric_descriptor_1.create_metric_descriptor('integ-test-metric-1')
+    alert_policy_1 = alert_policy_1.create_alert_policy('integ-test-policy-1', 'integ-test-metric-1')
+    metric_descriptor_2 = metric_descriptor_2.create_metric_descriptor('integ-test-metric-2')
+    alert_policy_2 = alert_policy_2.create_alert_policy('integ-test-policy-2', 'integ-test-metric-2')
+
+    assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE['display_name']
+    assert metric_descriptor_1.type == constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME='integ-test-metric-1')
+    assert alert_policy_1.display_name == 'integ-test-policy-1'
+    assert alert_policy_1.notification_channels[0] == notification_channel.name
+    assert metric_descriptor_2.type == constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME='integ-test-metric-2')
+    assert alert_policy_2.display_name == 'integ-test-policy-2'
+    assert alert_policy_2.notification_channels[0] == notification_channel.name
+
+    def assert_jira_issues_are_created(metric_names):
+        # Search for all issues where the status is 'unresolved' and
+        # the integ-test-metric custom field is set to this the Cloud Monitoring project ID
+        project_id = config['PROJECT_ID']
+        for metric_name in metric_names:
+            query_string = f'description~"custom/{metric_name} for {project_id}" and status=10000' # issue status for To Do
+            created_monitoring_issues = jira_client.search_issues(query_string)
+            assert len(created_monitoring_issues) == 1
+
+    def assert_jira_issues_are_resolved(metric_names):
+        # Search for all issues where the status is 'resolved' and
+        # the integ-test-metric custom field is set to this the Cloud Monitoring project ID
+        project_id = config['PROJECT_ID']
+        for metric_name in metric_names:
+            query_string = f'description~"custom/{metric_name} for {project_id}" and status={config["CLOSED_JIRA_ISSUE_STATUS"]}'
+            resolved_monitoring_issues = jira_client.search_issues(query_string)
+            assert len(resolved_monitoring_issues) == 1
+
+    # trigger incident for integ-test-policy-1 and check jira issue created
+    append_to_time_series(config, 'integ-test-metric-1', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
+    long_retry(assert_jira_issues_are_created, ['integ-test-metric-1'])
+
+    # trigger incident for integ-test-policy-2 and check issues for policy 1 and 2 exist
+    append_to_time_series(config, 'integ-test-metric-2', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
+    long_retry(assert_jira_issues_are_created, ['integ-test-metric-1', 'integ-test-metric-2'])
+    
+    # resolve incident for integ-test-policy-1 and check jira issue resolved for policy 1, unresolved for 2
+    append_to_time_series(config, 'integ-test-metric-1', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
+    long_retry(assert_jira_issues_are_resolved, ['integ-test-metric-1'])
+    long_retry(assert_jira_issues_are_created, ['integ-test-metric-2'])
+
+    # resolve incident for integ-test-policy-2 and check both jira issues are resolved
+    append_to_time_series(config, 'integ-test-metric-2', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
+    long_retry(assert_jira_issues_are_resolved, ['integ-test-metric-1', 'integ-test-metric-2'])
     
