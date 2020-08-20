@@ -116,7 +116,7 @@ def alert_policy(config, notification_channel, request):
             test_alert_policy['display_name'] = alert_policy_name
             test_alert_policy['user_labels']['metric'] = metric_name
             metric_path = constants.METRIC_PATH.format(METRIC_NAME=metric_name)
-            test_alert_policy['conditions'][0]['condition_threshold']['filter'] = test_alert_policy['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
+            test_alert_policy['conditions'][0]['condition_threshold']['filter'] = constants.TEST_ALERT_POLICY_TEMPLATE['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
 
             alert_policy = policy_client.create_alert_policy(
                 gcp_project_path,
