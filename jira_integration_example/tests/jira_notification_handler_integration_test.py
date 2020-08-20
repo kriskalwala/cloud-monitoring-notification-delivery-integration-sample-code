@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import time
+import functools
 
 import pytest
 
@@ -69,13 +70,13 @@ def metric_descriptor(config, request):
             test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE
             test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME=metric_name)
 
-            metric_descriptor = short_retry(metric_client.create_metric_descriptor,
+            metric_descriptor = metric_client.create_metric_descriptor(
                 gcp_project_path,
                 test_metric_descriptor)
             metric_descriptor = short_retry(metric_client.get_metric_descriptor, metric_descriptor.name)
 
             # tear down (addfinalizer is called after the test finishes execution)
-            request.addfinalizer(metric_client.delete_metric_descriptor(metric_descriptor.name))
+            request.addfinalizer(functools.partial(metric_client.delete_metric_descriptor, metric_descriptor.name))
 
             return metric_descriptor
         
@@ -117,13 +118,13 @@ def alert_policy(config, notification_channel, request):
             metric_path = constants.METRIC_PATH.format(METRIC_NAME=metric_name)
             test_alert_policy['conditions'][0]['condition_threshold']['filter'] = test_alert_policy['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
 
-            alert_policy = short_retry(policy_client.create_alert_policy,
+            alert_policy = policy_client.create_alert_policy(
                                        gcp_project_path,
                                        test_alert_policy)
             alert_policy = short_retry(policy_client.get_alert_policy, alert_policy.name)
 
             # tear down (addfinalizer is called after the test finishes execution)
-            request.addfinalizer(policy_client.delete_alert_policy(alert_policy.name))
+            request.addfinalizer(functools.partial(policy_client.delete_alert_policy, alert_policy.name))
 
             return alert_policy
 
