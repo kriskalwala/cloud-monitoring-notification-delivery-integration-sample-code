@@ -187,10 +187,10 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
 
 def test_multiple_tickets(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     # Sanity check that the test fixtures were initialized with values that the rest of the test expects
-    metric_descriptor_1 = metric_descriptor_1.create_metric_descriptor('integ-test-metric-1')
-    alert_policy_1 = alert_policy_1.create_alert_policy('integ-test-policy-1', 'integ-test-metric-1')
-    metric_descriptor_2 = metric_descriptor_2.create_metric_descriptor('integ-test-metric-2')
-    alert_policy_2 = alert_policy_2.create_alert_policy('integ-test-policy-2', 'integ-test-metric-2')
+    metric_descriptor_1 = metric_descriptor.create_metric_descriptor('integ-test-metric-1')
+    alert_policy_1 = alert_policy.create_alert_policy('integ-test-policy-1', 'integ-test-metric-1')
+    metric_descriptor_2 = metric_descriptor.create_metric_descriptor('integ-test-metric-2')
+    alert_policy_2 = alert_policy.create_alert_policy('integ-test-policy-2', 'integ-test-metric-2')
 
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE['display_name']
     assert metric_descriptor_1.type == constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME='integ-test-metric-1')
