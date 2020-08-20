@@ -61,7 +61,7 @@ def jira_client(config):
 
 @pytest.fixture
 def metric_descriptor(config, request):
-    def create_metric_descriptor(self, metric_name):
+    def create_metric_descriptor(metric_name):
         # setup
         metric_client = monitoring_v3.MetricServiceClient()
         gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
@@ -104,7 +104,7 @@ def notification_channel(config):
 
 @pytest.fixture
 def alert_policy(config, notification_channel, request):
-    def create_alert_policy(self, alert_policy_name, metric_name):
+    def create_alert_policy(alert_policy_name, metric_name):
         # setup
         policy_client = monitoring_v3.AlertPolicyServiceClient()
         gcp_project_path = policy_client.project_path(config['PROJECT_ID'])
