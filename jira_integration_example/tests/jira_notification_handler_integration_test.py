@@ -54,8 +54,7 @@ def jira_client(config):
     yield jira_client
 
     # tear down
-    project_id = config['PROJECT_ID']
-    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric"')
+    test_issues = jira_client.search_issues('description~"custom/integ-test-metric"')
     for issue in test_issues:
         issue.delete()
 
