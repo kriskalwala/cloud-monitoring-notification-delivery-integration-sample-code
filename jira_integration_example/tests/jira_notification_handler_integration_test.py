@@ -48,20 +48,20 @@ def jira_client(config):
                   'access_token_secret': config['JIRA_ACCESS_TOKEN_SECRET'],
                   'consumer_key': config['JIRA_CONSUMER_KEY'],
                   'key_cert': config['JIRA_KEY_CERT']}
-    jira_client = JIRA(config['JIRA_URL'], oauth=oauth_dict)                                         
+    jira_client = JIRA(config['JIRA_URL'], oauth=oauth_dict)                    
 
     yield jira_client
 
     # tear down
     project_id = config['PROJECT_ID']
-    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric for {project_id}"')
+    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric* for {project_id}"')
     for issue in test_issues:
         issue.delete()
 
 
 @pytest.fixture(scope='function')
 def metric_descriptor(config, request):
-    class MetricDescriptor(object):
+    class MetricDescriptor():
         def create_metric_descriptor(self, metric_name):
             # setup
             metric_client = monitoring_v3.MetricServiceClient()
@@ -79,7 +79,7 @@ def metric_descriptor(config, request):
             request.addfinalizer(functools.partial(metric_client.delete_metric_descriptor, metric_descriptor.name))
 
             return metric_descriptor
-        
+
     return MetricDescriptor()
 
 
@@ -105,7 +105,7 @@ def notification_channel(config):
 
 @pytest.fixture(scope='function')
 def alert_policy(config, notification_channel, request):
-    class AlertPolicy(object):
+    class AlertPolicy():
         def create_alert_policy(self, alert_policy_name, metric_name):
             # setup
             policy_client = monitoring_v3.AlertPolicyServiceClient()
@@ -119,8 +119,8 @@ def alert_policy(config, notification_channel, request):
             test_alert_policy['conditions'][0]['condition_threshold']['filter'] = test_alert_policy['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
 
             alert_policy = policy_client.create_alert_policy(
-                                       gcp_project_path,
-                                       test_alert_policy)
+                gcp_project_path,
+                test_alert_policy)
             alert_policy = short_retry(policy_client.get_alert_policy, alert_policy.name)
 
             # tear down (addfinalizer is called after the test finishes execution)
