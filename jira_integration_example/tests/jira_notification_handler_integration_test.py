@@ -41,7 +41,7 @@ def config():
     return main.app.config
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def jira_client(config):
     # setup
     oauth_dict = {'access_token': config['JIRA_ACCESS_TOKEN'],
@@ -54,36 +54,35 @@ def jira_client(config):
 
     # tear down
     project_id = config['PROJECT_ID']
-    test_issues = jira_client.search_issues(f'description~"custom/integ-test-metric* for {project_id}"')
+    test_issues = jira_client.search_issues(f'description="custom/integ-test-metric* for {project_id}*"')
     for issue in test_issues:
         issue.delete()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def metric_descriptor(config, request):
-    class MetricDescriptor():
-        def create_metric_descriptor(self, metric_name):
-            # setup
-            metric_client = monitoring_v3.MetricServiceClient()
-            gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
+    def create_metric_descriptor(self, metric_name):
+        # setup
+        metric_client = monitoring_v3.MetricServiceClient()
+        gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
 
-            test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE
-            test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME=metric_name)
+        test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE
+        test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME=metric_name)
 
-            metric_descriptor = metric_client.create_metric_descriptor(
-                gcp_project_path,
-                test_metric_descriptor)
-            metric_descriptor = short_retry(metric_client.get_metric_descriptor, metric_descriptor.name)
+        metric_descriptor = metric_client.create_metric_descriptor(
+            gcp_project_path,
+            test_metric_descriptor)
+        metric_descriptor = short_retry(metric_client.get_metric_descriptor, metric_descriptor.name)
 
-            # tear down (addfinalizer is called after the test finishes execution)
-            request.addfinalizer(functools.partial(metric_client.delete_metric_descriptor, metric_descriptor.name))
+        # tear down (addfinalizer is called after the test finishes execution)
+        request.addfinalizer(functools.partial(metric_client.delete_metric_descriptor, metric_descriptor.name))
 
-            return metric_descriptor
+        return metric_descriptor
 
-    return MetricDescriptor()
+    return create_metric_descriptor
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def notification_channel(config):
     # setup
     notification_channel_client = monitoring_v3.NotificationChannelServiceClient()
@@ -103,32 +102,31 @@ def notification_channel(config):
     notification_channel_client.delete_notification_channel(notification_channel.name)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def alert_policy(config, notification_channel, request):
-    class AlertPolicy():
-        def create_alert_policy(self, alert_policy_name, metric_name):
-            # setup
-            policy_client = monitoring_v3.AlertPolicyServiceClient()
-            gcp_project_path = policy_client.project_path(config['PROJECT_ID'])
+    def create_alert_policy(self, alert_policy_name, metric_name):
+        # setup
+        policy_client = monitoring_v3.AlertPolicyServiceClient()
+        gcp_project_path = policy_client.project_path(config['PROJECT_ID'])
 
-            test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE
-            test_alert_policy['notification_channels'].append(notification_channel.name)
-            test_alert_policy['display_name'] = alert_policy_name
-            test_alert_policy['user_labels']['metric'] = metric_name
-            metric_path = constants.METRIC_PATH.format(METRIC_NAME=metric_name)
-            test_alert_policy['conditions'][0]['condition_threshold']['filter'] = constants.TEST_ALERT_POLICY_TEMPLATE['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
+        test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE
+        test_alert_policy['notification_channels'].append(notification_channel.name)
+        test_alert_policy['display_name'] = alert_policy_name
+        test_alert_policy['user_labels']['metric'] = metric_name
+        metric_path = constants.METRIC_PATH.format(METRIC_NAME=metric_name)
+        test_alert_policy['conditions'][0]['condition_threshold']['filter'] = constants.TEST_ALERT_POLICY_TEMPLATE['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
 
-            alert_policy = policy_client.create_alert_policy(
-                gcp_project_path,
-                test_alert_policy)
-            alert_policy = short_retry(policy_client.get_alert_policy, alert_policy.name)
+        alert_policy = policy_client.create_alert_policy(
+            gcp_project_path,
+            test_alert_policy)
+        alert_policy = short_retry(policy_client.get_alert_policy, alert_policy.name)
 
-            # tear down (addfinalizer is called after the test finishes execution)
-            request.addfinalizer(functools.partial(policy_client.delete_alert_policy, alert_policy.name))
+        # tear down (addfinalizer is called after the test finishes execution)
+        request.addfinalizer(functools.partial(policy_client.delete_alert_policy, alert_policy.name))
 
-            return alert_policy
+        return alert_policy
 
-    return AlertPolicy()
+    return create_alert_policy
 
 
 def append_to_time_series(config, metric_name, point_value):
@@ -152,8 +150,8 @@ def append_to_time_series(config, metric_name, point_value):
 
 def test_open_close_ticket(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     # Sanity check that the test fixtures were initialized with values that the rest of the test expects
-    metric_descriptor = metric_descriptor.create_metric_descriptor('integ-test-metric')
-    alert_policy = alert_policy.create_alert_policy('integ-test-policy', 'integ-test-metric')
+    metric_descriptor = metric_descriptor('integ-test-metric')
+    alert_policy = alert_policy('integ-test-policy', 'integ-test-metric')
 
     assert metric_descriptor.type == constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME='integ-test-metric')
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE['display_name']
@@ -187,10 +185,10 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
 
 def test_multiple_tickets(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     # Sanity check that the test fixtures were initialized with values that the rest of the test expects
-    metric_descriptor_1 = metric_descriptor.create_metric_descriptor('integ-test-metric-1')
-    alert_policy_1 = alert_policy.create_alert_policy('integ-test-policy-1', 'integ-test-metric-1')
-    metric_descriptor_2 = metric_descriptor.create_metric_descriptor('integ-test-metric-2')
-    alert_policy_2 = alert_policy.create_alert_policy('integ-test-policy-2', 'integ-test-metric-2')
+    metric_descriptor_1 = metric_descriptor('integ-test-metric-1')
+    alert_policy_1 = alert_policy('integ-test-policy-1', 'integ-test-metric-1')
+    metric_descriptor_2 = metric_descriptor('integ-test-metric-2')
+    alert_policy_2 = alert_policy('integ-test-policy-2', 'integ-test-metric-2')
 
     assert notification_channel.display_name == constants.TEST_NOTIFICATION_CHANNEL_TEMPLATE['display_name']
     assert metric_descriptor_1.type == constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME='integ-test-metric-1')
