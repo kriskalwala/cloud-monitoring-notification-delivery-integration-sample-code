@@ -49,7 +49,7 @@ def jira_client(config):
                   'access_token_secret': config['JIRA_ACCESS_TOKEN_SECRET'],
                   'consumer_key': config['JIRA_CONSUMER_KEY'],
                   'key_cert': config['JIRA_KEY_CERT']}
-    jira_client = JIRA(config['JIRA_URL'], oauth=oauth_dict)                    
+    jira_client = JIRA(config['JIRA_URL'], oauth=oauth_dict)
 
     yield jira_client
 
@@ -223,7 +223,7 @@ def test_multiple_tickets(config, metric_descriptor, notification_channel, alert
     # trigger incident for integ-test-policy-2 and check issues for policy 1 and 2 exist
     append_to_time_series(config, 'integ-test-metric-2', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE + 1)
     long_retry(assert_jira_issues_are_created, ['integ-test-metric-1', 'integ-test-metric-2'])
-    
+
     # resolve incident for integ-test-policy-1 and check jira issue resolved for policy 1, unresolved for 2
     append_to_time_series(config, 'integ-test-metric-1', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
     long_retry(assert_jira_issues_are_resolved, ['integ-test-metric-1'])
