@@ -14,6 +14,7 @@
 
 import time
 import functools
+from copy import deepcopy
 
 import pytest
 
@@ -66,8 +67,8 @@ def metric_descriptor(config, request):
         metric_client = monitoring_v3.MetricServiceClient()
         gcp_project_path = metric_client.project_path(config['PROJECT_ID'])
 
-        test_metric_descriptor = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE
-        test_metric_descriptor['type'] = constants.TEST_METRIC_DESCRIPTOR_TEMPLATE['type'].format(METRIC_NAME=metric_name)
+        test_metric_descriptor = deepcopy(constants.TEST_METRIC_DESCRIPTOR_TEMPLATE)
+        test_metric_descriptor['type'] = test_metric_descriptor['type'].format(METRIC_NAME=metric_name)
 
         metric_descriptor = metric_client.create_metric_descriptor(
             gcp_project_path,
@@ -109,12 +110,12 @@ def alert_policy(config, notification_channel, request):
         policy_client = monitoring_v3.AlertPolicyServiceClient()
         gcp_project_path = policy_client.project_path(config['PROJECT_ID'])
 
-        test_alert_policy = constants.TEST_ALERT_POLICY_TEMPLATE
+        test_alert_policy = deepcopy(constants.TEST_ALERT_POLICY_TEMPLATE)
         test_alert_policy['notification_channels'].append(notification_channel.name)
         test_alert_policy['display_name'] = alert_policy_name
         test_alert_policy['user_labels']['metric'] = metric_name
         metric_path = constants.METRIC_PATH.format(METRIC_NAME=metric_name)
-        test_alert_policy['conditions'][0]['condition_threshold']['filter'] = constants.TEST_ALERT_POLICY_TEMPLATE['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
+        test_alert_policy['conditions'][0]['condition_threshold']['filter'] = test_alert_policy['conditions'][0]['condition_threshold']['filter'].format(METRIC_PATH=metric_path)
 
         alert_policy = policy_client.create_alert_policy(
             gcp_project_path,
