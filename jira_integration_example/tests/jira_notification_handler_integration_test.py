@@ -232,4 +232,3 @@ def test_open_resolve_multiple_tickets(config, metric_descriptor, notification_c
     # resolve incident for integ-test-policy-2 and check both jira issues are resolved
     append_to_time_series(config, 'integ-test-metric-2', constants.TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE)
     long_retry(assert_jira_issues_are_resolved, ['integ-test-metric-1', 'integ-test-metric-2'])
-    
