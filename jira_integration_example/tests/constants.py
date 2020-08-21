@@ -19,18 +19,16 @@
 
 from google.protobuf.duration_pb2 import Duration
 
-METRIC_NAME = 'integ-test-metric'
-METRIC_PATH = f'custom.googleapis.com/{METRIC_NAME}'
+# caller is required to fill in the metric name
+METRIC_PATH = 'custom.googleapis.com/{METRIC_NAME}'
 RESOURCE_TYPE = 'gce_instance'
 INSTANCE_ID = '1234567890123456789'
 ZONE = 'us-central1-f'
-ALERT_POLICY_NAME = 'integ-test-policy'
 TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE = 3.0
-PROJECT_ID = ''
 
 
-TEST_METRIC_DESCRIPTOR = {
-    'type': f'custom.googleapis.com/{METRIC_NAME}',
+TEST_METRIC_DESCRIPTOR_TEMPLATE = {
+    'type': METRIC_PATH,
     'metric_kind': 'GAUGE',
     'value_type': 'DOUBLE',
     'description': 'A custom metric meant for testing purposes'
@@ -47,30 +45,19 @@ TEST_NOTIFICATION_CHANNEL_TEMPLATE = {
 }
 
 TEST_ALERT_POLICY_TEMPLATE = {
-    'display_name': ALERT_POLICY_NAME,
-    'user_labels': {'type': 'test_policy', 'metric': METRIC_NAME},
+    # caller is required to fill in the alert policy name
+    'display_name': '{ALERT_POLICY_NAME}',
+    'user_labels': {'type': 'test_policy', 'metric': '{METRIC_NAME}'},
     'combiner': 'AND',
     'conditions': [{
         'display_name': 'test condition',
         'condition_threshold': {
-            'filter': f'metric.type = "{METRIC_PATH}" AND resource.type = "{RESOURCE_TYPE}"',
+            # caller is required to fill in the metric path
+            'filter': 'metric.type = "{METRIC_PATH}" AND ' + f'resource.type = "{RESOURCE_TYPE}"',
             'comparison': 'COMPARISON_GT',
             'threshold_value': TRIGGER_NOTIFICATION_THRESHOLD_DOUBLE,
             'duration': Duration(seconds=0),
         }
     }],
     'notification_channels': []
-}
-
-TEST_SERIES = {
-    'metric': {
-        'type': METRIC_PATH,
-    },
-    'resource': {
-        'type': RESOURCE_TYPE,
-        'labels': {
-            'instance_id': INSTANCE_ID,
-            'zone': ZONE
-        }
-    }
 }
