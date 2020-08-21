@@ -183,7 +183,7 @@ def test_open_close_ticket(config, metric_descriptor, notification_channel, aler
     long_retry(assert_jira_issue_is_resolved)
 
 
-def test_multiple_tickets(config, metric_descriptor, notification_channel, alert_policy, jira_client):
+def test_open_resolve_multiple_tickets(config, metric_descriptor, notification_channel, alert_policy, jira_client):
     # Sanity check that the test fixtures were initialized with values that the rest of the test expects
     metric_descriptor_1 = metric_descriptor('integ-test-metric-1')
     alert_policy_1 = alert_policy('integ-test-policy-1', 'integ-test-metric-1')
