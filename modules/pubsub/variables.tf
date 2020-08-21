@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+ # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,6 @@
 # limitations under the License.
 
 
-output "topic" {
-  value = "${module.pubsub.topic}"
-}
-
-output "url" {
-  value = "${module.cloud_run_with_pubsub.url}"
-}
-
-output "pubsub_service_account" {
-  value = "${module.pubsub_service_account.service_account_email}"
-}
+variable "project" {}
+variable "topic" {}
+variable "push_subscription" {}

@@ -13,14 +13,19 @@
 # limitations under the License.
 
 
-output "topic" {
-  value = "${module.pubsub.topic}"
+resource "google_pubsub_topic" "tf" {
+  name    = var.topic
+  project = var.project
 }
 
-output "url" {
-  value = "${module.cloud_run_with_pubsub.url}"
-}
-
-output "pubsub_service_account" {
-  value = "${module.pubsub_service_account.service_account_email}"
+resource "google_pubsub_subscription" "push" {
+  name = var.push_subscription.name
+  topic = google_pubsub_topic.tf.name
+  
+  push_config {
+    push_endpoint = var.push_subscription.push_endpoint
+    oidc_token {
+      service_account_email = var.push_subscription.auth_account
+    }
+  }
 }

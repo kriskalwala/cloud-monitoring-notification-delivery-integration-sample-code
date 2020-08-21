@@ -25,9 +25,10 @@ import os
 import json
 
 from flask import Flask, request
+from jira import JIRA, JIRAError
 
 import config
-from utilities import pubsub, philips_hue
+from utilities import pubsub, jira_notification_handler
 
 
 app_config = config.load()
@@ -76,18 +77,23 @@ def send_monitoring_notification_to_third_party(notification):
         party service was successful.
     """
 
-    philips_hue_client = philips_hue.PhilipsHueClient(app.config['BRIDGE_IP_ADDRESS'],
-                                                      app.config['USERNAME'])
-
     try:
-        hue_value = philips_hue.get_target_hue_from_monitoring_notification(
-            notification, app.config["POLICY_HUE_MAPPING"])
-        philips_hue_client.set_color(app.config['LIGHT_ID'], hue_value)
-    except philips_hue.Error as e:
+        oauth_dict = {'access_token': app.config['JIRA_ACCESS_TOKEN'],
+                      'access_token_secret': app.config['JIRA_ACCESS_TOKEN_SECRET'],
+                      'consumer_key': app.config['JIRA_CONSUMER_KEY'],
+                      'key_cert': app.config['JIRA_KEY_CERT']}
+        jira_client = JIRA(app.config['JIRA_URL'], oauth=oauth_dict)
+        jira_notification_handler.update_jira_based_on_monitoring_notification(
+            jira_client,
+            app.config['JIRA_PROJECT'],
+            app.config['CLOSED_JIRA_ISSUE_STATUS'],
+            notification)
+
+    except (jira_notification_handler.Error, JIRAError) as e:
         logger.error(e)
         return (str(e), 400)
 
-    return (repr(hue_value), 200)
+    return ('', 200)
 
 
 if __name__ == '__main__':
